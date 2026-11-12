@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Slugonomics</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800;900&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+/* Layout idea: left-aligned editorial pages; one live budget demo in the hero; decisions as an index list, not card grids; navy band for simulators. */
+:root{
+  --paper:#F3F6F9;--surface:#FFFFFF;--sunk:#E8EEF3;--ink:#0E2A47;--text:#1C2D3F;--muted:#586A7C;--line:#D5DEE7;
+  --slug:#F6C81E;--slug-ink:#271F00;--sea:#2C6E9B;
+  --good:#1F7A50;--good-bg:#E2F2E9;--warn:#8A5A06;--warn-bg:#FBEFD3;--bad:#B23A2B;--bad-bg:#F8E3DF;
+  --band:#0E2A47;--band-2:#163A5F;--band-text:#E7EEF5;--band-muted:#A9BCCE;
+  --sans:'Schibsted Grotesk',ui-sans-serif,system-ui,-apple-system,'Segoe UI',sans-serif;
+  --serif:'Source Serif 4',Georgia,'Times New Roman',serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0A1521;--surface:#0F2133;--sunk:#14293F;--ink:#ECF2F8;--text:#D5E0EA;--muted:#93A7BA;--line:#22394F;
+  --sea:#7DB6DF;--good:#6CCB98;--good-bg:#12372A;--warn:#F0BC57;--warn-bg:#382B0F;--bad:#F1907F;--bad-bg:#3D1D19;
+  --band:#0F2C49;--band-2:#163A5F;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#0A1521;--surface:#0F2133;--sunk:#14293F;--ink:#ECF2F8;--text:#D5E0EA;--muted:#93A7BA;--line:#22394F;
+  --sea:#7DB6DF;--good:#6CCB98;--good-bg:#12372A;--warn:#F0BC57;--warn-bg:#382B0F;--bad:#F1907F;--bad-bg:#3D1D19;
+  --band:#0F2C49;--band-2:#163A5F;color-scheme:dark}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--text);font:16px/1.5 var(--sans)}
+a{color:var(--sea);text-underline-offset:3px}
+h1,h2,h3,h4{font-family:var(--sans);color:var(--ink);margin:0;text-wrap:balance;letter-spacing:-.02em}
+h1{font-size:clamp(2.3rem,5.2vw,3.7rem);line-height:1.02;font-weight:800}
+h2{font-size:clamp(1.6rem,3vw,2.2rem);line-height:1.1;font-weight:800}
+h3{font-size:1.18rem;line-height:1.25;font-weight:700;letter-spacing:-.01em}
+h4{font-size:1.02rem;font-weight:700}
+p{margin:0;font-family:var(--serif);font-size:1.06rem;line-height:1.6;max-width:65ch}
+.num{font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.wrap{max-width:1160px;margin:0 auto;padding:0 24px}
+@media (max-width:480px){.wrap{padding:0 18px}}
+button{font:inherit;cursor:pointer;color:inherit}
+:focus-visible{outline:3px solid var(--slug);outline-offset:2px;border-radius:4px}
+.ic{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.stack{display:flex;flex-direction:column;gap:14px}
+
+/* header */
+.top{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:1px solid var(--line)}
+.navrow{display:flex;align-items:center;gap:24px;height:64px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink);font-weight:800;font-size:1.2rem;letter-spacing:-.02em}
+.brand svg{width:30px;height:30px}
+.links{display:flex;gap:4px;margin-left:auto}
+.links a{position:relative;padding:8px 12px;text-decoration:none;color:var(--muted);font-weight:600;font-size:.95rem}
+.links a:hover{color:var(--ink)}
+.links a.on{color:var(--ink)}
+.links a.on::after{content:"";position:absolute;left:12px;right:12px;bottom:-13px;height:3px;background:var(--slug);border-radius:2px}
+.links a.plan{margin-left:10px;border:1.5px solid var(--line);border-radius:8px;color:var(--ink)}
+.links a.plan::after{display:none}
+.links a.plan .ct{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;margin-left:6px;border-radius:10px;background:var(--slug);color:var(--slug-ink);font-size:.75rem;font-weight:800}
+.menubtn{display:none;margin-left:auto;background:none;border:1.5px solid var(--line);border-radius:8px;padding:7px 12px;font-weight:700;color:var(--ink)}
+@media (max-width:880px){
+  .menubtn{display:block}
+  .links{display:none;position:absolute;top:64px;left:0;right:0;flex-direction:column;background:var(--surface);border-bottom:1px solid var(--line);padding:8px 18px 16px}
+  .links.open{display:flex}
+  .links a{padding:13px 0;border-bottom:1px solid var(--line)}
+  .links a.on::after{display:none}
+  .links a.plan{margin:12px 0 0;padding:12px;text-align:center}
+}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:8px;padding:13px 20px;font-weight:700;font-size:1rem;text-decoration:none;background:var(--ink);color:var(--paper);line-height:1}
+.btn:hover{filter:brightness(1.12)}
+.btn.slug{background:var(--slug);color:var(--slug-ink)}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn.line:hover{box-shadow:inset 0 0 0 1.5px var(--ink);filter:none}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.btnrow{display:flex;gap:10px;flex-wrap:wrap}
+
+main{min-height:60vh}
+.page{padding:48px 0 88px}
+.pagehead{display:grid;gap:14px;margin-bottom:36px;max-width:760px}
+.pagehead p{color:var(--muted);font-size:1.15rem}
+.label{font-weight:700;font-size:.9rem;color:var(--sea)}
+
+/* hero */
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:56px;align-items:center;padding:56px 0 64px}
+@media (max-width:920px){.hero{grid-template-columns:1fr;gap:36px;padding-top:36px}}
+.hero .lead{font-size:1.22rem;color:var(--muted);margin:20px 0 28px}
+.hero .who{margin-top:22px;font-size:.92rem;color:var(--muted);display:flex;gap:10px;align-items:center}
+.hero .who b{color:var(--ink)}
+.demo{background:var(--band);color:var(--band-text);border-radius:16px;padding:28px;position:relative;overflow:hidden}
+.demo h3{color:#fff;font-size:1.05rem;font-weight:600}
+.demo .facts{display:flex;gap:22px;margin:14px 0 20px;flex-wrap:wrap}
+.demo .facts div{font-size:.85rem;color:var(--band-muted)}
+.demo .facts b{display:block;color:#fff;font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums}
+.demo label{display:flex;justify-content:space-between;font-weight:600;font-size:.95rem}
+.demo label output{color:var(--slug);font-weight:800;font-variant-numeric:tabular-nums}
+.demo input[type=range]{width:100%;accent-color:var(--slug);margin:10px 0 22px}
+.strip{display:grid;grid-template-columns:repeat(11,1fr);gap:4px}
+.strip span{height:52px;border-radius:4px;background:var(--slug);transition:background .25s,opacity .25s;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;font-size:.7rem;font-weight:700;color:var(--slug-ink)}
+.strip span.out{background:rgba(255,255,255,.1);color:var(--band-muted)}
+.strip span.fin{outline:2px dashed rgba(255,255,255,.35);outline-offset:2px}
+.demo .result{margin-top:20px;font-size:1.5rem;font-weight:800;color:#fff;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.demo .result small{display:block;font-size:.92rem;font-weight:500;color:var(--band-muted);letter-spacing:0;margin-top:4px}
+.demo a{color:var(--slug);font-weight:700}
+
+/* sections */
+.sec{padding:64px 0;border-top:1px solid var(--line)}
+.sechead{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:28px;flex-wrap:wrap}
+.sechead p{color:var(--muted);margin-top:8px}
+
+/* process (a real sequence) */
+.process{display:grid;grid-template-columns:repeat(5,1fr);border-top:3px solid var(--ink)}
+.process div{padding:18px 18px 0 0}
+.process b{display:block;font-size:2rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1;margin-bottom:12px}
+.process h4{margin-bottom:6px}
+.process p{font-size:.95rem;color:var(--muted)}
+@media (max-width:820px){.process{grid-template-columns:1fr 1fr;row-gap:18px}}
+@media (max-width:480px){.process{grid-template-columns:1fr}}
+
+/* decision index */
+.index{border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:52px 1fr auto auto;gap:18px;align-items:center;padding:20px 8px;border-bottom:1px solid var(--line);text-decoration:none;color:inherit}
+.row:hover{background:var(--surface)}
+.row:hover .chev{transform:translateX(3px);color:var(--ink)}
+.row .badge{width:52px;height:52px;border-radius:12px;background:var(--sunk);color:var(--ink);display:grid;place-items:center}
+.row .badge .ic{width:26px;height:26px}
+.row h3{margin-bottom:3px}
+.row p{font-size:.98rem;color:var(--muted)}
+.row .meta{font-size:.88rem;color:var(--muted);text-align:right;white-space:nowrap}
+.row .meta .st{display:block;font-weight:700;margin-top:2px}
+.row .meta .st.done{color:var(--good)}
+.row .meta .st.prog{color:var(--warn)}
+.chev{color:var(--muted);transition:transform .15s}
+@media (max-width:600px){.row{grid-template-columns:44px 1fr auto;gap:14px}.row .badge{width:44px;height:44px}.row .meta{display:none}}
+
+/* simulators band */
+.band{background:var(--band);color:var(--band-text);padding:72px 0}
+.band h2,.band h3{color:#fff}
+.band p{color:var(--band-muted)}
+.sims{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+@media (max-width:820px){.sims{grid-template-columns:1fr}}
+.sim{background:var(--band-2);border-radius:14px;padding:28px;display:flex;flex-direction:column;gap:14px}
+.sim .art{height:150px;border-radius:10px;background:rgba(255,255,255,.05);display:grid;place-items:center}
+.sim .art svg{height:110px}
+.sim ul{margin:0;padding:0;list-style:none;display:grid;gap:6px;font-size:.95rem}
+.sim li{display:flex;gap:8px;color:var(--band-text)}
+.sim li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--slug);margin-top:8px;flex:none}
+.sim .btn{align-self:flex-start;margin-top:auto}
+
+/* decision player */
+.player{display:grid;grid-template-columns:240px minmax(0,1fr);gap:56px;align-items:start}
+@media (max-width:860px){.player{grid-template-columns:1fr;gap:24px}}
+.stepper{position:sticky;top:92px;display:flex;flex-direction:column;gap:2px}
+.stepper button{display:flex;align-items:center;gap:12px;background:none;border:0;padding:10px 0;text-align:left;font-weight:600;color:var(--muted)}
+.stepper button i{font-style:normal;display:grid;place-items:center;width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line);font-size:.85rem;font-weight:800;font-variant-numeric:tabular-nums;flex:none}
+.stepper button.on{color:var(--ink)}
+.stepper button.on i{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.stepper button.done i{background:var(--good-bg);border-color:var(--good);color:var(--good)}
+.stepper button:disabled{opacity:.45;cursor:default}
+@media (max-width:860px){.stepper{position:static;flex-direction:row;overflow-x:auto;gap:14px;border-bottom:1px solid var(--line);padding-bottom:10px}.stepper button{white-space:nowrap;padding:6px 0}}
+.back{display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:.92rem;text-decoration:none;color:var(--muted);margin-bottom:18px}
+.back:hover{color:var(--ink)}
+.dtitle{display:flex;gap:16px;align-items:center;margin-bottom:36px}
+.dtitle .badge{width:56px;height:56px;border-radius:14px;background:var(--slug);color:var(--slug-ink);display:grid;place-items:center;flex:none}
+.dtitle .badge .ic{width:28px;height:28px}
+.dtitle h1{font-size:clamp(1.9rem,4vw,2.7rem)}
+.stage{max-width:720px;display:grid;gap:18px}
+.stage .sub{color:var(--muted)}
+.opts{display:grid;gap:10px}
+.opt{display:grid;grid-template-columns:32px 1fr;gap:14px;align-items:start;width:100%;text-align:left;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:15px 16px;font-size:1rem;line-height:1.45}
+.opt i{font-style:normal;display:grid;place-items:center;width:30px;height:30px;border-radius:7px;background:var(--sunk);font-weight:800;color:var(--ink)}
+.opt:hover:not(:disabled){border-color:var(--ink)}
+.opt:disabled{cursor:default}
+.opt.right{border-color:var(--good);background:var(--good-bg)}.opt.right i{background:var(--good);color:#fff}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}.opt.wrong i{background:var(--bad);color:#fff}
+.opt.meh{border-color:var(--warn);background:var(--warn-bg)}.opt.meh i{background:var(--warn);color:#fff}
+.fb{border-left:4px solid var(--ink);background:var(--surface);border-radius:0 10px 10px 0;padding:16px 18px}
+.fb.good{border-color:var(--good)}.fb.bad{border-color:var(--bad)}.fb.meh{border-color:var(--warn)}
+.fb h4{margin-bottom:4px}
+.fb.good h4{color:var(--good)}.fb.bad h4{color:var(--bad)}.fb.meh h4{color:var(--warn)}
+.learn{display:grid;gap:0;border-top:1px solid var(--line)}
+.learn div{display:grid;grid-template-columns:40px 1fr;gap:14px;padding:18px 0;border-bottom:1px solid var(--line)}
+.learn b{font-size:1.1rem;font-weight:800;color:var(--sea);font-variant-numeric:tabular-nums}
+.learn h4{margin-bottom:4px}
+.scenario{background:var(--sunk);border-radius:12px;padding:20px 22px}
+.scenario p{font-size:1.12rem;color:var(--ink)}
+.conf{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.conf span{font-size:.85rem;color:var(--muted)}
+.conf button{width:44px;height:44px;border-radius:8px;border:1.5px solid var(--line);background:var(--surface);font-weight:800;color:var(--ink)}
+.conf button.pick{background:var(--slug);border-color:var(--slug);color:var(--slug-ink)}
+.checks{display:grid;gap:8px}
+.check{display:grid;grid-template-columns:22px 1fr;gap:14px;align-items:start;background:var(--surface);border:1.5px solid var(--line);border-radius:10px;padding:14px 16px;cursor:pointer}
+.check:has(input:checked){border-color:var(--good)}
+.check input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--good)}
+.check b{display:block;color:var(--ink)}
+.check small{color:var(--muted);font-size:.9rem}
+.note{font-size:.9rem;color:var(--muted)}
+
+/* tools */
+.toolwrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:48px;align-items:start}
+@media (max-width:900px){.toolwrap{grid-template-columns:1fr;gap:20px}}
+.toolnav{display:flex;flex-direction:column;gap:2px;position:sticky;top:92px}
+.toolnav a{display:flex;align-items:center;gap:10px;padding:11px 12px;border-radius:8px;text-decoration:none;color:var(--muted);font-weight:600}
+.toolnav a:hover{color:var(--ink);background:var(--sunk)}
+.toolnav a.on{background:var(--ink);color:var(--paper)}
+@media (max-width:900px){.toolnav{position:static;flex-direction:row;overflow-x:auto;padding-bottom:6px}.toolnav a{white-space:nowrap;box-shadow:inset 0 0 0 1.5px var(--line)}}
+.toolhead{margin-bottom:22px}
+.toolhead p{color:var(--muted);margin-top:6px}
+.tool{display:grid;grid-template-columns:minmax(0,.95fr) minmax(0,1.05fr);gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface)}
+@media (max-width:760px){.tool{grid-template-columns:1fr}}
+.tool .card{padding:24px;border-right:1px solid var(--line)}
+@media (max-width:760px){.tool .card{border-right:0;border-bottom:1px solid var(--line)}}
+.field{margin-bottom:18px}
+.field:last-child{margin-bottom:0}
+.field label{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:.93rem;color:var(--ink);margin-bottom:6px}
+.field label output{font-weight:800;font-variant-numeric:tabular-nums;color:var(--sea);white-space:nowrap}
+.field input[type=range]{width:100%;accent-color:var(--ink)}
+.field .hint{font-size:.82rem;color:var(--muted);margin-top:2px;line-height:1.4}
+.out{padding:24px;background:var(--paper)}
+.out .eyebrow{font-weight:600;font-size:.92rem;color:var(--muted)}
+.out .big{font-size:2.7rem;font-weight:800;line-height:1.05;color:var(--ink);letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-top:2px}
+.out .big .small{font-size:1rem;font-weight:600;letter-spacing:0}
+.out p{font-size:1rem}
+.rows{width:100%;border-collapse:collapse;margin:16px 0;font-size:.95rem}
+.rows td{padding:8px 0;border-bottom:1px solid var(--line)}
+.rows td.n{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+.rows tr.tot td{font-weight:800;color:var(--ink);border-bottom:0;border-top:2px solid var(--ink)}
+.bars{display:grid;gap:10px;margin:16px 0}
+.bar{display:grid;grid-template-columns:110px 1fr 84px;gap:10px;align-items:center;font-size:.88rem}
+.bar .track{height:12px;background:var(--sunk);border-radius:3px;overflow:hidden}
+.bar .fill{height:100%;background:var(--sea);border-radius:3px}
+.bar .fill.bad{background:var(--bad)}.bar .fill.good{background:var(--good)}
+.bar b{text-align:right;font-variant-numeric:tabular-nums}
+.verdict{border-radius:8px;padding:12px 14px;margin-top:12px;font-weight:700;font-size:.95rem}
+.verdict.good{background:var(--good-bg);color:var(--good)}
+.verdict.bad{background:var(--bad-bg);color:var(--bad)}
+.verdict.meh{background:var(--warn-bg);color:var(--warn)}
+.why{font-size:.95rem;color:var(--muted);margin-top:14px}
+.weeks{display:grid;grid-template-columns:repeat(11,1fr);gap:3px;margin:16px 0 6px}
+.weeks div{height:38px;border-radius:3px;background:var(--good);display:flex;align-items:flex-end;justify-content:center;font-size:.68rem;color:#fff;padding-bottom:3px;font-weight:700}
+.weeks div.short{background:var(--bad)}
+.next{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;margin-top:20px;padding:18px 20px;border-radius:12px;background:var(--sunk)}
+.next p{font-size:.98rem}
+
+/* resources */
+.filter{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px}
+.filter button{border:1.5px solid var(--line);background:transparent;border-radius:8px;padding:8px 13px;font-weight:600;font-size:.9rem;color:var(--muted)}
+.filter button.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+.dir{display:grid;grid-template-columns:1fr 1fr;column-gap:48px;border-top:1px solid var(--line)}
+@media (max-width:780px){.dir{grid-template-columns:1fr}}
+.entry{padding:22px 0;border-bottom:1px solid var(--line);display:grid;gap:6px}
+.entry .tag{font-size:.85rem;font-weight:700;color:var(--sea)}
+.entry .tag.ucsc{color:var(--warn)}
+.entry p{font-size:1rem;color:var(--muted)}
+.entry a{font-weight:700;font-size:.95rem}
+.alert{margin-top:28px;padding:16px 18px;border-left:4px solid var(--bad);background:var(--surface);border-radius:0 10px 10px 0}
+
+/* plan */
+.summary{display:grid;grid-template-columns:repeat(4,1fr);border-top:3px solid var(--ink);margin-bottom:32px}
+.summary div{padding:16px 16px 0 0}
+.summary b{display:block;font-size:2rem;font-weight:800;color:var(--ink);font-variant-numeric:tabular-nums;line-height:1.1}
+.summary span{font-size:.9rem;color:var(--muted)}
+@media (max-width:700px){.summary{grid-template-columns:1fr 1fr;row-gap:16px}}
+.meter{height:8px;background:var(--sunk);border-radius:4px;overflow:hidden}
+.meter div{height:100%;background:var(--slug)}
+.plangroup{padding:22px 0;border-bottom:1px solid var(--line)}
+.plangroup h3{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.planitem{display:grid;grid-template-columns:22px 1fr;gap:12px;padding:9px 0;cursor:pointer}
+.planitem input{width:20px;height:20px;margin:2px 0 0;accent-color:var(--good)}
+.planitem b{font-weight:600;color:var(--ink)}
+.planitem.done b{text-decoration:line-through;color:var(--muted)}
+.planitem small{display:block;color:var(--muted);font-size:.88rem}
+.empty{padding:56px 0;display:grid;gap:16px;justify-items:start;border-top:1px solid var(--line)}
+.copybox{width:100%;height:200px;margin-top:12px;font:14px/1.5 var(--sans);padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--text)}
+
+/* compare */
+.scroll{overflow-x:auto;border-top:3px solid var(--ink)}
+table.cmp{width:100%;border-collapse:collapse;font-size:.97rem;min-width:620px}
+table.cmp th,table.cmp td{padding:15px 16px 15px 0;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+table.cmp thead th{font-size:.92rem;color:var(--muted);font-weight:700}
+table.cmp thead th:last-child{color:var(--ink)}
+table.cmp td:first-child{font-weight:700;color:var(--ink);width:20%}
+table.cmp td:last-child{color:var(--ink);font-weight:600}
+table.cmp td:nth-child(2){color:var(--muted)}
+.gaps{display:grid;grid-template-columns:repeat(3,1fr);gap:32px;margin-top:20px}
+@media (max-width:780px){.gaps{grid-template-columns:1fr;gap:20px}}
+.gaps h3{margin-bottom:6px}
+.gaps p{font-size:1rem;color:var(--muted)}
+
+/* checkup */
+.ck{max-width:640px}
+.ck .meter{margin:14px 0 28px}
+
+footer{border-top:1px solid var(--line);padding:36px 0 48px;color:var(--muted);font-size:.88rem}
+footer .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:40px}
+@media (max-width:760px){footer .cols{grid-template-columns:1fr;gap:16px}}
+footer p{font-family:var(--sans);font-size:.88rem;max-width:none;margin-bottom:8px}
+footer .brand{font-size:1rem;margin-bottom:10px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:8px;font-weight:700;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s;z-index:50}
+.toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap navrow">
+    <a class="brand" href="#home" aria-label="Slugonomics home">
+      <svg viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="14" fill="#0E2A47"/><path d="M10 46c5-1 8-7 13-10 7-5 16-6 22-4 5 1 8 5 9 9 0 3-2 5-6 5H10z" fill="#F6C81E"/><path d="M46 32l3-10M50 34l7-7" stroke="#F6C81E" stroke-width="3" stroke-linecap="round"/><circle cx="49.5" cy="21" r="2.8" fill="#F6C81E"/><circle cx="57.5" cy="26" r="2.8" fill="#F6C81E"/><circle cx="43" cy="39" r="2" fill="#0E2A47"/></svg>
+      Slugonomics
+    </a>
+    <button class="menubtn" id="menubtn" aria-expanded="false" aria-controls="navlinks">Menu</button>
+    <nav class="links" id="navlinks">
+      <a href="#paths" data-nav="paths">Decisions</a>
+      <a href="#tools" data-nav="tools">Calculators</a>
+      <a href="#play" data-nav="play">Simulators</a>
+      <a href="#resources" data-nav="resources">Campus help</a>
+      <a href="#why" data-nav="why">About</a>
+      <a href="#plan" data-nav="plan" class="plan">My plan<span class="ct" id="planct" hidden></span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer>
+  <div class="wrap cols">
+    <div>
+      <div class="brand"><span>Slugonomics</span></div>
+      <p>A student-led financial literacy project at UC Santa Cruz. Not an official UCSC website, and not financial, tax or legal advice. Confirm anything about your own aid with the UCSC Financial Aid and Scholarship Office.</p>
+      <p>© 2026 the Slugonomics team. All rights reserved.</p>
+    </div>
+    <div>
+      <p>Numbers reflect 2026 rules: a 6.52% fixed rate on 2026–27 undergraduate Direct Loans with a 1.057% origination fee, a $16,100 federal standard deduction, and the $16.90 California minimum wage.</p>
+      <p>Your progress and plan stay in this browser. Nothing you enter is sent anywhere.</p>
+    </div>
+  </div>
+</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+const $=(s,el=document)=>el.querySelector(s);
+const $$=(s,el=document)=>[...el.querySelectorAll(s)];
+const money=(n,d=0)=>(n<0?'−':'')+'$'+Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const store={get(k,d){try{const v=localStorage.getItem('slugo:'+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem('slugo:'+k,JSON.stringify(v));}catch(e){}}};
+let S=store.get('state',{paths:{},plan:[],checkup:null});
+const save=()=>{store.set('state',S);updCount();};
+function updCount(){const n=S.plan.filter(x=>!x.done).length,el=$('#planct');if(!el)return;el.hidden=!n;el.textContent=n;}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2200);}
+const IC={
+ cap:'<path d="M2 9.5 12 4.5l10 5-10 5z"/><path d="M6 11.5V16c3.3 2.2 8.7 2.2 12 0v-4.5"/><path d="M22 9.5V15"/>',
+ card:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/>',
+ cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v.01M18 14.5v.01"/>',
+ house:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"/>',
+ cup:'<path d="M4 9h13v4.5A5.5 5.5 0 0 1 11.5 19h-2A5.5 5.5 0 0 1 4 13.5z"/><path d="M17 10.5h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3.5v2.5M12 3.5v2.5"/>',
+ chev:'<path d="m9 6 6 6-6 6"/>',
+ left:'<path d="m15 6-6 6 6 6"/>'
+};
+const icon=(k,c='ic')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
+const PICON={aid:'cap',credit:'card',paycheck:'cash',lease:'house',quarter:'cal',habit:'cup'};
+const TICON={budget:'cal',loancost:'cap',cardpayoff:'card',paycalc:'cash',habitcost:'cup',rent:'house'};
+/* ==================== 2026 constants ==================== */
+const LOAN_RATE=6.52, ORIG_FEE=0.01057, FED_STD=16100, CA_STD=5706, CA_CREDIT=153, SDI_R=0.013, MIN_WAGE=16.90;
+const FED_BR=[[12400,.10],[50400,.12],[105700,.22],[201775,.24],[256225,.32],[640600,.35],[1e12,.37]];
+const CA_BR=[[11079,.01],[26264,.02],[41452,.04],[57542,.06],[72724,.08],[371479,.093],[1e12,.103]];
+function brTax(x,br){let t=0,p=0;for(const[top,r]of br){if(x<=p)break;t+=(Math.min(x,top)-p)*r;p=top;}return t;}
+const fedTax=inc=>brTax(Math.max(0,inc-FED_STD),FED_BR);
+const caTax=inc=>Math.max(0,brTax(Math.max(0,inc-CA_STD),CA_BR)-CA_CREDIT);
+function pmt(P,ratePct,months){const r=ratePct/100/12;if(P<=0)return 0;if(r===0)return P/months;return P*r/(1-Math.pow(1+r,-months));}
+
+/* ==================== tools ==================== */
+// Each tool: id, name, blurb, fields, calc(v) -> html
+const TOOLS={
+ budget:{name:'Quarter Budget',ico:'🗓️',blurb:'Your aid arrives in one lump each quarter. See how many weeks it actually lasts.',
+  fields:[
+   {k:'aid',l:'Aid refund this quarter (after tuition & housing)',min:0,max:8000,step:50,v:1800,fmt:'$'},
+   {k:'savings',l:'Money already in checking',min:0,max:5000,step:50,v:400,fmt:'$'},
+   {k:'job',l:'Take-home pay per week',min:0,max:800,step:10,v:150,fmt:'$'},
+   {k:'family',l:'Help from family per month',min:0,max:1500,step:25,v:0,fmt:'$'},
+   {k:'rent',l:'Rent per month (0 if it’s in your aid)',min:0,max:2500,step:25,v:0,fmt:'$'},
+   {k:'food',l:'Groceries & food per week',min:0,max:300,step:5,v:85,fmt:'$'},
+   {k:'phone',l:'Phone, subscriptions per month',min:0,max:300,step:5,v:60,fmt:'$'},
+   {k:'transport',l:'Transport per week',min:0,max:150,step:5,v:15,fmt:'$'},
+   {k:'fun',l:'Going out & fun per week',min:0,max:300,step:5,v:60,fmt:'$'},
+  ],
+  calc(v){
+   const W=11, months=W/4.33;
+   const income=v.aid+v.savings+v.job*W+v.family*months;
+   const wk=v.food+v.transport+v.fun+(v.rent+v.phone)/4.33;
+   const spend=wk*W, left=income-spend;
+   let bal=v.aid+v.savings, cells='', shortWeek=null;
+   for(let i=1;i<=W;i++){bal+=v.job+v.family/4.33-wk;const s=bal<0;if(s&&shortWeek==null)shortWeek=i;cells+=`<div class="${s?'short':''}" title="Week ${i}: ${money(bal)}">${i}</div>`;}
+   const safe=(income-(v.rent+v.phone)*months)/W - v.transport;
+   let verdict=left>=0?`<div class="verdict good">You make it through all 11 weeks with ${money(left)} left over. Move some of it to savings for next quarter's books.</div>`
+     :`<div class="verdict bad">You run out in week ${shortWeek}. You're ${money(-left)} short for the quarter.</div>`;
+   return `<div class="eyebrow">Weekly spending</div><div class="big num">${money(wk)}<span class="small muted"> /week</span></div>
+   <p class="small muted" style="margin-top:6px">Quarter = 11 weeks (10 of classes + finals).</p>
+   <div class="weeks" aria-label="Week by week balance">${cells}</div><p class="small muted">Green weeks you're in the positive. Red weeks you're out of money.</p>
+   <table class="rows"><tr><td>Money coming in this quarter</td><td class="n">${money(income)}</td></tr>
+   <tr><td>Money going out this quarter</td><td class="n">${money(spend)}</td></tr>
+   <tr class="tot"><td>Left at finals week</td><td class="n">${money(left)}</td></tr></table>${verdict}
+   <p class="why" style="margin-top:12px">To break even, food + fun can total about <b>${money(Math.max(0,safe))}</b> a week.${left<0?' Before you reach for a credit card, check <a href="#resources">CalFresh and Slug Support</a>: many students qualify and don\'t know it.':''}</p>`;
+  }},
+ loancost:{name:'Loan Cost',ico:'🎓',blurb:'What a student loan really costs, and what borrowing less saves you.',
+  fields:[
+   {k:'amt',l:'Amount you borrow',min:500,max:31000,step:250,v:5500,fmt:'$'},
+   {k:'rate',l:'Interest rate',min:0,max:15,step:.01,v:LOAN_RATE,fmt:'%',hint:'2026–27 federal undergraduate rate: 6.52% fixed. Private loans vary.'},
+   {k:'years',l:'Repayment term (years)',min:5,max:25,step:1,v:10,fmt:'y'},
+   {k:'school',l:'Years until repayment starts (school + 6-mo grace)',min:0,max:5,step:.5,v:4,fmt:'y'},
+   {k:'sub',l:'Subsidized? (1 = yes, 0 = no)',min:0,max:1,step:1,v:0,fmt:'',hint:'Government pays the interest on subsidized loans while you\'re in school.'},
+  ],
+  calc(v){
+   const fee=v.amt*ORIG_FEE, got=v.amt-fee;
+   const accrued=v.sub?0:v.amt*v.rate/100*v.school;
+   const P=v.amt+accrued, n=v.years*12, m=pmt(P,v.rate,n), total=m*n;
+   const less=v.amt*0.7, Pl=less+(v.sub?0:less*v.rate/100*v.school), ml=pmt(Pl,v.rate,n);
+   const ratio=total/got;
+   return `<div class="eyebrow">Monthly payment after school</div><div class="big num">${money(m)}<span class="small muted"> /mo for ${v.years} yrs</span></div>
+   <table class="rows"><tr><td>You borrow</td><td class="n">${money(v.amt)}</td></tr>
+   <tr><td>Origination fee (taken out up front)</td><td class="n">−${money(fee)}</td></tr>
+   <tr><td>Cash that actually reaches you</td><td class="n">${money(got)}</td></tr>
+   <tr><td>Interest that piles up during school</td><td class="n">${money(accrued)}</td></tr>
+   <tr><td>Balance when repayment starts</td><td class="n">${money(P)}</td></tr>
+   <tr class="tot"><td>Total you pay back</td><td class="n">${money(total)}</td></tr></table>
+   <div class="bars"><div class="bar"><span>You received</span><div class="track"><div class="fill good" style="width:${Math.min(100,got/total*100)}%"></div></div><b>${money(got)}</b></div>
+   <div class="bar"><span>You repay</span><div class="track"><div class="fill bad" style="width:100%"></div></div><b>${money(total)}</b></div></div>
+   <div class="verdict ${ratio>1.6?'bad':'meh'}">Every $1 that reached you costs ${money(ratio,2)} to repay.</div>
+   <p class="why" style="margin-top:12px">Borrow 30% less (${money(less)}) and your payment drops to <b>${money(ml)}</b>/mo, saving ${money((m-ml)*n)} overall.${v.sub?'':' Paying just the interest while in school (about '+money(v.amt*v.rate/100/12)+'/mo) stops it from piling up.'}</p>`;
+  }},
+ cardpayoff:{name:'Credit Card Payoff',ico:'💳',blurb:'The minimum-payment trap, in numbers.',
+  fields:[
+   {k:'bal',l:'Card balance',min:100,max:10000,step:50,v:1200,fmt:'$'},
+   {k:'apr',l:'APR',min:0,max:35,step:.25,v:22.5,fmt:'%',hint:'New card offers averaged about 24% APR in late 2026. Student cards are often lower.'},
+   {k:'pay',l:'Your monthly payment',min:25,max:1000,step:5,v:40,fmt:'$'},
+  ],
+  calc(v){
+   const r=v.apr/100/12;
+   function run(payFn){let b=v.bal,i=0,m=0;while(b>0.005&&m<600){const int=b*r;i+=int;b+=int;const p=Math.min(b,payFn(b));if(p<=int&&m>0){return{m:Infinity,i};}b-=p;m++;}return{m,i};}
+   const mine=run(()=>v.pay);
+   const minimum=run(b=>Math.max(25,b*.01+b*r));
+   const fast=run(()=>Math.max(v.pay*2,v.pay+50));
+   const fmtM=m=>m===Infinity?'never':m>=24?(m/12).toFixed(1)+' yrs':m+' mo';
+   const maxI=Math.max(mine.i,minimum.i,fast.i,1);
+   const row=(label,o,cls)=>`<div class="bar"><span>${label}</span><div class="track"><div class="fill ${cls}" style="width:${o.m===Infinity?100:Math.max(3,o.i/maxI*100)}%"></div></div><b>${o.m===Infinity?'∞':money(o.i)}</b></div>`;
+   return `<div class="eyebrow">At ${money(v.pay)}/mo you're debt-free in</div><div class="big num">${fmtM(mine.m)}</div>
+   ${mine.m===Infinity?'<div class="verdict bad">Your payment doesn\'t even cover the interest. The balance will never shrink.</div>':`<p class="muted" style="margin-top:6px">and pay <b>${money(mine.i)}</b> in interest on a ${money(v.bal)} balance.</p>`}
+   <div class="eyebrow" style="margin-top:16px">Interest paid by strategy</div>
+   <div class="bars">${row('Minimum only',minimum,'bad')}${row('Your plan',mine,'')}${row(money(Math.max(v.pay*2,v.pay+50))+'/mo',fast,'good')}</div>
+   <table class="rows"><tr><td>Minimum only</td><td class="n">${fmtM(minimum.m)}</td></tr><tr><td>Your plan</td><td class="n">${fmtM(mine.m)}</td></tr><tr><td>Paying ${money(Math.max(v.pay*2,v.pay+50))}/mo</td><td class="n">${fmtM(fast.m)}</td></tr></table>
+   <p class="why">The real move: pay the <b>statement balance</b> in full every month and you pay $0 in interest. Set autopay for the statement balance, not the minimum.</p>`;
+  }},
+ paycalc:{name:'Paycheck',ico:'💵',blurb:'Gross vs. net: where your paycheck goes, and why filing taxes can pay you back.',
+  fields:[
+   {k:'wage',l:'Hourly wage',min:MIN_WAGE,max:40,step:.1,v:18,fmt:'$',hint:'California minimum wage in 2026: $16.90/hr.'},
+   {k:'hours',l:'Hours per week',min:1,max:40,step:1,v:12,fmt:'h'},
+   {k:'weeks',l:'Weeks worked this year',min:1,max:52,step:1,v:40,fmt:'w'},
+   {k:'campus',l:'Campus job while enrolled? (1 = yes)',min:0,max:1,step:1,v:1,fmt:'',hint:'Students working for their own school while enrolled at least half-time are usually exempt from Social Security & Medicare (FICA).'},
+  ],
+  calc(v){
+   const gw=v.wage*v.hours*2, annual=v.wage*v.hours*v.weeks;
+   // withholding uses annualized biweekly pay (how payroll does it), actual tax uses real annual earnings
+   const ann=gw*26;
+   const wFed=fedTax(ann)/26, wSt=caTax(ann)/26, sdi=gw*SDI_R, ss=v.campus?0:gw*.062, med=v.campus?0:gw*.0145;
+   const net=gw-wFed-wSt-sdi-ss-med;
+   const periods=v.weeks/2;
+   const withheldFed=wFed*periods, withheldSt=wSt*periods;
+   const owedFed=fedTax(annual), owedSt=caTax(annual);
+   const refund=(withheldFed-owedFed)+(withheldSt-owedSt);
+   return `<div class="eyebrow">Take-home every two weeks</div><div class="big num">${money(net,2)}</div><p class="small muted" style="margin-top:6px">from ${money(gw,2)} gross (${v.hours} hrs × 2 weeks × ${money(v.wage,2)})</p>
+   <table class="rows"><tr><td>Gross pay</td><td class="n">${money(gw,2)}</td></tr>
+   <tr><td>Federal income tax withheld</td><td class="n">−${money(wFed,2)}</td></tr>
+   <tr><td>CA income tax withheld</td><td class="n">−${money(wSt,2)}</td></tr>
+   <tr><td>CA SDI (1.3%)</td><td class="n">−${money(sdi,2)}</td></tr>
+   <tr><td>Social Security (6.2%)</td><td class="n">${v.campus?'exempt':'−'+money(ss,2)}</td></tr>
+   <tr><td>Medicare (1.45%)</td><td class="n">${v.campus?'exempt':'−'+money(med,2)}</td></tr>
+   <tr class="tot"><td>Net pay</td><td class="n">${money(net,2)}</td></tr></table>
+   <p>This year you earn about <b>${money(annual)}</b>${annual<FED_STD?', which is under the $16,100 standard deduction, so you likely owe no federal income tax at all':''}.</p>
+   <div class="verdict ${refund>1?'good':'meh'}">${refund>1?`Estimated refund if you file: ${money(refund)}. It only comes back if you file.`:'Withholding is close to what you owe. Filing still builds a record and may unlock credits.'}</div>
+   <p class="why" style="margin-top:12px">Payroll withholds as if every paycheck lasts all year. If you only work part of the year, you're often over-withheld. Estimates use single-filer 2026 brackets and no other income.</p>`;
+  }},
+ habitcost:{name:'Habit Cost',ico:'☕',blurb:'What a small daily spend becomes if you invest it instead.',
+  fields:[
+   {k:'amt',l:'Amount per purchase',min:1,max:40,step:.5,v:7,fmt:'$'},
+   {k:'days',l:'Times per week',min:1,max:7,step:1,v:5,fmt:'×'},
+   {k:'years',l:'Years',min:1,max:40,step:1,v:10,fmt:'y'},
+   {k:'ret',l:'Yearly return if invested',min:0,max:10,step:.5,v:7,fmt:'%',hint:'Long-run stock index average is often cited near 7% after inflation, but it\'s never guaranteed.'},
+  ],
+  calc(v){
+   const yr=v.amt*v.days*52, mo=yr/12, r=v.ret/100/12, n=v.years*12;
+   const fv=r===0?mo*n:mo*((Math.pow(1+r,n)-1)/r);
+   const spent=yr*v.years;
+   const at40=r===0?mo*12*22:mo*((Math.pow(1+r,264)-1)/r);
+   return `<div class="eyebrow">That habit costs</div><div class="big num">${money(yr)}<span class="small muted"> /year</span></div>
+   <div class="bars" style="margin-top:16px"><div class="bar"><span>Spent over ${v.years} yrs</span><div class="track"><div class="fill bad" style="width:${spent/fv*100}%"></div></div><b>${money(spent)}</b></div>
+   <div class="bar"><span>If invested</span><div class="track"><div class="fill good" style="width:100%"></div></div><b>${money(fv)}</b></div></div>
+   <p>Invested from age 18 to 40 instead, it could grow to about <b>${money(at40)}</b>.</p>
+   <div class="verdict meh">You don't have to quit. Cut it in half and you'd still keep about ${money(fv/2)}.</div>`;
+  }},
+ rent:{name:'Off-Campus Move',ico:'🏠',blurb:'The real monthly cost of an apartment, including what the listing leaves out.',
+  fields:[
+   {k:'rent',l:'Your share of rent per month',min:400,max:2500,step:25,v:1150,fmt:'$'},
+   {k:'util',l:'Utilities & internet (your share)',min:0,max:300,step:5,v:90,fmt:'$'},
+   {k:'deposit',l:'Security deposit (your share)',min:0,max:4000,step:50,v:1150,fmt:'$'},
+   {k:'lease',l:'Months on the lease',min:6,max:12,step:1,v:12,fmt:'mo'},
+   {k:'school',l:'Months you\'re actually in Santa Cruz',min:6,max:12,step:1,v:9,fmt:'mo'},
+   {k:'commute',l:'Extra transport per month',min:0,max:300,step:5,v:30,fmt:'$'},
+   {k:'ins',l:'Renters insurance per month',min:0,max:40,step:1,v:15,fmt:'$'},
+  ],
+  calc(v){
+   const monthly=v.rent+v.util+v.commute+v.ins;
+   const year=monthly*v.lease - (v.lease>v.school?v.commute*(v.lease-v.school):0);
+   const perSchoolMonth=year/v.school;
+   const moveIn=v.deposit+v.rent+(v.util>0?50:0);
+   const empty=v.rent*Math.max(0,v.lease-v.school);
+   return `<div class="eyebrow">True cost per month you're here</div><div class="big num">${money(perSchoolMonth)}</div><p class="small muted" style="margin-top:6px">vs. ${money(v.rent)} on the listing</p>
+   <table class="rows"><tr><td>Rent + utilities + insurance + transport</td><td class="n">${money(monthly)}/mo</td></tr>
+   <tr><td>Total for the lease year</td><td class="n">${money(year)}</td></tr>
+   <tr><td>Rent for months you're not here</td><td class="n">${money(empty)}</td></tr>
+   <tr class="tot"><td>Cash needed on move-in day</td><td class="n">${money(moveIn)}</td></tr></table>
+   ${empty>0?`<div class="verdict meh">A ${v.lease}-month lease for a ${v.school}-month school year means ${money(empty)} for an empty room, unless you sublet (check the lease allows it).</div>`:'<div class="verdict good">Your lease matches the time you\'re here. No summer rent wasted.</div>'}
+   <p class="why" style="margin-top:12px">Move-in cash usually lands before your next aid disbursement. Plan for it a quarter ahead. Your deposit should come back if you document the unit's condition on move-in day.</p>`;
+  }}
+};
+
+function fieldHTML(t,f,val){
+ const v=val??f.v;
+ const disp=f.fmt==='$'?money(v,f.step<1?2:0):f.fmt==='%'?v+'%':f.fmt===''?(v?'Yes':'No'):v+' '+f.fmt;
+ return `<div class="field"><label for="${t}-${f.k}"><span>${f.l}</span><output id="${t}-${f.k}-o">${disp}</output></label>
+ <input type="range" id="${t}-${f.k}" data-k="${f.k}" min="${f.min}" max="${f.max}" step="${f.step}" value="${v}">${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;
+}
+function mountTool(el,id,preset={}){
+ const T=TOOLS[id];
+ el.innerHTML=`<div class="tool"><div class="card">${T.fields.map(f=>fieldHTML(id,f,preset[f.k])).join('')}</div><div class="out" aria-live="polite"></div></div>`;
+ const out=$('.out',el);
+ const read=()=>{const v={};T.fields.forEach(f=>{v[f.k]=parseFloat($('#'+id+'-'+f.k,el).value);});return v;};
+ const upd=()=>{const v=read();T.fields.forEach(f=>{const x=v[f.k];$('#'+id+'-'+f.k+'-o',el).textContent=f.fmt==='$'?money(x,f.step<1?2:0):f.fmt==='%'?x+'%':f.fmt===''?(x?'Yes':'No'):x+' '+f.fmt;});out.innerHTML=T.calc(v);};
+ $$('input[type=range]',el).forEach(i=>i.addEventListener('input',upd));
+ upd();
+}
+
+/* ==================== decision paths ==================== */
+const PATHS=[
+ {id:'aid',ico:'🎓',title:'Accept my financial aid offer',q:'Which parts of my aid should I say yes to?',time:'8 min',tool:'loancost',preset:{amt:2000,sub:0},
+  gut:{q:'Your aid offer lists a $3,500 subsidized loan. What does "subsidized" mean?',opts:['It\'s free money you don\'t pay back','The government pays the interest while you\'re in school','It has a lower interest rate than other loans','You only repay it if you graduate'],a:1,ex:'It\'s still a loan you repay, at the same 6.52% rate as unsubsidized loans in 2026–27. The difference: no interest builds up while you\'re enrolled at least half-time.'},
+  learn:[
+   ['Free money first','Grants and scholarships (Pell, Cal Grant, UC grants) don\'t get repaid. Always accept them first.'],
+   ['Earned money next','Work-study is a job you get paid for. You only receive it if you work the hours, so it won\'t pay your fall bill up front.'],
+   ['Loans last, subsidized before unsubsidized','You can accept part of a loan. Take only the gap you actually need, and use subsidized loans before unsubsidized, since those grow interest from day one.'],
+   ['The fee nobody mentions','Federal loans have a 1.057% origination fee. Borrow $5,500 and about $58 is removed before the money reaches you.'],
+  ],
+  decide:{s:'Your offer: $9,800 in grants, a $3,500 subsidized loan and a $2,000 unsubsidized loan. After grants, your real gap for the year is $4,100. What do you accept?',
+   opts:[
+    {t:'Accept everything. Extra cash is nice to have.',r:'meh',fb:'You\'d borrow $1,400 more than you need. At 6.52% plus 4 years of in-school interest on the unsubsidized part, that extra cash costs you roughly $2,400 to repay.'},
+    {t:'Grants + the full subsidized loan + $600 of the unsubsidized loan.',r:'good',fb:'You cover the exact gap, use the cheapest loan first, and only $600 grows interest while you\'re in school.'},
+    {t:'Decline all loans and put the gap on a credit card.',r:'bad',fb:'A credit card at ~24% APR with no grace period while in school is the most expensive way to pay for college. Federal loans have fixed rates and income-based repayment options.'}]},
+  plan:[
+   {t:'Open my aid offer and list grants, work-study and loans separately',w:'Your student portal'},
+   {t:'Calculate my real gap: cost of attendance minus grants and family help',w:'Use the Quarter Budget tool'},
+   {t:'Accept only the loan amount that covers that gap, subsidized first',w:'You can lower a loan amount later, too'},
+   {t:'Complete loan entrance counseling and sign the MPN',w:'studentaid.gov',href:'https://studentaid.gov'},
+   {t:'Set a reminder to renew my FAFSA or CA Dream Act application when it opens in the fall',w:'Aid isn\'t automatic each year'},
+   {t:'Book drop-in advising if anything on my offer is confusing',w:'UCSC Financial Aid & Scholarship Office',href:'https://financialaid.ucsc.edu'}]},
+ {id:'credit',ico:'💳',title:'Get my first credit card',q:'Should I get one, and which one?',time:'7 min',tool:'cardpayoff',preset:{bal:800,pay:30},
+  gut:{q:'You spend $400 on your card this month. The statement balance is $400 and the minimum due is $35. What do you pay to avoid interest?',opts:['$35, the minimum','$400, the statement balance','Anything over $35','Nothing, if you pay within 60 days'],a:1,ex:'Only paying the full statement balance by the due date avoids interest. Pay less and interest is charged, usually at 20%+ APR.'},
+  learn:[
+   ['A card is a credit-building tool, not extra money','Used right, it builds your credit history, which later affects apartment applications, car loans and even some job checks.'],
+   ['Three numbers matter','APR (the interest rate), the annual fee (look for $0), and your credit limit.'],
+   ['Utilization','Try to keep your balance under 30% of your limit. A $500 limit means staying under $150 at statement time.'],
+   ['Autopay the statement balance','Set this up the day you get the card. One late payment can stay on your report for years.'],
+  ],
+  decide:{s:'A table at Quarry Plaza is giving away hoodies if you sign up for their card (27.99% APR, $0 fee). Your credit union offers a student card (17.5% APR, $0 fee). You have no credit history.',
+   opts:[
+    {t:'Get the hoodie card. Free hoodie and they\'ll approve me today.',r:'bad',fb:'A higher APR only matters if you carry a balance, but sign-up-table cards often have higher rates and fees. A hoodie isn\'t a reason to open an account you\'ll keep for years.'},
+    {t:'Get the credit union student card, put one subscription on it and autopay the statement balance.',r:'good',fb:'A small, predictable charge plus full autopay builds history with zero interest. This is the textbook first card.'},
+    {t:'Get both. More cards means more available credit.',r:'meh',fb:'Two new accounts at once means two hard inquiries and two due dates to track. Start with one and add another after 6–12 months of on-time payments.'}]},
+  plan:[
+   {t:'Check my credit report for free',w:'annualcreditreport.com',href:'https://www.annualcreditreport.com'},
+   {t:'Compare one student card and one credit union card by APR and fees',w:'Ignore sign-up gifts'},
+   {t:'Set autopay to the full statement balance',w:'Not the minimum'},
+   {t:'Keep my balance under 30% of my limit at statement time',w:''},
+   {t:'Book a free SlugCents peer session about credit',w:'SlugCents',href:'https://slugcents.ucsc.edu'}]},
+ {id:'paycheck',ico:'💵',title:'Understand my first paycheck',q:'Why is my check smaller than I expected?',time:'6 min',tool:'paycalc',preset:{},
+  gut:{q:'You earned $6,000 this year from a campus job and had $280 in income tax withheld. You don\'t owe anything. What happens if you don\'t file a tax return?',opts:['Nothing, the $280 is gone either way','The IRS mails it back automatically','You get a penalty','You lose the $280 you\'re owed back'],a:3,ex:'With $6,000 in income you\'re well under the $16,100 standard deduction. The withheld money is yours, but it only comes back if you file.'},
+  learn:[
+   ['Gross vs. net','Gross is hours × wage. Net is what reaches your bank account after withholding.'],
+   ['What gets withheld','Federal and CA income tax, CA SDI (1.3%), and usually Social Security + Medicare (7.65%). Campus jobs while enrolled are often FICA-exempt.'],
+   ['Your W-4 controls withholding','You fill it out on day one. It tells payroll how much income tax to hold back.'],
+   ['Filing can pay you','Part-time students are often over-withheld. Filing is how you get it back, and free filing options exist.'],
+  ],
+  decide:{s:'It\'s February. Your W-2 shows $7,200 in wages and $340 of federal and state income tax withheld. A friend says students "don\'t need to file."',
+   opts:[
+    {t:'Skip it, my friend is probably right.',r:'bad',fb:'You may not be required to file, but you\'d leave about $340 with the government. Not required doesn\'t mean not worth it.'},
+    {t:'File free through IRS Free File or a VITA site and get the refund.',r:'good',fb:'You get your withholding back and start a clean filing record, which helps with future aid verification.'},
+    {t:'Pay a tax-prep app $60 to file.',r:'meh',fb:'You\'ll get your refund, but a simple W-2 return qualifies for free filing. Keep the $60.'}]},
+  plan:[
+   {t:'Look at one pay stub and find gross, each deduction and net',w:'Use the Paycheck tool to check it'},
+   {t:'Confirm my W-4 is filled out correctly',w:'Ask your payroll or HR contact'},
+   {t:'Save every W-2 and 1098-T I receive in January',w:'You need them to file'},
+   {t:'File for free by mid-April',w:'IRS Free File',href:'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free'}]},
+ {id:'lease',ico:'🏠',title:'Move off campus',q:'Can I afford an apartment, and what do I sign?',time:'8 min',tool:'rent',preset:{},
+  gut:{q:'You\'re signing a 12-month lease in Santa Cruz but you\'ll only be here for the 9-month school year. What\'s the most common money surprise?',opts:['Utilities are included','Paying 3 months of rent for a room you\'re not in','Rent goes down in summer','The deposit is optional'],a:1,ex:'Many Santa Cruz leases run 12 months. Unless you sublet (and the lease allows it), summer rent is on you.'},
+  learn:[
+   ['The listing isn\'t the cost','Add utilities, internet, renters insurance, furniture and extra commuting. Your true monthly cost is usually $150–$300 more.'],
+   ['Move-in cash','Deposit + first month (sometimes last month too) is due up front, often before your next aid payment arrives.'],
+   ['Everyone on the lease is responsible','On a joint lease, if a roommate stops paying, the landlord can come after anyone on it.'],
+   ['Protect your deposit','Photograph every room on move-in day and email the photos to your landlord so there\'s a dated record.'],
+  ],
+  decide:{s:'You found a room for $1,150/month on a 12-month lease. Your aid refund lands in late September, but move-in is September 1 and needs $2,300 up front. You have $900.',
+   opts:[
+    {t:'Put the $1,400 gap on a credit card and pay it off when aid arrives.',r:'meh',fb:'It can work if the aid really covers it and you pay the full balance on time. But it starts the year in debt with no cushion. Ask the landlord about splitting the deposit first.'},
+    {t:'Ask the landlord to split the deposit over 3 months and ask Financial Aid about the disbursement date.',r:'good',fb:'Many landlords will negotiate the deposit, and knowing your exact aid date lets you plan instead of borrowing.'},
+    {t:'Sign without reading the lease. It\'s standard.',r:'bad',fb:'Leases differ on subletting, fees, early termination and who pays utilities. Ten minutes of reading can save hundreds.'}]},
+  plan:[
+   {t:'Run my true monthly cost with the Off-Campus Move tool',w:'Including summer months'},
+   {t:'Read the whole lease: subletting, early termination, utilities',w:'Ask questions before signing'},
+   {t:'Get renters insurance',w:'Often $10–20/month'},
+   {t:'Photograph the unit on move-in day and email the photos to my landlord',w:'Protects your deposit'},
+   {t:'Know where to get help with a renter\'s rights problem',w:'UCSC Basic Needs',href:'https://basicneeds.ucsc.edu'}]},
+ {id:'quarter',ico:'🗓️',title:'Make it through the quarter',q:'My aid came in one lump. How do I make it last?',time:'7 min',tool:'budget',preset:{},
+  gut:{q:'Your aid refund of $1,800 hits your account in week 1 of a 10-week quarter. How much can you spend per week if it\'s your only money?',opts:['About $180','About $160','About $300','About $1,800'],a:1,ex:'A quarter is about 11 weeks including finals. $1,800 ÷ 11 ≈ $164. Spending like the first week lasts forever is how students run dry by week 7.'},
+  learn:[
+   ['Divide by weeks, not months','Aid arrives by quarter. Divide it by 11 weeks to get your weekly number.'],
+   ['Fixed first, fun last','Rent, phone and transport come out first. Food comes next. Whatever is left is your fun money.'],
+   ['Watch weeks 6–8','That\'s when most students run low. Check your balance every Sunday.'],
+   ['Running short isn\'t failing','CalFresh, the food pantries and Slug Support emergency funds exist for exactly this. Using them is smart, not embarrassing.'],
+  ],
+  decide:{s:'It\'s week 6. You have $210 left and five weeks to go. A buy-now-pay-later app offers to split a $180 grocery haul into four payments.',
+   opts:[
+    {t:'Use buy-now-pay-later for groceries.',r:'bad',fb:'You\'d be borrowing against money you don\'t have yet. Missed BNPL payments can bring late fees, and the payments land right when you\'re shortest.'},
+    {t:'Check CalFresh eligibility, use the campus pantry and set a $40/week food cap.',r:'good',fb:'CalFresh can add monthly grocery money and doesn\'t reduce your financial aid. Pantries stretch the rest. This solves the problem instead of moving it.'},
+    {t:'Pick up 10 extra work hours this week.',r:'meh',fb:'More income helps, but it lands in 2 weeks and costs study time right before finals. Use it together with food support, not instead of it.'}]},
+  plan:[
+   {t:'Find my weekly number: money in this quarter ÷ 11',w:'Quarter Budget tool'},
+   {t:'Check my balance every Sunday',w:'Put it on your calendar'},
+   {t:'Check if I qualify for CalFresh',w:'UCSC CalFresh outreach',href:'https://basicneeds.ucsc.edu'},
+   {t:'Know where the campus food pantries are',w:'UCSC Basic Needs',href:'https://basicneeds.ucsc.edu'},
+   {t:'Bookmark Slug Support for real emergencies',w:'Dean of Students',href:'https://deanofstudents.ucsc.edu'}]},
+ {id:'habit',ico:'☕',title:'Small spending, big numbers',q:'Do my daily habits actually matter?',time:'5 min',tool:'habitcost',preset:{},
+  gut:{q:'You spend $7 on coffee or delivery 5 days a week. Roughly how much is that per year?',opts:['About $350','About $900','About $1,800','About $3,600'],a:2,ex:'$7 × 5 × 52 = $1,820. Small, frequent purchases are the easiest money to lose track of.'},
+  learn:[
+   ['Frequency beats price','A $7 habit five times a week costs more per year than most students\' textbooks.'],
+   ['Delivery fees stack','Service fee + delivery fee + tip + menu markup often add 30–50% to the food price.'],
+   ['Compound growth needs time','Money invested at 18 has decades to grow. The same amount at 30 grows far less.'],
+   ['Budget for joy','The goal isn\'t zero fun. Pick the habits you love and cut the ones you do on autopilot.'],
+  ],
+  decide:{s:'You order delivery about 4 times a week, averaging $19 with fees. You want to save for a $1,000 emergency fund by June.',
+   opts:[
+    {t:'Delete the app forever.',r:'meh',fb:'Cold turkey works for some people, but most bounce back. A cap usually lasts longer than a ban.'},
+    {t:'Cap delivery at once a week and auto-transfer $40 every Friday to savings.',r:'good',fb:'That\'s about $57 a week back in your pocket. Automating the transfer makes it happen without willpower. You hit $1,000 in about 25 weeks.'},
+    {t:'Keep ordering and save whatever is left at the end of the month.',r:'bad',fb:'"Save what\'s left" usually means saving $0. Pay yourself first.'}]},
+  plan:[
+   {t:'Check my last 30 days of transactions for repeat small purchases',w:'Your banking app'},
+   {t:'Pick one habit to cap, not cut',w:''},
+   {t:'Set up an automatic weekly transfer to savings',w:'Even $10 counts'},
+   {t:'Open a high-yield savings account for my emergency fund',w:'Compare rates; look for no monthly fee'}]},
+];
+const PATH=Object.fromEntries(PATHS.map(p=>[p.id,p]));
+const STEPS=['Guess','Learn','Run the numbers','Decide','Plan'];
+
+const RES=[
+ {c:'UCSC',n:'Financial Aid & Scholarship Office',d:'Questions about your aid offer, loans, appeals and disbursement dates. Drop-in advising by Zoom or in person at 205 Hahn Student Services.',u:'https://financialaid.ucsc.edu',tag:'Aid & loans'},
+ {c:'UCSC',n:'SlugCents',d:'UCSC\'s peer-led financial literacy program: workshops and one-on-one money conversations with other students.',u:'https://slugcents.ucsc.edu',tag:'Learn'},
+ {c:'UCSC',n:'Basic Needs',d:'Food pantries, CalFresh application help, housing resources and renter\'s rights information, all in one hub.',u:'https://basicneeds.ucsc.edu',tag:'Food & housing'},
+ {c:'UCSC',n:'Slug Support (Dean of Students)',d:'Case management and emergency funds when something unexpected leaves a gap for basic needs. Phone: 831-459-4446.',u:'https://deanofstudents.ucsc.edu',tag:'Emergency'},
+ {c:'National',n:'StudentAid.gov',d:'Your federal loan balances and servicer, the FAFSA, entrance and exit counseling, and repayment plans.',u:'https://studentaid.gov',tag:'Aid & loans'},
+ {c:'National',n:'AnnualCreditReport.com',d:'The official site for free credit reports from all three bureaus.',u:'https://www.annualcreditreport.com',tag:'Credit'},
+ {c:'National',n:'IRS Free File',d:'File your federal return for free if your income qualifies, which covers most students.',u:'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free',tag:'Taxes'},
+ {c:'California',n:'GetCalFresh.org',d:'Apply for CalFresh, California\'s monthly grocery benefit. Many college students qualify, and it doesn\'t reduce financial aid.',u:'https://www.getcalfresh.org',tag:'Food & housing'},
+ {c:'California',n:'California Student Aid Commission',d:'Cal Grant, the CA Dream Act Application and state aid deadlines.',u:'https://www.csac.ca.gov',tag:'Aid & loans'},
+ {c:'National',n:'Consumer Financial Protection Bureau',d:'Plain-language guides on credit cards, banking and debt collection, plus a place to file complaints.',u:'https://www.consumerfinance.gov',tag:'Credit'},
+];
+
+/* ==================== views ==================== */
+const V={};
+const L='ABCD';
+function statusOf(id){const st=S.paths[id]||{};return st.done?'<span class="st done">Finished</span>':st.step?'<span class="st prog">In progress</span>':'';}
+function rowHTML(p){return `<a class="row" href="#${p.id}"><span class="badge">${icon(PICON[p.id])}</span><span><h3>${p.title}</h3><p>${p.q}</p></span><span class="meta">${p.time}${statusOf(p.id)}</span>${icon('chev','ic chev')}</a>`;}
+
+V.home=()=>{
+ const done=PATHS.filter(p=>S.paths[p.id]?.done).length;
+ return `<div class="wrap"><div class="hero">
+  <div>
+   <h1>Practice the money decisions of college before they cost you.</h1>
+   <p class="lead">Your aid offer, your first credit card, your first lease, your first paycheck. Work through each one with real 2026 numbers and walk away with a plan for this week.</p>
+   <div class="btnrow"><a class="btn slug" href="#checkup">Find where to start</a><a class="btn line" href="#paths">Browse decisions</a></div>
+   <div class="who">${done?`You've finished <b>${done} of ${PATHS.length}</b> decisions. <a href="#plan">Open your plan</a>`:'Made by UC Santa Cruz students. Free, with no account needed.'}</div>
+  </div>
+  <div class="demo" aria-label="Quarter budget demo">
+   <h3>Your aid lands once a quarter. How long does it last?</h3>
+   <div class="facts"><div><b>$1,800</b>aid refund</div><div><b>$400</b>in checking</div><div><b>11</b>weeks incl. finals</div></div>
+   <label for="demo-spend"><span>You spend per week</span><output id="demo-out">$240</output></label>
+   <input type="range" id="demo-spend" min="120" max="360" step="10" value="240">
+   <div class="strip" id="demo-strip" aria-hidden="true"></div>
+   <div class="result" id="demo-res"></div>
+   <p class="small" style="margin-top:14px;color:var(--band-muted)">Use your own numbers in the <a href="#budget">quarter budget calculator</a>.</p>
+  </div>
+ </div></div>
+
+ <section class="sec"><div class="wrap">
+  <div class="sechead"><div><h2>Every decision follows the same five steps</h2><p>Each one takes 5 to 8 minutes.</p></div></div>
+  <div class="process">
+   <div><b>1</b><h4>Guess</h4><p>Commit to an answer first. It makes the lesson stick.</p></div>
+   <div><b>2</b><h4>Learn</h4><p>Four short points. Only what this decision needs.</p></div>
+   <div><b>3</b><h4>Run the numbers</h4><p>A calculator with your own situation plugged in.</p></div>
+   <div><b>4</b><h4>Decide</h4><p>A realistic UCSC scenario, and what each choice costs.</p></div>
+   <div><b>5</b><h4>Plan</h4><p>Pick your next steps. They go to My plan.</p></div>
+  </div>
+ </div></section>
+
+ <section class="sec"><div class="wrap">
+  <div class="sechead"><div><h2>What are you deciding right now?</h2><p>Start with whatever is in front of you this quarter. There's no required order.</p></div><a class="btn line" href="#checkup">Not sure? Take the 2-minute checkup</a></div>
+  <div class="index">${PATHS.map(rowHTML).join('')}</div>
+ </div></section>
+
+ <section class="band"><div class="wrap">
+  <h2>Try it with fake money first</h2><p style="margin-top:8px">Two simulators set in Santa Cruz. Make choices, live with them, start over.</p>
+  <div class="sims">${simCards()}</div>
+ </div></section>`;
+};
+function bindHome(){
+ const r=$('#demo-spend');if(!r)return;
+ const strip=$('#demo-strip');strip.innerHTML=Array.from({length:11},(_,i)=>`<span class="${i===10?'fin':''}">${i+1}</span>`).join('');
+ const cells=$$('span',strip);
+ const upd=()=>{const w=+r.value,total=2200,lasts=total/w;$('#demo-out').textContent=money(w);
+  cells.forEach((c,i)=>c.classList.toggle('out',i+1>lasts));
+  const wk=Math.floor(lasts);
+  $('#demo-res').innerHTML=lasts>=11?`You make it to finals with ${money(total-w*11)} left.<small>That's ${money(total/11)} a week if you spread it evenly.</small>`:`You run out in week ${wk+1}.<small>To reach finals, spend ${money(total/11)} a week or less.</small>`;};
+ r.addEventListener('input',upd);upd();
+}
+
+V.paths=()=>`<div class="wrap page"><div class="pagehead"><h1>Decisions</h1><p>Six money moments almost every UCSC student hits. Each one ends with steps you can take this week.</p></div>
+ <div class="index">${PATHS.map(rowHTML).join('')}</div>
+ <div class="next"><p><b>Not sure where to start?</b> Five quick questions will point you to the one that matters most right now.</p><a class="btn" href="#checkup">Take the checkup</a></div></div>`;
+
+/* ----- checkup ----- */
+const CHECK=[
+ {q:'Where do you live this year?',o:[['On campus','quarter'],['Off campus','lease'],['At home','habit'],['Moving off campus soon','lease']]},
+ {q:'Are there student loans in your aid offer?',o:[['Yes, and I understand them','quarter'],['Yes, and I\'m not sure what I accepted','aid'],['No','credit'],['I haven\'t looked at my offer','aid']]},
+ {q:'Do you have a credit card?',o:[['Yes, and I pay it in full','habit'],['Yes, and I carry a balance','credit'],['No, but I want one','credit'],['No, and I\'m not interested','quarter']]},
+ {q:'Do you have a job?',o:[['Yes, on campus','paycheck'],['Yes, off campus','paycheck'],['I\'m looking for one','paycheck'],['No','quarter']]},
+ {q:'Last quarter, did you run low on money before finals?',o:[['Never','habit'],['Once or twice','quarter'],['Most quarters','quarter'],['I don\'t keep track','quarter']]},
+];
+let ck={i:0,a:[]};
+V.checkup=()=>{
+ if(ck.i>=CHECK.length){
+  const tally={};ck.a.forEach((x,i)=>tally[x]=(tally[x]||0)+1+(i===1||i===4?.5:0));
+  const ranked=Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
+  S.checkup=ranked;save();
+  const top=PATH[ranked[0]];
+  return `<div class="wrap page ck"><div class="pagehead" style="margin-bottom:24px"><span class="label">Your checkup result</span><h1>Start with: ${top.title}</h1><p>Based on your answers, this is the decision most likely to save you money or stress this quarter.</p></div>
+  <div class="btnrow"><a class="btn slug" href="#${top.id}">Start this decision</a><button class="btn line" id="ck-redo">Retake the checkup</button></div>
+  ${ranked.length>1?`<h3 style="margin:44px 0 12px">Also worth doing</h3><div class="index">${ranked.slice(1,4).map(id=>rowHTML(PATH[id])).join('')}</div>`:''}</div>`;
+ }
+ const c=CHECK[ck.i];
+ return `<div class="wrap page ck"><span class="label">Question ${ck.i+1} of ${CHECK.length}</span><div class="meter"><div style="width:${ck.i/CHECK.length*100}%"></div></div>
+ <h2 style="margin-bottom:20px">${c.q}</h2><div class="opts">${c.o.map((o,j)=>`<button class="opt" data-ck="${j}"><i>${L[j]}</i><span>${o[0]}</span></button>`).join('')}</div>
+ <p class="note" style="margin-top:18px">No dollar amounts and no names. Your answers stay in this browser.</p></div>`;
+};
+function bindCheckup(){
+ $$('[data-ck]').forEach(b=>b.onclick=()=>{ck.a.push(CHECK[ck.i].o[+b.dataset.ck][1]);ck.i++;render();});
+ const r=$('#ck-redo');if(r)r.onclick=()=>{ck={i:0,a:[]};render();};
+}
+
+/* ----- decision player ----- */
+function pathView(p){
+ const st=S.paths[p.id]=S.paths[p.id]||{step:0};
+ const step=st.view??st.step??0;
+ let body='';
+ if(step===0){
+  const g=p.gut,ans=st.gut;
+  body=`<h2>${g.q}</h2><p class="sub">Guess before you learn. Being wrong here costs nothing.</p>
+  <div class="opts">${g.opts.map((o,i)=>`<button class="opt ${ans==null?'':i===g.a?'right':i===ans?'wrong':''}" data-gut="${i}" ${ans!=null?'disabled':''}><i>${L[i]}</i><span>${o}</span></button>`).join('')}</div>
+  ${ans!=null?`<div class="fb ${ans===g.a?'good':'bad'}"><h4>${ans===g.a?'You got it.':'Not quite.'}</h4><p>${g.ex}</p></div>
+  <div><h4 style="margin-bottom:10px">How confident do you feel about this decision right now?</h4><div class="conf"><span>Not at all</span>${[1,2,3,4,5].map(n=>`<button data-c0="${n}" class="${st.c0===n?'pick':''}" aria-label="${n} of 5">${n}</button>`).join('')}<span>Very</span></div></div>`:''}`;
+ } else if(step===1){
+  body=`<h2>What you need to know</h2><div class="learn">${p.learn.map(([h,t],i)=>`<div><b>${i+1}</b><span><h4>${h}</h4><p>${t}</p></span></div>`).join('')}</div>`;
+ } else if(step===2){
+  body=`<h2>Run your own numbers</h2><p class="sub">Move the sliders to match your situation. Nothing is saved or sent.</p><div id="ptool"></div>`;
+ } else if(step===3){
+  const d=p.decide,pick=st.pick;
+  body=`<h2>Your call</h2><div class="scenario"><p>${d.s}</p></div>
+  <div class="opts">${d.opts.map((o,i)=>`<button class="opt ${pick===i?(o.r==='good'?'right':o.r==='bad'?'wrong':'meh'):''}" data-pick="${i}"><i>${L[i]}</i><span>${o.t}</span></button>`).join('')}</div>
+  ${pick!=null?`<div class="fb ${d.opts[pick].r}"><h4>${d.opts[pick].r==='good'?'Strong choice.':d.opts[pick].r==='bad'?'This one costs you.':'This works, with a catch.'}</h4><p>${d.opts[pick].fb}</p></div>${d.opts[pick].r!=='good'?'<p class="note">Pick another option to compare outcomes.</p>':''}`:''}`;
+ } else {
+  const chosen=new Set(S.plan.filter(x=>x.path===p.id).map(x=>x.t));
+  body=`<h2>Choose what you'll actually do</h2><p class="sub">Pick at least one. Your choices go to My plan, where you can check them off.</p>
+  <div class="checks">${p.plan.map((a,i)=>`<label class="check"><input type="checkbox" id="pl-${p.id}-${i}" data-plan="${i}" ${chosen.has(a.t)?'checked':''}><span><b>${a.t}</b>${a.w?`<small>${a.href?`<a href="${a.href}" target="_blank" rel="noopener">${a.w}</a>`:a.w}</small>`:''}</span></label>`).join('')}</div>
+  <div><h4 style="margin-bottom:10px">How confident do you feel about this decision now?</h4><div class="conf"><span>Not at all</span>${[1,2,3,4,5].map(n=>`<button data-c1="${n}" class="${st.c1===n?'pick':''}" aria-label="${n} of 5">${n}</button>`).join('')}<span>Very</span></div>
+  ${st.c0&&st.c1?`<p class="note" style="margin-top:10px">You started at ${st.c0} and you're now at ${st.c1}.</p>`:''}</div>`;
+ }
+ const canNext=step===0?(st.gut!=null&&!!st.c0):step===3?st.pick!=null:true;
+ const reach=st.done?4:(st.step||0);
+ return `<div class="wrap page"><a class="back" href="#paths">${icon('left')}All decisions</a>
+ <div class="dtitle"><span class="badge">${icon(PICON[p.id])}</span><div><h1>${p.title}</h1><p class="muted" style="margin-top:4px">${p.q} About ${p.time}.</p></div></div>
+ <div class="player"><nav class="stepper" aria-label="Steps">${STEPS.map((s,i)=>`<button data-go="${i}" class="${i===step?'on':i<reach||st.done?'done':''}" ${i>reach?'disabled':''} ${i===step?'aria-current="step"':''}><i>${i+1}</i>${s}</button>`).join('')}</nav>
+ <div class="stage">${body}
+ <div class="btnrow" style="margin-top:8px">${step>0?'<button class="btn line" id="pv-back">Back</button>':''}
+ ${step===4?`<button class="btn slug" id="pv-finish">${st.done?'Update my plan':'Save to my plan'}</button>`:`<button class="btn" id="pv-next" ${canNext?'':'disabled'}>Continue</button>`}</div>
+ ${step===0&&st.gut!=null&&!st.c0?'<p class="note">Rate your confidence to continue.</p>':''}</div></div></div>`;
+}
+function bindPath(p){
+ const st=S.paths[p.id];const step=st.view??st.step??0;
+ const go=n=>{st.view=n;st.step=Math.max(st.step||0,n);save();render();window.scrollTo({top:0});};
+ $$('[data-go]').forEach(b=>b.onclick=()=>{st.view=+b.dataset.go;save();render();});
+ $$('[data-gut]').forEach(b=>b.onclick=()=>{st.gut=+b.dataset.gut;save();render();});
+ $$('[data-c0]').forEach(b=>b.onclick=()=>{st.c0=+b.dataset.c0;save();render();});
+ $$('[data-c1]').forEach(b=>b.onclick=()=>{st.c1=+b.dataset.c1;save();render();});
+ $$('[data-pick]').forEach(b=>b.onclick=()=>{st.pick=+b.dataset.pick;save();render();});
+ $$('[data-plan]').forEach(c=>c.onchange=()=>{const a=p.plan[+c.dataset.plan];
+  if(c.checked){if(!S.plan.some(x=>x.path===p.id&&x.t===a.t))S.plan.push({path:p.id,t:a.t,w:a.w,href:a.href||'',done:false});}
+  else S.plan=S.plan.filter(x=>!(x.path===p.id&&x.t===a.t));save();});
+ const t=$('#ptool');if(t)mountTool(t,p.tool,p.preset);
+ const n=$('#pv-next');if(n)n.onclick=()=>go(step+1);
+ const b=$('#pv-back');if(b)b.onclick=()=>{st.view=step-1;save();render();window.scrollTo({top:0});};
+ const f=$('#pv-finish');if(f)f.onclick=()=>{
+  if(!S.plan.some(x=>x.path===p.id)){toast('Pick at least one step first');return;}
+  st.done=true;st.view=4;save();toast('Saved to My plan');location.hash='plan';};
+}
+
+/* ----- calculators ----- */
+const TOOL_IDS=Object.keys(TOOLS);
+function toolsView(active){
+ const id=active||'budget',T=TOOLS[id],rel=PATHS.find(p=>p.tool===id);
+ return `<div class="wrap page"><div class="pagehead"><h1>Calculators</h1><p>Each one answers a question students actually ask. All of them use 2026 federal and California rules.</p></div>
+ <div class="toolwrap"><nav class="toolnav" aria-label="Calculators">${TOOL_IDS.map(k=>`<a href="#${k}" class="${k===id?'on':''}" ${k===id?'aria-current="page"':''}>${icon(TICON[k])}${TOOLS[k].name}</a>`).join('')}</nav>
+ <div><div class="toolhead"><h2>${T.name}</h2><p>${T.blurb}</p></div><div id="toolmount"></div>
+ ${rel?`<div class="next"><p><b>Turn these numbers into a decision.</b> ${rel.title} takes about ${rel.time} and ends with a plan.</p><a class="btn" href="#${rel.id}">Start the decision</a></div>`:''}</div></div></div>`;
+}
+
+/* ----- simulators ----- */
+const SLUG_ART=`<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M8 82h144" stroke="rgba(255,255,255,.2)" stroke-width="2" stroke-dasharray="4 6"/><path d="M18 80c8-1 14-11 22-17 13-10 30-13 43-9 9 3 15 9 17 16 1 6-3 10-10 10H18z" fill="#F6C81E"/><path d="M87 55l5-19M94 59l13-14" stroke="#F6C81E" stroke-width="5" stroke-linecap="round"/><circle cx="92" cy="34" r="5" fill="#F6C81E"/><circle cx="108" cy="43" r="5" fill="#F6C81E"/><circle cx="83" cy="69" r="3.5" fill="#0E2A47"/><circle cx="128" cy="30" r="9" fill="none" stroke="#F6C81E" stroke-width="3"/><path d="M128 25v10M125 28h5a2 2 0 0 1 0 4h-4" stroke="#F6C81E" stroke-width="2" fill="none"/></svg>`;
+const CAL_ART=`<svg viewBox="0 0 160 100" aria-hidden="true"><g fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"><rect x="14" y="14" width="132" height="74" rx="6"/><path d="M14 32h132"/></g>${[0,1,2,3].map(i=>`<rect x="${24+i*31}" y="${74-[16,26,34,46][i]}" width="20" height="${[16,26,34,46][i]}" rx="3" fill="${i===3?'#F6C81E':'rgba(246,200,30,.55)'}"/>`).join('')}<g fill="#E7EEF5" font-family="Schibsted Grotesk,sans-serif" font-size="9" font-weight="700">${['Yr 1','Yr 2','Yr 3','Yr 4'].map((t,i)=>`<text x="${26+i*31}" y="26">${t}</text>`).join('')}</g></svg>`;
+function simCards(){return `
+ <article class="sim"><div class="art">${SLUG_ART}</div><h3>Slug Life</h3><p>A life simulator that starts you at 18 in Santa Cruz County. Every choice about school, work and money follows you for decades.</p>
+  <ul><li>UCSC or Cabrillo, then about 30 local careers</li><li>Life events from the Wharf to Quarry Plaza</li><li>Money lessons that unlock when you hit a real decision</li><li>Optional: enter your real numbers and play your own life</li></ul>
+  <a class="btn slug" href="slug-life.html">Play Slug Life</a></article>
+ <article class="sim"><div class="art">${CAL_ART}</div><h3>A Day in the Life of a Banana Slug</h3><p>Four years of college, month by month, from your first aid offer to your first job, with real loan, credit and tax mechanics.</p>
+  <ul><li>Four Years mode with three student backgrounds</li><li>One Week mode that fits a 15-minute workshop</li><li>26 short lessons you can take at your own pace</li><li>Decision Lab for testing what-if scenarios</li></ul>
+  <a class="btn slug" href="college-sim.html">Play the college sim</a></article>`;}
+V.play=()=>`<div class="wrap page"><div class="pagehead"><h1>Simulators</h1><p>Reading about money only gets you so far. Here you make the choices, see what happens and try again.</p></div></div>
+ <section class="band" style="padding-top:48px"><div class="wrap"><div class="sims" style="margin-top:0">${simCards()}</div></div></section>
+ <div class="wrap" style="padding:48px 24px 88px"><h3>Running a workshop?</h3><p class="muted" style="margin-top:6px">One Week mode takes about 15 minutes, which works for a class, a club meeting or a residence hall event. Add one decision walkthrough for a 30-minute session.</p></div>`;
+
+/* ----- resources ----- */
+let resFilter='All';
+V.resources=()=>{const tags=['All',...new Set(RES.map(r=>r.tag))];
+ return `<div class="wrap page"><div class="pagehead"><h1>Campus help</h1><p>Slugonomics can teach you the basics. For your own aid, food, housing or an emergency, these offices can actually help, and they're free for UCSC students.</p></div>
+ <div class="filter" role="group" aria-label="Filter by topic">${tags.map(t=>`<button data-f="${t}" class="${t===resFilter?'on':''}" aria-pressed="${t===resFilter}">${t}</button>`).join('')}</div>
+ <div class="dir">${RES.filter(r=>resFilter==='All'||r.tag===resFilter).map(r=>`<div class="entry"><span class="tag ${r.c==='UCSC'?'ucsc':''}">${r.c==='UCSC'?'UCSC office':r.c+' resource'}: ${r.tag.toLowerCase()}</span><h3>${r.n}</h3><p>${r.d}</p><a href="${r.u}" target="_blank" rel="noopener">${r.u.replace(/^https:\/\/(www\.)?/,'').replace(/\/.*$/,'')}</a></div>`).join('')}</div>
+ <div class="alert"><b>In a crisis right now?</b> Slug Support staff aren't available for immediate emergencies. If someone's safety is at risk, call 911.</div></div>`;};
+
+/* ----- plan ----- */
+V.plan=()=>{
+ const done=PATHS.filter(p=>S.paths[p.id]?.done),items=S.plan,finished=items.filter(x=>x.done).length;
+ const gains=done.filter(p=>S.paths[p.id].c0&&S.paths[p.id].c1);
+ const avg=k=>gains.reduce((s,p)=>s+S.paths[p.id][k],0)/gains.length;
+ const tried=PATHS.filter(p=>S.paths[p.id]?.gut!=null);
+ if(!items.length&&!done.length)return `<div class="wrap page"><div class="pagehead"><h1>My plan</h1><p>Your next steps show up here once you finish a decision.</p></div>
+  <div class="empty"><h3>Nothing here yet</h3><p class="muted">Finish any decision and choose at least one step. It takes about 7 minutes.</p><div class="btnrow"><a class="btn slug" href="#checkup">Find my first decision</a><a class="btn line" href="#paths">Browse decisions</a></div></div></div>`;
+ return `<div class="wrap page"><div class="pagehead"><h1>My plan</h1><p>The steps you chose. Check them off as you go.</p></div>
+ <div class="summary"><div><b>${done.length} of ${PATHS.length}</b><span>decisions finished</span></div><div><b>${finished} of ${items.length}</b><span>steps done</span></div>
+ <div><b>${gains.length?avg('c0').toFixed(1)+' to '+avg('c1').toFixed(1):'None yet'}</b><span>average confidence, before to after</span></div><div><b>${tried.length?tried.filter(p=>S.paths[p.id].gut===p.gut.a).length+' of '+tried.length:'None yet'}</b><span>first guesses that were right</span></div></div>
+ <div class="meter" aria-label="${finished} of ${items.length} steps done"><div style="width:${items.length?finished/items.length*100:0}%"></div></div>
+ <div style="margin-top:12px">${PATHS.filter(p=>items.some(x=>x.path===p.id)).map(p=>`<div class="plangroup"><h3>${icon(PICON[p.id])}${p.title}</h3>${items.map((x,i)=>x.path!==p.id?'':`<label class="planitem ${x.done?'done':''}"><input type="checkbox" id="pi-${i}" data-done="${i}" ${x.done?'checked':''}><span><b>${esc(x.t)}</b>${x.w?`<small>${x.href?`<a href="${x.href}" target="_blank" rel="noopener">${esc(x.w)}</a>`:esc(x.w)}</small>`:''}</span></label>`).join('')}</div>`).join('')}</div>
+ <div class="btnrow" style="margin-top:28px"><button class="btn" id="copyplan">Copy plan as text</button><a class="btn line" href="#paths">Do another decision</a><button class="btn line" id="resetall">Clear everything</button></div>
+ <div id="resetconfirm"></div>
+ <p class="note" style="margin-top:14px">Your plan is saved only in this browser. Copy it into your notes or calendar so you don't lose it.</p></div>`;
+};
+function bindPlan(){
+ $$('[data-done]').forEach(c=>c.onchange=()=>{S.plan[+c.dataset.done].done=c.checked;save();render();});
+ const cp=$('#copyplan');if(cp)cp.onclick=async()=>{
+  const txt='My Slugonomics plan\n\n'+PATHS.filter(p=>S.plan.some(x=>x.path===p.id)).map(p=>p.title+'\n'+S.plan.filter(x=>x.path===p.id).map(x=>`[${x.done?'x':' '}] ${x.t}${x.w?' ('+x.w+')':''}${x.href?' '+x.href:''}`).join('\n')).join('\n\n');
+  try{await navigator.clipboard.writeText(txt);toast('Plan copied');}catch(e){$('#resetconfirm').innerHTML=`<textarea class="copybox" id="copybox" readonly>${esc(txt)}</textarea><p class="note">Copying isn't available here. Select the text above and copy it.</p>`;}};
+ const r=$('#resetall');if(r)r.onclick=()=>{$('#resetconfirm').innerHTML=`<div class="fb bad" style="margin-top:16px"><h4>Clear all progress and your plan?</h4><p style="margin-bottom:12px">This can't be undone.</p><button class="btn" id="resetyes">Clear everything</button></div>`;$('#resetyes').onclick=()=>{S={paths:{},plan:[],checkup:null};save();ck={i:0,a:[]};render();toast('Everything cleared');};};
+}
+
+/* ----- about / comparison ----- */
+V.why=()=>`<div class="wrap page"><div class="pagehead"><h1>About Slugonomics</h1><p>Most college financial wellness platforms are large libraries. iGrad, which hundreds of universities license, offers articles, videos, courses, calculators and games, personalized by a sign-up checkup. That breadth is useful. Students usually arrive at one specific moment, though: an aid offer, a lease, a card offer. Slugonomics is built for that moment.</p></div>
+ <div class="scroll"><table class="cmp"><thead><tr><th></th><th>Typical platform (e.g. iGrad)</th><th>Slugonomics</th></tr></thead><tbody>
+ <tr><td>Where you start</td><td>A wellness checkup, then recommended content</td><td>The decision you're facing right now</td></tr>
+ <tr><td>Main format</td><td>Articles, videos and mini-courses</td><td>Five-step decision walkthroughs</td></tr>
+ <tr><td>Practice</td><td>Calculators and short games</td><td>A calculator inside every decision, plus two full simulators</td></tr>
+ <tr><td>Local detail</td><td>National content with school branding</td><td>Santa Cruz rent, UCSC quarters and aid timing, named campus offices</td></tr>
+ <tr><td>What you leave with</td><td>Points, badges and completed modules</td><td>A personal list of next steps</td></tr>
+ <tr><td>Measuring learning</td><td>Usage reports for administrators</td><td>A guess before and after, plus confidence ratings</td></tr>
+ <tr><td>Access</td><td>School-paid license with campus sign-in</td><td>Free, open link, no account</td></tr>
+ <tr><td>Who makes it</td><td>A fintech company</td><td>UCSC students who just made these decisions</td></tr>
+ </tbody></table></div>
+ <section style="margin-top:64px"><h2>What we don't have yet</h2>
+ <div class="gaps"><div><h3>Breadth</h3><p>Six decisions, not hundreds of topics. We'll add more based on what students ask for in interviews.</p></div>
+ <div><h3>Campus reporting</h3><p>Progress lives in each student's browser. A dashboard for campus staff would need accounts and a privacy review.</p></div>
+ <div><h3>Official review</h3><p>Our numbers follow 2026 federal and California rules but haven't been reviewed by UCSC Financial Aid yet.</p></div></div></section>
+ <section style="margin-top:64px;padding-top:32px;border-top:1px solid var(--line)"><h2>The team</h2><p class="muted" style="margin-top:10px">Slugonomics is a student-led project at UC Santa Cruz by Dutch Turner, Sungjun Lee, Mariana Zapien and Kwan Inkaew.</p></section></div>`;
+
+/* ==================== router ==================== */
+function render(){
+ const h=(location.hash||'#home').slice(1)||'home';
+ const app=$('#app');let html,after=null,nav=h;
+ if(PATH[h]){html=pathView(PATH[h]);after=()=>bindPath(PATH[h]);nav='paths';}
+ else if(TOOLS[h]){html=toolsView(h);after=()=>mountTool($('#toolmount'),h);nav='tools';}
+ else if(h==='tools'){html=toolsView();after=()=>mountTool($('#toolmount'),'budget');}
+ else if(h==='checkup'){html=V.checkup();after=bindCheckup;nav='paths';}
+ else if(V[h]&&h!=='home'){html=V[h]();}
+ else{html=V.home();nav='home';after=bindHome;}
+ app.innerHTML=html;
+ $$('.links a').forEach(a=>{const on=a.dataset.nav===nav;a.classList.toggle('on',on);on?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current');});
+ $('#navlinks').classList.remove('open');$('#menubtn').setAttribute('aria-expanded','false');
+ if(h==='resources')$$('[data-f]').forEach(b=>b.onclick=()=>{resFilter=b.dataset.f;render();});
+ if(h==='plan')bindPlan();
+ if(after)after();
+ updCount();
+}
+let lastHash=null;
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);
+ if(PATH[h]&&S.paths[h])S.paths[h].view=S.paths[h].done?4:S.paths[h].step||0;
+ if(h==='checkup'&&lastHash!=='checkup'&&ck.i>=CHECK.length)ck={i:0,a:[]};
+ lastHash=h;render();window.scrollTo({top:0});});
+$('#menubtn').onclick=()=>{const n=$('#navlinks');n.classList.toggle('open');$('#menubtn').setAttribute('aria-expanded',n.classList.contains('open'));};
+render();
+</script>
+</body>
+</html>
