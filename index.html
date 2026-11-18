@@ -139,8 +139,10 @@ main{min-height:60vh}
 .band{background:var(--band);color:var(--band-text);padding:72px 0}
 .band h2,.band h3{color:#fff}
 .band p{color:var(--band-muted)}
-.sims{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:32px}
+.sims{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:32px}
+@media (max-width:1100px){.sims{grid-template-columns:1fr 1fr}}
 @media (max-width:820px){.sims{grid-template-columns:1fr}}
+.sim .ver{font-size:.75rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--slug);margin-bottom:-8px}
 .sim{background:var(--band-2);border-radius:14px;padding:28px;display:flex;flex-direction:column;gap:14px}
 .sim .art{height:150px;border-radius:10px;background:rgba(255,255,255,.05);display:grid;place-items:center}
 .sim .art svg{height:110px}
@@ -716,7 +718,7 @@ V.home=()=>{
  </div></section>
 
  <section class="band"><div class="wrap">
-  <h2>Try it with fake money first</h2><p style="margin-top:8px">Two simulators set in Santa Cruz. Make choices, live with them, start over.</p>
+  <h2>Try it with fake money first</h2><p style="margin-top:8px">Three simulators set in Santa Cruz. Make choices, live with them, start over.</p>
   <div class="sims">${simCards()}</div>
  </div></section>`;
 };
@@ -833,10 +835,14 @@ function toolsView(active){
 /* ----- simulators ----- */
 const SLUG_ART=`<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M8 82h144" stroke="rgba(255,255,255,.2)" stroke-width="2" stroke-dasharray="4 6"/><path d="M18 80c8-1 14-11 22-17 13-10 30-13 43-9 9 3 15 9 17 16 1 6-3 10-10 10H18z" fill="#F6C81E"/><path d="M87 55l5-19M94 59l13-14" stroke="#F6C81E" stroke-width="5" stroke-linecap="round"/><circle cx="92" cy="34" r="5" fill="#F6C81E"/><circle cx="108" cy="43" r="5" fill="#F6C81E"/><circle cx="83" cy="69" r="3.5" fill="#0E2A47"/><circle cx="128" cy="30" r="9" fill="none" stroke="#F6C81E" stroke-width="3"/><path d="M128 25v10M125 28h5a2 2 0 0 1 0 4h-4" stroke="#F6C81E" stroke-width="2" fill="none"/></svg>`;
 const CAL_ART=`<svg viewBox="0 0 160 100" aria-hidden="true"><g fill="none" stroke="rgba(255,255,255,.25)" stroke-width="2"><rect x="14" y="14" width="132" height="74" rx="6"/><path d="M14 32h132"/></g>${[0,1,2,3].map(i=>`<rect x="${24+i*31}" y="${74-[16,26,34,46][i]}" width="20" height="${[16,26,34,46][i]}" rx="3" fill="${i===3?'#F6C81E':'rgba(246,200,30,.55)'}"/>`).join('')}<g fill="#E7EEF5" font-family="Schibsted Grotesk,sans-serif" font-size="9" font-weight="700">${['Yr 1','Yr 2','Yr 3','Yr 4'].map((t,i)=>`<text x="${26+i*31}" y="26">${t}</text>`).join('')}</g></svg>`;
+const CAP_ART=`<svg viewBox="0 0 160 100" aria-hidden="true"><path d="M8 86h144" stroke="rgba(255,255,255,.2)" stroke-width="2" stroke-dasharray="4 6"/><path d="M80 18 140 40 80 62 20 40z" fill="#F6C81E"/><path d="M48 51v17c0 7 14 13 32 13s32-6 32-13V51L80 62z" fill="rgba(246,200,30,.55)"/><path d="M128 44v22" stroke="#F6C81E" stroke-width="3" stroke-linecap="round"/><circle cx="128" cy="69" r="4" fill="#F6C81E"/><g fill="#E7EEF5" font-family="Schibsted Grotesk,sans-serif" font-size="9" font-weight="700"><text x="22" y="80">GPA</text><text x="114" y="90">48 mo</text></g></svg>`;
 function simCards(){return `
  <article class="sim"><div class="art">${SLUG_ART}</div><h3>Slug Life</h3><p>A life simulator that starts you at 18 in Santa Cruz County. Every choice about school, work and money follows you for decades.</p>
   <ul><li>UCSC or Cabrillo, then about 30 local careers</li><li>Life events from the Wharf to Quarry Plaza</li><li>Money lessons that unlock when you hit a real decision</li><li>Optional: enter your real numbers and play your own life</li></ul>
   <a class="btn slug" href="slug-life.html">Play Slug Life</a></article>
+ <article class="sim"><div class="art">${CAP_ART}</div><span class="ver">Slug Life · Version 2: school focus</span><h3>Slug College</h3><p>The Slug Life simulator zoomed in on school: four years at UC Santa Cruz, one month per turn, from move-in day to your loan grace period.</p>
+  <ul><li>Grades, study effort and the 2.0 GPA you need to keep your aid</li><li>Majors, clubs, RA jobs, research and internships</li><li>Aid each quarter, CalFresh, credit cards and your first lease</li><li>Optional: start from your real aid, rent and job</li></ul>
+  <a class="btn slug" href="slug-college.html">Play Slug College</a></article>
  <article class="sim"><div class="art">${CAL_ART}</div><h3>A Day in the Life of a Banana Slug</h3><p>Four years of college, month by month, from your first aid offer to your first job, with real loan, credit and tax mechanics.</p>
   <ul><li>Four Years mode with three student backgrounds</li><li>One Week mode that fits a 15-minute workshop</li><li>26 short lessons you can take at your own pace</li><li>Decision Lab for testing what-if scenarios</li></ul>
   <a class="btn slug" href="college-sim.html">Play the college sim</a></article>`;}
@@ -882,7 +888,7 @@ V.why=()=>`<div class="wrap page"><div class="pagehead"><h1>About Slugonomics</h
  <div class="scroll"><table class="cmp"><thead><tr><th></th><th>Typical platform (e.g. iGrad)</th><th>Slugonomics</th></tr></thead><tbody>
  <tr><td>Where you start</td><td>A wellness checkup, then recommended content</td><td>The decision you're facing right now</td></tr>
  <tr><td>Main format</td><td>Articles, videos and mini-courses</td><td>Five-step decision walkthroughs</td></tr>
- <tr><td>Practice</td><td>Calculators and short games</td><td>A calculator inside every decision, plus two full simulators</td></tr>
+ <tr><td>Practice</td><td>Calculators and short games</td><td>A calculator inside every decision, plus three full simulators</td></tr>
  <tr><td>Local detail</td><td>National content with school branding</td><td>Santa Cruz rent, UCSC quarters and aid timing, named campus offices</td></tr>
  <tr><td>What you leave with</td><td>Points, badges and completed modules</td><td>A personal list of next steps</td></tr>
  <tr><td>Measuring learning</td><td>Usage reports for administrators</td><td>A guess before and after, plus confidence ratings</td></tr>
