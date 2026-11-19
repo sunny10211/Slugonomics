@@ -295,6 +295,63 @@ main{min-height:60vh}
 .entry a{font-weight:700;font-size:.95rem}
 .alert{margin-top:28px;padding:16px 18px;border-left:4px solid var(--bad);background:var(--surface);border-radius:0 10px 10px 0}
 
+/* campus help */
+.helpp{position:relative}
+.hlang{position:absolute;right:24px;top:56px;display:inline-flex;border:1.5px solid var(--line);border-radius:999px;padding:3px;background:var(--surface)}
+.hlang button{border:0;background:none;border-radius:999px;padding:7px 14px;font-weight:650;font-size:.92rem;color:var(--muted)}
+.hlang button.on{background:var(--ink);color:var(--paper)}
+@media (max-width:700px){.hlang{position:static;margin-bottom:18px}}
+.helpp .pagehead{margin-bottom:20px;padding-right:220px}
+@media (max-width:700px){.helpp .pagehead{padding-right:0}}
+.hcrisis{max-width:none;font-size:.98rem;padding:14px 18px;border-radius:12px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--bark);margin-bottom:40px}
+.hcrisis b{color:var(--ink)}
+.tel{font-weight:700;white-space:nowrap}
+.hwrap{display:grid;grid-template-columns:minmax(280px,.8fr) minmax(0,1.5fr);gap:48px;align-items:start}
+@media (max-width:900px){.hwrap{grid-template-columns:1fr;gap:24px}.hwrap.has .hsits{display:none}.hwrap:not(.has) .hpane{display:none}}
+.hpick{font-size:1.25rem;margin-bottom:12px}
+.hsits{position:sticky;top:96px;border-top:2px solid var(--ink)}
+@media (max-width:900px){.hsits{position:static}}
+.hsit{display:grid;grid-template-columns:24px minmax(0,1fr) 18px;gap:14px;align-items:center;width:100%;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);padding:16px 8px;font:600 1.02rem/1.35 var(--sans);color:var(--ink)}
+.hsit .ic{color:var(--muted)}
+.hsit:hover{background:var(--surface)}
+.hsit.on{background:var(--surface);box-shadow:inset 4px 0 0 var(--slug)}
+.hsit.on .ic:first-child{color:var(--ink)}
+.hempty{border:1.5px dashed var(--line);border-radius:18px;padding:40px 32px;color:var(--muted)}
+.hdet{outline:none;scroll-margin-top:86px}
+.hsit{scroll-margin-top:86px}
+.hdet h2{font-size:clamp(1.6rem,3vw,2.2rem);margin-bottom:6px}
+.hback{display:none;align-items:center;gap:6px;background:none;border:0;padding:0;margin-bottom:16px;font-weight:600;color:var(--muted)}
+@media (max-width:900px){.hback{display:inline-flex}}
+.hsub{font-family:var(--sans);font-size:.98rem;font-weight:700;letter-spacing:0;color:var(--muted);margin:30px 0 12px;font-variation-settings:normal}
+.hcs{display:grid;gap:14px}
+.hc{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px 22px}
+.hc h4{font-size:1.18rem;font-family:var(--display);font-variation-settings:"opsz" 32}
+.hc p{margin-top:6px;color:var(--text);font-size:1rem}
+.hc dl{margin:12px 0 0;display:grid;gap:6px}
+.hc dl div{display:grid;grid-template-columns:70px minmax(0,1fr);gap:12px;font-size:.95rem}
+.hc dt{color:var(--muted)}
+.hc dd{margin:0;color:var(--ink)}
+.hcact{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.btn.sm{padding:10px 14px;font-size:.93rem;border-radius:9px}
+.hextra{margin-top:16px;padding:14px 16px;border-radius:12px;background:var(--sunk);max-width:none}
+.hgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px 36px}
+@media (max-width:640px){.hgrid{grid-template-columns:1fr}}
+.hlist{margin:0;padding-left:20px;display:grid;gap:8px}
+.hlist li{line-height:1.5}
+.hsay{margin:0 0 12px;padding:14px 16px;border-left:4px solid var(--slug);background:var(--surface);border-radius:0 12px 12px 0;font-size:1.02rem;line-height:1.55;color:var(--ink)}
+.hdates{margin-top:80px;border-top:2px solid var(--ink);padding-top:22px}
+.hdates h2,.htools h2{font-size:1.5rem;margin-bottom:10px}
+.hdate{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:8px 24px;align-items:center;padding:16px 0;border-bottom:1px solid var(--line)}
+.hdate time{font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--ink)}
+@media (max-width:640px){.hdate{grid-template-columns:1fr}.hdate .btn{justify-self:start}}
+.htools{margin-top:56px}
+.htools ul{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;column-gap:48px}
+@media (max-width:700px){.htools ul{grid-template-columns:1fr}}
+.htools li{display:grid;gap:2px;padding:14px 0;border-bottom:1px solid var(--line)}
+.htools li a{font-weight:700}
+.htools li span{color:var(--muted);font-size:.95rem}
+.hchecked{margin-top:32px;font-size:.9rem;color:var(--muted);max-width:none}
+
 /* plan */
 .summary{display:grid;grid-template-columns:repeat(4,1fr);border-top:3px solid var(--ink);margin-bottom:32px}
 .summary div{padding:16px 16px 0 0}
@@ -704,18 +761,6 @@ const PATHS=[
 const PATH=Object.fromEntries(PATHS.map(p=>[p.id,p]));
 const STEPS=['Guess','Learn','Run the numbers','Decide','Plan'];
 
-const RES=[
- {c:'UCSC',n:'Financial Aid & Scholarship Office',d:'Questions about your aid offer, loans, appeals and disbursement dates. Drop-in advising by Zoom or in person at 205 Hahn Student Services.',u:'https://financialaid.ucsc.edu',tag:'Aid & loans'},
- {c:'UCSC',n:'SlugCents',d:'UCSC\'s peer-led financial literacy program: workshops and one-on-one money conversations with other students.',u:'https://slugcents.ucsc.edu',tag:'Learn'},
- {c:'UCSC',n:'Basic Needs',d:'Food pantries, CalFresh application help, housing resources and renter\'s rights information, all in one hub.',u:'https://basicneeds.ucsc.edu',tag:'Food & housing'},
- {c:'UCSC',n:'Slug Support (Dean of Students)',d:'Case management and emergency funds when something unexpected leaves a gap for basic needs. Phone: 831-459-4446.',u:'https://deanofstudents.ucsc.edu',tag:'Emergency'},
- {c:'National',n:'StudentAid.gov',d:'Your federal loan balances and servicer, the FAFSA, entrance and exit counseling, and repayment plans.',u:'https://studentaid.gov',tag:'Aid & loans'},
- {c:'National',n:'AnnualCreditReport.com',d:'The official site for free credit reports from all three bureaus.',u:'https://www.annualcreditreport.com',tag:'Credit'},
- {c:'National',n:'IRS Free File',d:'File your federal return for free if your income qualifies, which covers most students.',u:'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free',tag:'Taxes'},
- {c:'California',n:'GetCalFresh.org',d:'Apply for CalFresh, California\'s monthly grocery benefit. Many college students qualify, and it doesn\'t reduce financial aid.',u:'https://www.getcalfresh.org',tag:'Food & housing'},
- {c:'California',n:'California Student Aid Commission',d:'Cal Grant, the CA Dream Act Application and state aid deadlines.',u:'https://www.csac.ca.gov',tag:'Aid & loans'},
- {c:'National',n:'Consumer Financial Protection Bureau',d:'Plain-language guides on credit cards, banking and debt collection, plus a place to file complaints.',u:'https://www.consumerfinance.gov',tag:'Credit'},
-];
 
 /* ==================== views ==================== */
 const V={};
@@ -919,13 +964,173 @@ V.play=()=>`<section class="band" style="padding-top:72px"><div class="wrap">
  <div class="sechead"><div><h1 style="color:#fff">Simulators</h1><p>Reading about money only gets you so far. Here you make the choices, live with them and start over.</p></div></div>
  ${gamesHTML()}</div></section>`;
 
-/* ----- resources ----- */
-let resFilter='All';
-V.resources=()=>{const tags=['All',...new Set(RES.map(r=>r.tag))];
- return `<div class="wrap page"><div class="pagehead"><h1>Campus help</h1><p>Slugonomics can teach you the basics. For your own aid, food, housing or an emergency, these offices can actually help, and they're free for UCSC students.</p></div>
- <div class="filter" role="group" aria-label="Filter by topic">${tags.map(t=>`<button data-f="${t}" class="${t===resFilter?'on':''}" aria-pressed="${t===resFilter}">${t}</button>`).join('')}</div>
- <div class="dir">${RES.filter(r=>resFilter==='All'||r.tag===resFilter).map(r=>`<div class="entry"><span class="tag ${r.c==='UCSC'?'ucsc':''}">${r.c==='UCSC'?'UCSC office':r.c+' resource'}: ${r.tag.toLowerCase()}</span><h3>${r.n}</h3><p>${r.d}</p><a href="${r.u}" target="_blank" rel="noopener">${r.u.replace(/^https:\/\/(www\.)?/,'').replace(/\/.*$/,'')}</a></div>`).join('')}</div>
- <div class="alert"><b>In a crisis right now?</b> Slug Support staff aren't available for immediate emergencies. If someone's safety is at risk, call 911.</div></div>`;};
+/* ----- campus help: situation-first, English / Spanish -----
+   Every contact below was checked against the office's official page on CHECKED.
+   Office names stay in English in both languages because that's what students will see on signs and websites. */
+const CHECKED='2026-11-19';
+let HL=store.get('lang','en');if(HL!=='es')HL='en';
+let helpSel=null;
+const tel=(n,d)=>`<a class="tel" href="tel:+1${n}">${d}</a>`;
+const ext=(u,l)=>`<a href="${u}" target="_blank" rel="noopener">${l}</a>`;
+const T2=o=>typeof o==='string'?o:(o[HL]??o.en);
+
+const HC={
+ slugcrisis:{n:'Slug Support crisis line',d:{en:'Urgent food or housing crisis. They can arrange emergency meal help, grocery cards and emergency housing.',es:'Crisis urgente de comida o vivienda. Pueden ayudarte con comidas de emergencia, tarjetas para el supermercado y vivienda de emergencia.'},
+  ph:['8314597003','(831) 459-7003'],when:{en:'Weekdays during business hours. Not for life-threatening emergencies.',es:'Días hábiles en horario de oficina. No es para emergencias que ponen en riesgo la vida.'},u:'https://deanofstudents.ucsc.edu/slug-support/program/contact.html'},
+ dos:{n:'Dean of Students Office (Slug Support)',d:{en:'Case managers who help you make a plan, plus a need-based emergency fund for students facing an emergency gap in basic needs.',es:'Gestores de casos que te ayudan a armar un plan, y un fondo de emergencia según necesidad para estudiantes con una falta urgente de lo básico.'},
+  ph:['8314594446','(831) 459-4446'],em:'deanofstudents@ucsc.edu',where:'Hahn Student Services, Suite 245',when:{en:'Mon–Fri, 9 a.m.–5 p.m.',es:'Lun–vie, 9 a.m.–5 p.m.'},u:'https://deanofstudents.ucsc.edu/slug-support/program/contact.html'},
+ finaid:{n:'Financial Aid & Scholarship Office',d:{en:'Your aid offer, disbursement dates, appeals, holds and loans. If you\'ve used all your aid options, they may help with an immediate need.',es:'Tu oferta de ayuda, fechas de pago, apelaciones, retenciones y préstamos. Si ya usaste todas tus opciones de ayuda, quizás puedan apoyarte con una necesidad inmediata.'},
+  ph:['8314592963','(831) 459-2963'],where:'205 Hahn Student Services',when:{en:'Virtual advising Mon–Fri 9 a.m.–noon. In person Mon–Fri 1–5 p.m.',es:'Asesoría virtual lun–vie 9 a.m.–12 p.m. En persona lun–vie 1–5 p.m.'},u:'https://financialaid.ucsc.edu'},
+ slugcents:{n:'SlugCents',d:{en:'Free peer money mentors and a certified personal finance counselor. Help with UCSC bills, enrollment holds, budgets, credit and aid questions.',es:'Mentores financieros estudiantiles gratuitos y un consejero certificado en finanzas personales. Ayuda con cobros de UCSC, retenciones de inscripción, presupuestos, crédito y preguntas de ayuda financiera.'},
+  ph:['8315020781','(831) 502-0781'],em:'slugcents@ucsc.edu',where:'Hahn Student Services, Room 203 (next to Financial Aid)',when:{en:'Drop-in Mon–Fri, 1–4 p.m. Hours can change.',es:'Sin cita lun–vie, 1–4 p.m. El horario puede cambiar.'},u:'https://slugcents.ucsc.edu/meet-with-us/'},
+ uss:{n:'Undocumented Student Services (EOP)',d:{en:'Help with the California Dream Act Application, scholarships and emergency support for undocumented and DACAmented students.',es:'Ayuda con la Solicitud del California Dream Act, becas y apoyo de emergencia para estudiantes indocumentados y con DACA.'},
+  ph:['8314594055','(831) 459-4055'],u:'https://eop.ucsc.edu/undocumented_student_services/'},
+ cowell:{n:'Cowell Coffee Shop pantry',d:{en:'Free groceries. Open to all UCSC students.',es:'Comida gratis. Abierto para todos los estudiantes de UCSC.'},where:{en:'Near the Cowell/Stevenson Dining Hall',es:'Cerca del comedor de Cowell/Stevenson'},when:{en:'Mon–Fri, 10 a.m.–3:30 p.m.',es:'Lun–vie, 10 a.m.–3:30 p.m.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ rfm:{n:'Redwood Free Market',d:{en:'Free groceries at the Basic Needs Hub.',es:'Comida gratis en el centro de Basic Needs.'},where:{en:'Rachel Carson College Café',es:'Café de Rachel Carson College'},when:{en:'Mon 2–5 p.m. · Tue & Thu 9 a.m.–1 p.m. and 2–5 p.m. · Fri 9 a.m.–noon',es:'Lun 2–5 p.m. · Mar y jue 9 a.m.–1 p.m. y 2–5 p.m. · Vie 9 a.m.–12 p.m.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ produce:{n:'Produce Pop-Up',d:{en:'Fresh fruit and vegetables at low or no cost.',es:'Frutas y verduras frescas a bajo costo o gratis.'},where:{en:'McHenry Library (Wed) · Science & Engineering Library (Fri)',es:'McHenry Library (miércoles) · Science & Engineering Library (viernes)'},when:{en:'Wed and Fri, 11 a.m.–3 p.m.',es:'Miércoles y viernes, 11 a.m.–3 p.m.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ swipes:{n:'Swipes for Slugs',d:{en:'Emergency dining hall meal swipes through an online form, up to two times per academic year.',es:'Comidas de emergencia en los comedores mediante un formulario en línea, hasta dos veces por año académico.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ calfresh:{n:'UCSC CalFresh Outreach',d:{en:'Help applying for CalFresh, California\'s monthly grocery money on an EBT card. Book a session or email them.',es:'Ayuda para solicitar CalFresh, el dinero mensual de California para comida en una tarjeta EBT. Haz una cita o escríbeles.'},em:'calfresh@ucsc.edu',u:'https://basicneeds.ucsc.edu/food-security/calfresh/'},
+ tenant:{n:'Tenant Sanctuary',d:{en:'Tenant counselors and a staff attorney who explain your rights: rent increases, repairs, deposits, harassment, evictions and lease terms.',es:'Consejeros para inquilinos y un abogado que explican tus derechos: aumentos de renta, reparaciones, depósitos, acoso, desalojos y contratos.'},
+  ph:['8312000740','(831) 200-0740'],where:{en:'703 Pacific Ave, downtown Santa Cruz. During the school year, also Wednesday mornings on campus at Redwood Free Market or the Cowell Coffee Shop.',es:'703 Pacific Ave, centro de Santa Cruz. Durante el año escolar, también los miércoles por la mañana en el campus, en Redwood Free Market o Cowell Coffee Shop.'},when:{en:'Downtown drop-in Mon & Wed, 9 a.m.–3 p.m. (closed noon–1). Check their calendar before you go.',es:'Sin cita en el centro lun y mié, 9 a.m.–3 p.m. (cerrado de 12 a 1). Revisa su calendario antes de ir.'},u:'https://tenantsanctuary.org'},
+ cro:{n:'Community Rentals Office',d:{en:'UCSC\'s off-campus housing office: rental listings, the free Renters Workshop, and advice on leases and landlords.',es:'La oficina de vivienda fuera del campus de UCSC: anuncios de renta, el Renters Workshop gratuito y consejos sobre contratos y caseros.'},
+  ph:['8314594435','(831) 459-4435'],em:'communityrentals@ucsc.edu',where:'Hahn Student Services',when:{en:'Mon–Fri, 10 a.m.–noon and 1–4 p.m. Zoom front desk Mon–Fri, 1–3 p.m.',es:'Lun–vie, 10 a.m.–12 p.m. y 1–4 p.m. Recepción por Zoom lun–vie, 1–3 p.m.'},u:'https://communityrentals.ucsc.edu'},
+ caps:{n:'CAPS (Counseling & Psychological Services)',d:{en:'Free, confidential support for UCSC students, 24 hours a day. After hours, weekends and holidays, press 3 to talk to a crisis counselor.',es:'Apoyo gratuito y confidencial para estudiantes de UCSC, las 24 horas. Fuera de horario, fines de semana y días festivos, marca 3 para hablar con un consejero de crisis.'},
+  ph:['8314592628','(831) 459-2628'],where:{en:'Cowell Student Health Center, East Wing, 2nd floor',es:'Cowell Student Health Center, ala este, 2.º piso'},when:{en:'24/7 by phone',es:'24/7 por teléfono'},u:'https://caps.ucsc.edu'},
+ its:{n:'UCSC ITS',d:{en:'Forward suspicious emails to phishing@ucsc.edu. If you entered your UCSC password or approved a Duo push you didn\'t start, contact the ITS Support Center right away.',es:'Reenvía los correos sospechosos a phishing@ucsc.edu. Si escribiste tu contraseña de UCSC o aprobaste un aviso de Duo que no iniciaste, contacta de inmediato al ITS Support Center.'},em:'phishing@ucsc.edu',em2:'help@ucsc.edu',u:'https://its.ucsc.edu/security/scams.html'},
+ ftc:{n:'ReportFraud.ftc.gov',d:{en:'The federal government\'s place to report scams. If someone is using your identity, go to IdentityTheft.gov for a recovery plan.',es:'El sitio del gobierno federal para denunciar estafas. Si alguien usa tu identidad, entra a IdentityTheft.gov para un plan de recuperación.'},u:'https://reportfraud.ftc.gov'},
+ cfpb:{n:'Consumer Financial Protection Bureau',d:{en:'File a complaint about a debt collector, bank or credit card company. Companies have to respond.',es:'Presenta una queja sobre un cobrador de deudas, banco o compañía de tarjetas de crédito. Las compañías tienen que responder.'},u:'https://www.consumerfinance.gov/complaint/'}
+};
+
+const SIT=[
+ {id:'food',ic:'cup',t:{en:'I\'m out of food or money for food',es:'Me quedé sin comida o sin dinero para comida'},
+  first:['cowell','rfm','slugcrisis'],also:['produce','swipes','calfresh'],
+  bring:{en:['Your student ID number','A free PantrySoft account (make it before your first pantry visit)','A reusable bag'],es:['Tu número de estudiante','Una cuenta gratuita de PantrySoft (créala antes de tu primera visita a la despensa)','Una bolsa reutilizable']},
+  say:{en:'Hi, I\'m a UCSC student and I\'m short on food this week. What can I get today, and what should I sign up for so this doesn\'t happen again?',es:'Hola, soy estudiante de UCSC y esta semana no me alcanza para la comida. ¿Qué puedo recibir hoy y a qué me debo inscribir para que no me vuelva a pasar?'},
+  know:{en:['Pantries are for exactly this. You don\'t have to prove anything beyond being a student.','Grants, scholarships and student loans used for school usually don\'t count as income for CalFresh, and CalFresh doesn\'t reduce your financial aid.','CalFresh has immigration rules. Undocumented students can still use every campus pantry listed here.'],es:['Las despensas existen justo para esto. No tienes que demostrar nada más que ser estudiante.','Las becas, subvenciones y préstamos estudiantiles para la escuela normalmente no cuentan como ingreso para CalFresh, y CalFresh no reduce tu ayuda financiera.','CalFresh tiene reglas migratorias. Los estudiantes indocumentados igual pueden usar todas las despensas del campus de esta lista.']},
+  site:[['#quarter','Make it through the quarter'],['#budget','Quarter budget calculator']]},
+ {id:'rent',ic:'house',t:{en:'I can\'t pay rent or might lose my housing',es:'No puedo pagar la renta o podría perder mi vivienda'},
+  first:['slugcrisis','dos'],also:['finaid','tenant'],
+  bring:{en:['Your lease or housing contract','How much you owe and when it\'s due','Any notice from your landlord (a photo is fine)'],es:['Tu contrato de renta o de vivienda','Cuánto debes y para cuándo','Cualquier aviso de tu casero (una foto sirve)']},
+  say:{en:'I\'m a UCSC student and I can\'t cover my rent this month. I owe about [amount] by [date]. What options do I have?',es:'Soy estudiante de UCSC y no me alcanza para la renta de este mes. Debo aproximadamente [cantidad] para el [fecha]. ¿Qué opciones tengo?'},
+  know:{en:['Call before the due date if you can. There are more options before rent is late than after.','Tell your landlord in writing (text or email) when you expect to pay. Keep a copy.','If you get an eviction notice, don\'t ignore it and don\'t move out right away. Call Tenant Sanctuary first.'],es:['Si puedes, llama antes de la fecha de pago. Hay más opciones antes de atrasarte que después.','Avísale a tu casero por escrito (mensaje o correo) cuándo piensas pagar. Guarda una copia.','Si recibes un aviso de desalojo, no lo ignores y no te mudes de inmediato. Llama primero a Tenant Sanctuary.']},
+  site:[['#lease','Move off campus'],['#rent','Off-campus move calculator']]},
+ {id:'aid',ic:'cap',t:{en:'My financial aid is late, short or confusing',es:'Mi ayuda financiera llegó tarde, no alcanza o no la entiendo'},
+  first:['finaid','slugcents'],also:['uss'],
+  bring:{en:['Your student ID number','Your aid offer or a screenshot of your portal','Any email about a hold, missing document or change'],es:['Tu número de estudiante','Tu oferta de ayuda o una captura de pantalla de tu portal','Cualquier correo sobre una retención, un documento faltante o un cambio']},
+  say:{en:'I\'m trying to understand my aid for this quarter. It [hasn\'t arrived / is less than I expected / has a hold]. Can you walk me through what\'s happening and what I need to do?',es:'Estoy tratando de entender mi ayuda de este trimestre. [No ha llegado / es menos de lo que esperaba / tiene una retención]. ¿Me pueden explicar qué está pasando y qué tengo que hacer?'},
+  know:{en:['If your family\'s situation changed (a job loss, divorce, medical bills), you can ask Financial Aid to review your aid. It\'s called a special circumstances appeal.','You can accept part of a loan instead of all of it, and you can ask for more later in the year if you need it.','File the FAFSA or California Dream Act Application every year. The priority deadline is March 2.'],es:['Si la situación de tu familia cambió (pérdida de trabajo, divorcio, gastos médicos), puedes pedirle a Financial Aid que revise tu ayuda. Se llama apelación por circunstancias especiales.','Puedes aceptar solo una parte de un préstamo, y pedir más después en el año si lo necesitas.','Llena la FAFSA o la Solicitud del California Dream Act cada año. La fecha prioritaria es el 2 de marzo.']},
+  site:[['#aid','Accept my financial aid offer'],['#loancost','Loan cost calculator']]},
+ {id:'landlord',ic:'house',t:{en:'I have a problem with my landlord, lease or deposit',es:'Tengo un problema con mi casero, mi contrato o mi depósito'},
+  first:['tenant','cro'],also:[],
+  bring:{en:['Your lease','Texts and emails with your landlord','Dated photos of the problem or of the place at move-in','Rent receipts'],es:['Tu contrato','Mensajes y correos con tu casero','Fotos con fecha del problema o de cómo estaba el lugar al mudarte','Recibos de renta']},
+  say:{en:'I rent in Santa Cruz and my landlord [is keeping my deposit / raised my rent / won\'t fix something]. I\'d like to understand my rights before I respond.',es:'Rento en Santa Cruz y mi casero [se quiere quedar con mi depósito / me subió la renta / no quiere arreglar algo]. Quiero entender mis derechos antes de responder.'},
+  know:{en:['In California, a landlord has 21 days after you move out to return your deposit or send an itemized list of deductions.','During a fixed-term lease, rent usually can\'t go up unless your lease says it can.','Put requests in writing and keep copies. It protects you if there\'s a dispute later.'],es:['En California, el casero tiene 21 días después de que te mudas para devolverte el depósito o enviarte una lista detallada de los descuentos.','Durante un contrato de plazo fijo, normalmente la renta no puede subir a menos que el contrato lo permita.','Haz tus peticiones por escrito y guarda copias. Te protege si hay un problema después.']},
+  site:[['#lease','Move off campus'],['#rent','Off-campus move calculator']]},
+ {id:'bill',ic:'cash',t:{en:'I got hit with a surprise bill or emergency cost',es:'Me llegó una factura inesperada o un gasto de emergencia'},
+  first:['dos','slugcents'],also:['finaid'],
+  bring:{en:['The bill or estimate','What you have in your account right now'],es:['La factura o el presupuesto','Cuánto tienes ahora en tu cuenta']},
+  say:{en:'I had an unexpected [repair / medical bill / travel] cost of about [amount] and I can\'t cover it without falling behind on rent or food. Is there emergency help I can apply for?',es:'Tuve un gasto inesperado de [reparación / factura médica / viaje] de aproximadamente [cantidad] y no puedo pagarlo sin atrasarme con la renta o la comida. ¿Hay ayuda de emergencia que pueda solicitar?'},
+  know:{en:['Before putting it on a credit card, ask the company for a payment plan. Many say yes, often with no interest.','Slug Support\'s emergency fund is need-based and for emergencies only. The intake form isn\'t for same-day crises; call the crisis line for those.'],es:['Antes de pagarlo con tarjeta de crédito, pídele a la compañía un plan de pagos. Muchas aceptan, a menudo sin intereses.','El fondo de emergencia de Slug Support es según necesidad y solo para emergencias. El formulario no es para crisis del mismo día; para eso llama a la línea de crisis.']},
+  site:[['#cardpayoff','Credit card payoff calculator']]},
+ {id:'taxes',ic:'cal',t:{en:'I need help with taxes or tax forms',es:'Necesito ayuda con los impuestos o formularios'},
+  first:['slugcents'],also:[],
+  extra:{en:'SlugCents has offered free, in-person tax preparation by IRS-certified student volunteers each spring, for students with incomes up to about $67,000. Check their site in January for this season\'s days. IRS Free File is the online option.',es:'SlugCents ha ofrecido cada primavera preparación de impuestos gratuita y en persona con voluntarios estudiantiles certificados por el IRS, para estudiantes con ingresos de hasta unos $67,000. Revisa su sitio en enero para ver los días de esta temporada. IRS Free File es la opción en línea.'},
+  bring:{en:['Photo ID','Your Social Security card or ITIN letter','Every W-2 and 1099 from last year','Your 1098-T from UCSC','Bank account and routing numbers for direct deposit'],es:['Identificación con foto','Tu tarjeta del Seguro Social o carta del ITIN','Todos tus W-2 y 1099 del año pasado','Tu 1098-T de UCSC','Números de cuenta y de ruta bancaria para el depósito directo']},
+  say:{en:'I worked part-time last year and I\'ve never filed on my own. Can you help me file and see if I get a refund?',es:'Trabajé medio tiempo el año pasado y nunca he declarado impuestos por mi cuenta. ¿Me pueden ayudar a declarar y ver si me toca un reembolso?'},
+  know:{en:['Students who earn a little often get back most of what was withheld, but only if they file.','Delivery and gig apps don\'t withhold taxes. Set aside about 20% of what you make.','Your 1098-T can help your family claim an education tax credit.'],es:['Los estudiantes que ganan poco a menudo recuperan casi todo lo que les retuvieron, pero solo si declaran.','Las apps de entregas y trabajos por encargo no retienen impuestos. Aparta cerca del 20% de lo que ganes.','Tu 1098-T puede ayudar a tu familia a pedir un crédito fiscal por educación.']},
+  site:[['#paycheck','Understand my first paycheck'],['#paycalc','Paycheck calculator']]},
+ {id:'debt',ic:'card',t:{en:'I\'m behind on a credit card or a collector is calling',es:'Estoy atrasado con una tarjeta o me llama un cobrador'},
+  first:['slugcents'],also:['cfpb'],
+  bring:{en:['Your latest statements','Any letters from a collector'],es:['Tus últimos estados de cuenta','Cualquier carta de un cobrador']},
+  say:{en:'I have about [amount] on a credit card and I\'m only making minimum payments. Can you help me make a plan to pay it down?',es:'Tengo unos [cantidad] en una tarjeta de crédito y solo hago los pagos mínimos. ¿Me pueden ayudar a armar un plan para pagarla?'},
+  know:{en:['Call the card company before you miss a payment. Ask about a hardship plan or a lower rate.','If a collector contacts you, ask them in writing to verify the debt before you pay anything.','Your credit reports are free every week at AnnualCreditReport.com.'],es:['Llama a la compañía de la tarjeta antes de atrasarte. Pregunta por un plan por dificultades o una tasa más baja.','Si te contacta un cobrador, pídele por escrito que verifique la deuda antes de pagar cualquier cosa.','Tus reportes de crédito son gratis cada semana en AnnualCreditReport.com.']},
+  site:[['#credit','Get my first credit card'],['#cardpayoff','Credit card payoff calculator']]},
+ {id:'scam',ic:'card',t:{en:'I think I got scammed',es:'Creo que me estafaron'},
+  first:['its','ftc'],also:[],
+  bring:{en:['Screenshots of the messages','Any payment receipts or transaction IDs'],es:['Capturas de pantalla de los mensajes','Cualquier recibo de pago o número de transacción']},
+  say:{en:'I sent money / entered my login on a site I now think was fake. What should I do right now to protect my accounts?',es:'Mandé dinero / escribí mi usuario y contraseña en un sitio que ahora creo que era falso. ¿Qué debo hacer ahora mismo para proteger mis cuentas?'},
+  know:{en:['Call your bank using the number on the back of your card, not one from the message.','Change your passwords, starting with email and banking.','Freezing your credit at Equifax, Experian and TransUnion is free and stops anyone opening accounts in your name.'],es:['Llama a tu banco al número que aparece atrás de tu tarjeta, no al del mensaje.','Cambia tus contraseñas, empezando por tu correo y tu banco.','Congelar tu crédito en Equifax, Experian y TransUnion es gratis y evita que alguien abra cuentas a tu nombre.']},
+  site:[]},
+ {id:'stress',ic:'cal',t:{en:'I\'m overwhelmed and need someone to talk to',es:'Estoy abrumado y necesito hablar con alguien'},
+  first:['caps'],also:[],
+  extra:{en:'You can also call or text 988, the national crisis line, any time. Or text HOME to 741741 to reach the Crisis Text Line.',es:'También puedes llamar o enviar un mensaje al 988, la línea nacional de crisis, a cualquier hora. O envía HOME al 741741 para comunicarte con la Crisis Text Line.'},
+  bring:{en:[],es:[]},
+  say:{en:'I\'m a UCSC student and I\'m really stressed about money and school. I\'d like to talk to someone.',es:'Soy estudiante de UCSC y estoy muy estresado por el dinero y la escuela. Me gustaría hablar con alguien.'},
+  know:{en:['Money stress is one of the most common reasons students reach out. You don\'t need to be in a crisis to call.'],es:['El estrés por dinero es una de las razones más comunes por las que los estudiantes buscan ayuda. No necesitas estar en crisis para llamar.']},
+  site:[]}
+];
+
+const HDATES=[
+ {d:'2027-03-02',t:{en:'FAFSA and California Dream Act priority deadline, and the Cal Grant deadline',es:'Fecha prioritaria de la FAFSA y la Solicitud del California Dream Act, y fecha límite de Cal Grant'},u:'https://www.csac.ca.gov'},
+ {d:'2027-04-15',t:{en:'Tax Day: 2026 federal and California returns are due',es:'Día de impuestos: vencen las declaraciones federales y de California de 2026'},u:'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free'}
+];
+
+const HTOOLS=[
+ ['StudentAid.gov',{en:'Federal loans, the FAFSA, repayment plans',es:'Préstamos federales, la FAFSA, planes de pago'},'https://studentaid.gov'],
+ ['California Student Aid Commission',{en:'Cal Grant and the California Dream Act Application',es:'Cal Grant y la Solicitud del California Dream Act'},'https://www.csac.ca.gov'],
+ ['GetCalFresh.org',{en:'Apply for CalFresh online',es:'Solicita CalFresh en línea'},'https://www.getcalfresh.org'],
+ ['AnnualCreditReport.com',{en:'Your free credit reports',es:'Tus reportes de crédito gratis'},'https://www.annualcreditreport.com'],
+ ['IRS Free File',{en:'File your federal return for free',es:'Declara tus impuestos federales gratis'},'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free'],
+ ['Consumer Financial Protection Bureau',{en:'Guides and complaints about banks, cards and collectors',es:'Guías y quejas sobre bancos, tarjetas y cobradores'},'https://www.consumerfinance.gov']
+];
+
+const HUI={
+ en:{title:'Campus help',lead:'Tell us what\'s going on. We\'ll show you who at UCSC can help, how to reach them, and what to say.',pick:'What\'s going on?',first:'Start here',also:'Also try',bring:'Bring',say:'What to say',copy:'Copy',copied:'Copied',know:'Good to know',site:'Work through it on Slugonomics',call:'Call',email:'Email',where:'Where',when:'When',web:'Website',dates:'Coming up',addcal:'Add to calendar',tools:'Online tools',crisis:'In danger right now? Call 911.',crisis2:'Need to talk? CAPS answers 24/7 at',crisis3:'or call or text 988.',checked:'Every phone number, place and hour on this page was checked against the office\'s official page on',wrong:'Something out of date?',tell:'Tell Sungjun',free:'All of these are free for UCSC students.',choose:'Pick what\'s happening and the steps appear here.',back:'All situations',fmt:{month:'long',day:'numeric',year:'numeric'},loc:'en-US'},
+ es:{title:'Ayuda en el campus',lead:'Cuéntanos qué está pasando. Te mostramos quién en UCSC te puede ayudar, cómo contactarlos y qué decir.',pick:'¿Qué está pasando?',first:'Empieza aquí',also:'También puedes',bring:'Lleva',say:'Qué decir',copy:'Copiar',copied:'Copiado',know:'Es bueno saber',site:'Practícalo en Slugonomics',call:'Llamar',email:'Correo',where:'Dónde',when:'Cuándo',web:'Sitio web',dates:'Próximas fechas',addcal:'Agregar al calendario',tools:'Herramientas en línea',crisis:'¿Estás en peligro ahora? Llama al 911.',crisis2:'¿Necesitas hablar? CAPS contesta 24/7 al',crisis3:'o llama o envía un mensaje al 988.',checked:'Cada teléfono, lugar y horario de esta página se comparó con la página oficial de cada oficina el',wrong:'¿Algo está desactualizado?',tell:'Avísale a Sungjun',free:'Todo esto es gratis para estudiantes de UCSC.',choose:'Elige qué está pasando y aquí aparecen los pasos.',back:'Todas las situaciones',fmt:{month:'long',day:'numeric',year:'numeric'},loc:'es-US'}
+};
+const SITE_ES={'Make it through the quarter':'Llegar al final del trimestre','Quarter budget calculator':'Calculadora del presupuesto trimestral','Move off campus':'Mudarte fuera del campus','Off-campus move calculator':'Calculadora de mudanza fuera del campus','Accept my financial aid offer':'Aceptar mi oferta de ayuda financiera','Loan cost calculator':'Calculadora del costo de préstamos','Credit card payoff calculator':'Calculadora para pagar tu tarjeta','Understand my first paycheck':'Entender mi primer cheque','Paycheck calculator':'Calculadora de cheque de pago','Get my first credit card':'Mi primera tarjeta de crédito'};
+const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString(HUI[HL].loc,HUI[HL].fmt);
+
+function contactHTML(k,primary){const c=HC[k],U=HUI[HL];
+ const rows=[];
+ if(c.where)rows.push(`<div><dt>${U.where}</dt><dd>${T2(c.where)}</dd></div>`);
+ if(c.when)rows.push(`<div><dt>${U.when}</dt><dd>${T2(c.when)}</dd></div>`);
+ const acts=[];
+ if(c.ph)acts.push(`<a class="btn ${primary?'slug':'line'} sm" href="tel:+1${c.ph[0]}">${U.call} ${c.ph[1]}</a>`);
+ if(c.em)acts.push(`<a class="btn line sm" href="mailto:${c.em}">${c.em}</a>`);
+ if(c.em2)acts.push(`<a class="btn line sm" href="mailto:${c.em2}">${c.em2}</a>`);
+ acts.push(`<a class="btn line sm" href="${c.u}" target="_blank" rel="noopener">${U.web}</a>`);
+ return `<article class="hc"><h4>${c.n}</h4><p>${T2(c.d)}</p>${rows.length?`<dl>${rows.join('')}</dl>`:''}<div class="hcact">${acts.join('')}</div></article>`;}
+
+function sitDetail(s){const U=HUI[HL],bring=T2(s.bring),know=T2(s.know);
+ return `<div class="hdet" id="hdet" tabindex="-1">
+  <button class="hback" data-hback>${icon('left')} ${U.back}</button>
+  <h2>${T2(s.t)}</h2>
+  <h3 class="hsub">${U.first}</h3><div class="hcs">${s.first.map(k=>contactHTML(k,true)).join('')}</div>
+  ${s.extra?`<p class="hextra">${T2(s.extra)}</p>`:''}
+  ${s.also.length?`<h3 class="hsub">${U.also}</h3><div class="hcs">${s.also.map(k=>contactHTML(k,false)).join('')}</div>`:''}
+  <div class="hgrid">
+   ${bring.length?`<section><h3 class="hsub">${U.bring}</h3><ul class="hlist">${bring.map(b=>`<li>${b}</li>`).join('')}</ul></section>`:''}
+   <section><h3 class="hsub">${U.say}</h3><blockquote class="hsay" id="hsay">${esc(T2(s.say))}</blockquote><button class="btn line sm" data-hcopy>${U.copy}</button></section>
+  </div>
+  ${know.length?`<h3 class="hsub">${U.know}</h3><ul class="hlist">${know.map(b=>`<li>${b}</li>`).join('')}</ul>`:''}
+  ${s.site.length?`<h3 class="hsub">${U.site}</h3><div class="btnrow">${s.site.map(([h,l])=>`<a class="btn line sm" href="${h}">${HL==='es'?(SITE_ES[l]||l):l}</a>`).join('')}</div>`:''}
+ </div>`;}
+
+V.resources=()=>{const U=HUI[HL],today=new Date().toISOString().slice(0,10),dates=HDATES.filter(x=>x.d>=today),sel=SIT.find(s=>s.id===helpSel);
+ return `<div class="wrap page helpp" lang="${HL}">
+ <div class="hlang" role="group" aria-label="Language / Idioma"><button data-lang="en" aria-pressed="${HL==='en'}" class="${HL==='en'?'on':''}" lang="en">English</button><button data-lang="es" aria-pressed="${HL==='es'}" class="${HL==='es'?'on':''}" lang="es">Español</button></div>
+ <div class="pagehead"><h1>${U.title}</h1><p>${U.lead} ${U.free}</p></div>
+ <p class="hcrisis"><b>${U.crisis}</b> ${U.crisis2} ${tel('8314592628','(831) 459-2628')} ${HL==='es'?'(marca 3 fuera de horario)':'(press 3 after hours)'}, ${U.crisis3.replace('988','<a class="tel" href="tel:988">988</a>')}</p>
+ <div class="hwrap ${sel?'has':''}">
+  <nav class="hsits" aria-label="${U.pick}"><h2 class="hpick">${U.pick}</h2>${SIT.map(s=>`<button class="hsit ${s.id===helpSel?'on':''}" data-sit="${s.id}" aria-pressed="${s.id===helpSel}">${icon(s.ic)}<span>${T2(s.t)}</span>${icon('chev','ic chev')}</button>`).join('')}</nav>
+  <div class="hpane" aria-live="polite">${sel?sitDetail(sel):`<div class="hempty"><p>${U.choose}</p></div>`}</div>
+ </div>
+ ${dates.length?`<section class="hdates"><h2>${U.dates}</h2>${dates.map((x,i)=>`<div class="hdate"><time datetime="${x.d}">${fmtDate(x.d)}</time><span>${T2(x.t)}</span><button class="btn line sm" data-ics="${i}">${U.addcal}</button></div>`).join('')}</section>`:''}
+ <section class="htools"><h2>${U.tools}</h2><ul>${HTOOLS.map(([n,d,u])=>`<li><a href="${u}" target="_blank" rel="noopener">${n}</a><span>${T2(d)}</span></li>`).join('')}</ul></section>
+ <p class="hchecked">${U.checked} ${fmtDate(CHECKED)}. ${U.wrong} <a href="https://www.linkedin.com/in/sungjun-lee-572283340" target="_blank" rel="noopener">${U.tell}</a>.</p>
+ </div>`;};
+
+function bindHelp(){
+ $$('[data-lang]').forEach(b=>b.onclick=()=>{HL=b.dataset.lang;store.set('lang',HL);render();});
+ $$('[data-sit]').forEach(b=>b.onclick=()=>{helpSel=b.dataset.sit===helpSel&&innerWidth>900?null:b.dataset.sit;render();const d=$('#hdet');if(d){d.focus({preventScroll:true});if(innerWidth<=900)d.scrollIntoView({block:'start'});}});
+ $$('[data-hback]').forEach(b=>b.onclick=()=>{const id=helpSel;helpSel=null;render();const t=$(`[data-sit="${id}"]`);if(t){t.focus();if(innerWidth<=900)t.scrollIntoView({block:'center'});}});
+ $$('[data-hcopy]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText($('#hsay').textContent);b.textContent=HUI[HL].copied;}catch(e){const r=document.createRange();r.selectNodeContents($('#hsay'));const s=getSelection();s.removeAllRanges();s.addRange(r);}});
+ const today=new Date().toISOString().slice(0,10),dates=HDATES.filter(x=>x.d>=today);
+ $$('[data-ics]').forEach(b=>b.onclick=()=>{const x=dates[+b.dataset.ics],d=x.d.replace(/-/g,''),n=new Date(new Date(x.d+'T12:00:00').getTime()+864e5).toISOString().slice(0,10).replace(/-/g,'');
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Slugonomics//Campus help//EN','BEGIN:VEVENT',`UID:${d}-${Date.now()}@slugonomics`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,`DTSTART;VALUE=DATE:${d}`,`DTEND;VALUE=DATE:${n}`,`SUMMARY:${T2(x.t).replace(/,/g,'\\,')}`,`URL:${x.u}`,'BEGIN:VALARM','TRIGGER:-P7D','ACTION:DISPLAY','DESCRIPTION:Reminder','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download=`slugonomics-${x.d}.ics`;document.body.appendChild(a);a.click();a.remove();});
+}
 
 /* ----- plan ----- */
 V.plan=()=>{
@@ -983,7 +1188,7 @@ function render(){
  app.innerHTML=html;
  $$('.links a').forEach(a=>{const on=a.dataset.nav===nav;a.classList.toggle('on',on);on?a.setAttribute('aria-current','page'):a.removeAttribute('aria-current');});
  $('#navlinks').classList.remove('open');$('#menubtn').setAttribute('aria-expanded','false');
- if(h==='resources')$$('[data-f]').forEach(b=>b.onclick=()=>{resFilter=b.dataset.f;render();});
+ if(h==='resources')bindHelp();
  if(h==='plan')bindPlan();
  if(after)after();
  updCount();
