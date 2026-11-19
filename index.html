@@ -357,7 +357,10 @@ main{min-height:60vh}
 .langpick:focus-within{outline:3px solid var(--slug);outline-offset:2px}
 .langpick .ic{width:18px;height:18px;color:var(--muted)}
 .langpick select{appearance:none;-webkit-appearance:none;border:0;background:transparent;font:600 .95rem var(--sans);color:var(--ink);padding:0 16px 0 0;cursor:pointer;outline:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 7px) 55%,calc(100% - 2px) 55%;background-size:5px 5px;background-repeat:no-repeat}
-@media (max-width:880px){.navrow{gap:10px}.langpick{order:2;margin-left:auto}.menubtn{order:3;margin-left:0}}
+.langrow{display:flex;align-items:center}
+.langlbl{font-weight:600;font-size:.95rem;color:var(--muted)}
+@media (min-width:881px){.langlbl{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}}
+@media (max-width:880px){.langrow{display:block;padding:14px 0 6px}.langpick{margin-left:0;width:100%;height:48px;border-radius:10px;padding:0 14px;gap:10px}.langpick select{margin-left:auto;font-size:1rem}}
 .top .brand,.menubtn,.langpick select,.links a{white-space:nowrap;word-break:normal}
 .top .brand{flex-shrink:0}
 @media (max-width:420px){.langpick{padding:0 8px 0 9px;gap:4px}.top .brand{font-size:1.15rem}.top .brand svg{width:26px;height:26px}}
@@ -431,8 +434,8 @@ footer .brand{font-size:1rem;margin-bottom:10px}
       <a href="#resources" data-nav="resources">Campus help</a>
       <a href="#why" data-nav="why">About</a>
       <a href="#plan" data-nav="plan" class="plan">My plan<span class="ct" id="planct" hidden></span></a>
+      <span id="langslot" class="langrow"></span>
     </nav>
-    <span id="langslot"></span>
   </div>
 </header>
 
@@ -652,14 +655,14 @@ const pathQ=id=>STR['pq_'+id]?t('pq_'+id):PATH[id].q;
 const pathTime=p=>t('mins',parseInt(p.time)||p.time);
 const row4=r=>r[LIDX[LANG]]||r[0];
 
-function langPicker(){return `<label class="langpick" title="${t('lang')}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><select id="langsel" aria-label="${t('lang')} / Language">${LANGS.map(([k,n])=>`<option value="${k}" lang="${HTML_LANG[k]}" ${k===LANG?'selected':''}>${n}</option>`).join('')}</select></label>`;}
+function langPicker(){return `<label class="langpick" title="${t('lang')}"><span class="langlbl">${t('lang')}</span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><select id="langsel" aria-label="${t('lang')} / Language">${LANGS.map(([k,n])=>`<option value="${k}" lang="${HTML_LANG[k]}" ${k===LANG?'selected':''}>${n}</option>`).join('')}</select></label>`;}
 function applyChrome(){
  document.documentElement.lang=HTML_LANG[LANG];document.title=t('title');
  $$('.links a[data-nav]').forEach(a=>{const k=a.dataset.nav,ct=a.querySelector('.ct');a.firstChild&&a.firstChild.nodeType===3?a.firstChild.textContent=t('nav_'+k):a.prepend(t('nav_'+k));if(ct)a.appendChild(ct);});
  const mb=$('#menubtn');if(mb)mb.textContent=t('menu');
  const br=$('.top .brand');if(br)br.setAttribute('aria-label',t('home_aria'));
  const lp=$('#langslot');if(lp&&!$('#langsel')){lp.innerHTML=langPicker();$('#langsel').onchange=e=>{LANG=e.target.value;store.set('lang',LANG);render();};}
- const ls=$('#langsel');if(ls){ls.value=LANG;ls.setAttribute('aria-label',t('lang')+' / Language');}
+ const ll=$('.langlbl');if(ll)ll.textContent=t('lang');const ls=$('#langsel');if(ls){ls.value=LANG;ls.setAttribute('aria-label',t('lang')+' / Language');}
  const f=k=>{const el=$('#'+k);if(el)el.innerHTML=t(k);};['foot1','foot_copy','foot2','foot3'].forEach(f);
 }
 const IC={
