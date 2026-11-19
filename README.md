@@ -4,6 +4,7 @@ Financial literacy for UC Santa Cruz students — a UCSC-themed website with:
 
 - **Home** (`index.html`) — decisions, calculators, campus help and the Slugonomics overview
 - `assets/` — self-hosted fonts (Bricolage Grotesque, Instrument Sans; SIL Open Font License) and game screenshots
+- **Videos** (`index.html#videos`) — animated video lessons; first series: Renting 101 (3 episodes in `assets/videos/`)
 - **Slug Life** (`slug-life.html`) — life sim starting at 18, playable with your real finances
 - **Slug College** (`slug-college.html`) — Slug Life version 2, focused on school: four years at UCSC, month by month
 - **College Sim** (`college-sim.html`) — a week of college life: money, time, health, grades, social
