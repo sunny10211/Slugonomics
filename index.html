@@ -352,6 +352,24 @@ main{min-height:60vh}
 .htools li span{color:var(--muted);font-size:.95rem}
 .hchecked{margin-top:32px;font-size:.9rem;color:var(--muted);max-width:none}
 
+/* language picker */
+.langpick{position:relative;display:inline-flex;align-items:center;gap:6px;margin-left:14px;padding:0 10px 0 11px;height:40px;border:1.5px solid var(--line);border-radius:999px;color:var(--ink);background:var(--surface)}
+.langpick:focus-within{outline:3px solid var(--slug);outline-offset:2px}
+.langpick .ic{width:18px;height:18px;color:var(--muted)}
+.langpick select{appearance:none;-webkit-appearance:none;border:0;background:transparent;font:600 .95rem var(--sans);color:var(--ink);padding:0 16px 0 0;cursor:pointer;outline:none;background-image:linear-gradient(45deg,transparent 50%,currentColor 50%),linear-gradient(135deg,currentColor 50%,transparent 50%);background-position:calc(100% - 7px) 55%,calc(100% - 2px) 55%;background-size:5px 5px;background-repeat:no-repeat}
+@media (max-width:880px){.navrow{gap:10px}.langpick{order:2;margin-left:auto}.menubtn{order:3;margin-left:0}}
+.top .brand,.menubtn,.langpick select,.links a{white-space:nowrap;word-break:normal}
+.top .brand{flex-shrink:0}
+@media (max-width:420px){.langpick{padding:0 8px 0 9px;gap:4px}.top .brand{font-size:1.15rem}.top .brand svg{width:26px;height:26px}}
+.enonly{display:block;margin:-6px 0 18px;font-size:.92rem;color:var(--muted);max-width:none}
+.workshop .enonly{display:inline;margin:0;color:var(--band-muted)}
+/* Korean and Chinese: system CJK faces for glyphs the Latin fonts don't have, no negative tracking, no mid-word breaks */
+:root[lang="ko"]{--sans:'Instrument Sans','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic',ui-sans-serif,sans-serif;--display:'Bricolage Grotesque','Apple SD Gothic Neo','Noto Sans KR','Noto Sans CJK KR','Malgun Gothic',sans-serif}
+:root[lang="zh-CN"]{--sans:'Instrument Sans','PingFang SC','Hiragino Sans GB','Noto Sans SC','Noto Sans CJK SC','Microsoft YaHei',ui-sans-serif,sans-serif;--display:'Bricolage Grotesque','PingFang SC','Hiragino Sans GB','Noto Sans SC','Noto Sans CJK SC','Microsoft YaHei',sans-serif}
+:root[lang="ko"] h1,:root[lang="ko"] h2,:root[lang="ko"] h3,:root[lang="ko"] .game h3,:root[lang="zh-CN"] h1,:root[lang="zh-CN"] h2,:root[lang="zh-CN"] h3,:root[lang="zh-CN"] .game h3{letter-spacing:-.01em;line-height:1.22}
+:root[lang="ko"] body{word-break:keep-all;overflow-wrap:anywhere}
+:root[lang="ko"] .hero h1,:root[lang="zh-CN"] .hero h1{max-width:16ch;font-size:clamp(2.2rem,5vw,3.8rem)}
+:root[lang="zh-CN"] p,:root[lang="ko"] p{line-height:1.75}
 /* plan */
 .summary{display:grid;grid-template-columns:repeat(4,1fr);border-top:3px solid var(--ink);margin-bottom:32px}
 .summary div{padding:16px 16px 0 0}
@@ -414,6 +432,7 @@ footer .brand{font-size:1rem;margin-bottom:10px}
       <a href="#why" data-nav="why">About</a>
       <a href="#plan" data-nav="plan" class="plan">My plan<span class="ct" id="planct" hidden></span></a>
     </nav>
+    <span id="langslot"></span>
   </div>
 </header>
 
@@ -423,12 +442,12 @@ footer .brand{font-size:1rem;margin-bottom:10px}
   <div class="wrap cols">
     <div>
       <div class="brand"><span>Slugonomics</span></div>
-      <p>A student-led financial literacy project at UC Santa Cruz. Not an official UCSC website, and not financial, tax or legal advice. Confirm anything about your own aid with the UCSC Financial Aid and Scholarship Office.</p>
-      <p>© 2026 Sungjun Lee. All rights reserved.</p>
+      <p id="foot1"></p>
+      <p id="foot_copy"></p>
     </div>
     <div>
-      <p>Numbers reflect 2026 rules: a 6.52% fixed rate on 2026–27 undergraduate Direct Loans with a 1.057% origination fee, a $16,100 federal standard deduction, and the $16.90 California minimum wage.</p>
-      <p>Your progress and plan stay in this browser. Nothing you enter is sent anywhere.</p>
+      <p id="foot2"></p>
+      <p id="foot3"></p>
     </div>
   </div>
 </footer>
@@ -444,6 +463,205 @@ let S=store.get('state',{paths:{},plan:[],checkup:null});
 const save=()=>{store.set('state',S);updCount();};
 function updCount(){const n=S.plan.filter(x=>!x.done).length,el=$('#planct');if(!el)return;el.hidden=!n;el.textContent=n;}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2200);}
+/* ==================== languages ====================
+   Hand-written translations. Each entry is [English, Spanish, Korean, Simplified Chinese].
+   Office and program names stay in English, because that's what students see on campus signs and websites. */
+const LANGS=[['en','English'],['es','Español'],['ko','한국어'],['zh','中文']];
+const LIDX={en:0,es:1,ko:2,zh:3};
+const HTML_LANG={en:'en',es:'es',ko:'ko',zh:'zh-CN'};
+const LOCALE={en:'en-US',es:'es-US',ko:'ko-KR',zh:'zh-CN'};
+let LANG=(()=>{const s=store.get('lang',null);if(s&&LIDX[s]!=null)return s;const n=(navigator.language||'en').slice(0,2);return LIDX[n]!=null?n:'en';})();
+function t(k,...a){const e=STR[k];if(!e)return k;let v=e[LIDX[LANG]];if(v==null||v==='')v=e[0];return typeof v==='function'?v(...a):v;}
+const tx=o=>o==null?'':typeof o==='string'?o:(o[LANG]??o.en);
+const STR={
+ title:['Slugonomics: practice the money decisions of college','Slugonomics: practica las decisiones de dinero de la universidad','Slugonomics: 대학 생활의 돈 결정을 미리 연습하세요','Slugonomics：提前练习大学里的理财决定'],
+ nav_paths:['Decisions','Decisiones','결정 가이드','理财决定'],
+ nav_tools:['Calculators','Calculadoras','계산기','计算器'],
+ nav_play:['Simulators','Simuladores','시뮬레이터','模拟游戏'],
+ nav_resources:['Campus help','Ayuda en el campus','캠퍼스 도움','校园帮助'],
+ nav_why:['About','Acerca de','소개','关于我们'],
+ nav_plan:['My plan','Mi plan','내 계획','我的计划'],
+ menu:['Menu','Menú','메뉴','菜单'],
+ lang:['Language','Idioma','언어','语言'],
+ home_aria:['Slugonomics home','Inicio de Slugonomics','Slugonomics 홈','Slugonomics 首页'],
+ foot1:['A student-led financial literacy project at UC Santa Cruz. Not an official UCSC website, and not financial, tax or legal advice. Confirm anything about your own aid with the UCSC Financial Aid and Scholarship Office.',
+  'Un proyecto de educación financiera creado por un estudiante de UC Santa Cruz. No es un sitio oficial de UCSC ni constituye asesoría financiera, fiscal o legal. Confirma cualquier dato sobre tu propia ayuda con la Financial Aid and Scholarship Office de UCSC.',
+  'UC Santa Cruz 학생이 이끄는 금융 교육 프로젝트입니다. UCSC 공식 웹사이트가 아니며, 금융·세무·법률 자문이 아닙니다. 본인의 학자금 지원에 관한 내용은 UCSC Financial Aid and Scholarship Office에 꼭 확인하세요.',
+  '由 UC Santa Cruz 学生主导的理财教育项目。本网站不是 UCSC 官方网站，也不构成财务、税务或法律建议。有关你本人助学金的任何问题，请向 UCSC Financial Aid and Scholarship Office 确认。'],
+ foot_copy:['© 2026 Sungjun Lee. All rights reserved.','© 2026 Sungjun Lee. Todos los derechos reservados.','© 2026 Sungjun Lee. 모든 권리 보유.','© 2026 Sungjun Lee。保留所有权利。'],
+ foot2:['Numbers reflect 2026 rules: a 6.52% fixed rate on 2026–27 undergraduate Direct Loans with a 1.057% origination fee, a $16,100 federal standard deduction, and the $16.90 California minimum wage.',
+  'Las cifras siguen las reglas de 2026: una tasa fija de 6.52% para los préstamos Direct Loans de pregrado 2026–27 con una comisión de originación de 1.057%, una deducción estándar federal de $16,100 y el salario mínimo de California de $16.90.',
+  '모든 수치는 2026년 기준입니다: 2026–27학년도 학부 Direct Loan 고정금리 6.52%(대출 수수료 1.057%), 연방 표준공제 $16,100, 캘리포니아 최저임금 시간당 $16.90.',
+  '数字依据 2026 年规定：2026–27 学年本科 Direct Loan 固定利率 6.52%，贷款手续费 1.057%；联邦标准扣除额 $16,100；加州最低工资每小时 $16.90。'],
+ foot3:['Your progress and plan stay in this browser. Nothing you enter is sent anywhere.','Tu progreso y tu plan se quedan en este navegador. Nada de lo que escribes se envía a ningún lado.','진행 상황과 계획은 이 브라우저에만 저장돼요. 입력한 내용은 어디에도 전송되지 않습니다.','你的进度和计划只保存在这个浏览器里，你输入的任何内容都不会被发送出去。'],
+ en_only:['','Por ahora, esta guía está en inglés. Pronto estará en español.','이 가이드는 현재 영어로만 제공돼요. 한국어 버전도 곧 준비됩니다.','这份指南目前仅提供英文版，中文版即将推出。'],
+ games_en:['','Por ahora, los juegos están en inglés.','게임은 현재 영어로만 제공돼요.','游戏目前仅提供英文版。'],
+
+ /* home */
+ h1:['Practice the money decisions of college before they cost you.','Practica las decisiones de dinero de la universidad antes de que te cuesten.','대학 생활의 돈 문제, 비싼 대가를 치르기 전에 미리 연습하세요.','在真正付出代价之前，先练习大学里的理财决定。'],
+ lead:['Your aid offer, first credit card, first lease, first paycheck. Work through each one with real 2026 numbers and leave with a plan for this week.','Tu oferta de ayuda financiera, tu primera tarjeta de crédito, tu primer contrato de renta, tu primer cheque. Recorre cada uno con cifras reales de 2026 y sal con un plan para esta semana.','학자금 지원 제안서, 첫 신용카드, 첫 임대 계약, 첫 월급. 2026년 실제 숫자로 하나씩 따져 보고, 이번 주에 바로 실천할 계획을 세워 보세요.','助学金通知、第一张信用卡、第一份租约、第一份工资单。用 2026 年的真实数字逐一演练，带着本周就能执行的计划离开。'],
+ cta_start:['Find where to start','Encuentra por dónde empezar','어디서 시작할지 찾기','找到起点'],
+ cta_play:['Play the simulators','Juega los simuladores','시뮬레이터 해 보기','玩模拟游戏'],
+ free:['Free for every student. No account needed.','Gratis para todos los estudiantes. Sin crear cuenta.','모든 학생에게 무료. 회원가입 필요 없음.','对所有学生免费，无需注册账号。'],
+ done_n:[(n,N)=>`You've finished <b>${n} of ${N}</b> decisions. <a href="#plan">Open your plan</a>`,(n,N)=>`Terminaste <b>${n} de ${N}</b> decisiones. <a href="#plan">Abre tu plan</a>`,(n,N)=>`결정 가이드 <b>${N}개 중 ${n}개</b>를 마쳤어요. <a href="#plan">내 계획 보기</a>`,(n,N)=>`你已完成 <b>${N} 个决定中的 ${n} 个</b>。<a href="#plan">查看你的计划</a>`],
+ trail_h:['Your aid lands once a quarter. Will it last until finals?','Tu ayuda llega una vez por trimestre. ¿Te alcanzará hasta los finales?','학자금은 쿼터마다 한 번에 들어와요. 기말고사까지 버틸 수 있을까요?','助学金每个学季只发一次。它能撑到期末考吗？'],
+ trail_given:['<b>$1,800</b> aid refund plus <b>$400</b> in checking, for 11 weeks including finals.','<b>$1,800</b> de reembolso de ayuda más <b>$400</b> en tu cuenta, para 11 semanas incluyendo finales.','학자금 환급 <b>$1,800</b>와 통장 잔고 <b>$400</b>로 기말고사 포함 11주를 버텨야 해요.','<b>$1,800</b> 助学金退款加上账户里的 <b>$400</b>，要撑过包括期末在内的 11 周。'],
+ spend_wk:['You spend per week','Gastas por semana','주당 지출','每周花费'],
+ wk:[i=>'Wk '+i,i=>'Sem '+i,i=>i+'주',i=>'第'+i+'周'],
+ finals:['Finals','Finales','기말','期末'],
+ res_ok:[l=>`You reach finals with ${l} left.`,l=>`Llegas a los finales con ${l} de sobra.`,l=>`기말고사까지 버티고 ${l}가 남아요.`,l=>`你能撑到期末，还剩 ${l}。`],
+ res_ok2:[p=>`Spread evenly, it covers ${p} a week.`,p=>`Repartido parejo, alcanza para ${p} por semana.`,p=>`고르게 나누면 주당 ${p}까지 쓸 수 있어요.`,p=>`平均分配的话，每周可花 ${p}。`],
+ res_short:[w=>`Your money runs out in week ${w}.`,w=>`Te quedas sin dinero en la semana ${w}.`,w=>`${w}주차에 돈이 바닥나요.`,w=>`你的钱会在第 ${w} 周用完。`],
+ res_short2:[p=>`To reach finals, keep spending to ${p} a week.`,p=>`Para llegar a los finales, gasta como máximo ${p} por semana.`,p=>`기말고사까지 버티려면 주당 ${p} 이하로 쓰세요.`,p=>`想撑到期末，每周花费要控制在 ${p} 以内。`],
+ trail_try:['Try it with your own numbers in the <a href="#budget">quarter budget calculator</a>.','Pruébalo con tus propios números en la <a href="#budget">calculadora del presupuesto trimestral</a>.','<a href="#budget">쿼터 예산 계산기</a>에서 내 숫자로 계산해 보세요.','用<a href="#budget">学季预算计算器</a>输入你自己的数字试试。'],
+ dec_h:['Start with the decision in front of you','Empieza por la decisión que tienes enfrente','지금 마주한 결정부터 시작하세요','从你眼前的决定开始'],
+ dec_p:['Six money moments almost every UCSC student hits. Each takes 5 to 8 minutes: guess first, learn what matters, run your own numbers, decide on a real Santa Cruz scenario, and leave with next steps.','Seis momentos de dinero que casi todo estudiante de UCSC enfrenta. Cada uno toma de 5 a 8 minutos: adivina primero, aprende lo importante, calcula con tus propios números, decide en un caso real de Santa Cruz y sal con tus próximos pasos.','거의 모든 UCSC 학생이 겪는 돈 문제 여섯 가지. 각각 5~8분이면 돼요. 먼저 추측해 보고, 핵심을 배우고, 내 숫자로 계산하고, 실제 산타크루즈 상황에서 결정한 뒤, 다음 할 일을 정리합니다.','几乎每个 UCSC 学生都会遇到的六个理财时刻。每个只需 5 到 8 分钟：先猜一猜，学会关键要点，用自己的数字算一算，在真实的圣克鲁兹情境中做决定，最后带走下一步行动。'],
+ checkup2:['Take the 2-minute checkup','Haz el chequeo de 2 minutos','2분 진단 받기','做 2 分钟小测'],
+ band_h:['Then live with your choices for years','Luego vive con tus decisiones durante años','그다음엔 그 선택과 함께 몇 년을 살아 보세요','然后，与你的选择共处多年'],
+ band_p:['Two simulators set in Santa Cruz. Mistakes cost fake money, and each money lesson appears the moment it happens to you.','Dos simuladores ambientados en Santa Cruz. Los errores cuestan dinero ficticio, y cada lección de dinero aparece en el momento en que te pasa.','산타크루즈를 배경으로 한 시뮬레이터 두 개. 실수해도 가상의 돈만 잃고, 돈에 관한 교훈은 그 일이 일어나는 순간 바로 나타나요.','两款以圣克鲁兹为背景的模拟游戏。犯错只会损失虚拟的钱，每一条理财知识都会在相关情况发生时及时出现。'],
+ proof_h:['Built so a campus can see it working','Hecho para que un campus vea que funciona','캠퍼스가 효과를 직접 확인할 수 있도록','让学校看得见成效'],
+ proof_p:['Slugonomics is free and needs no account, so anyone can open it and check every claim on this page.','Slugonomics es gratis y no requiere cuenta, así que cualquiera puede abrirlo y comprobar cada afirmación de esta página.','Slugonomics는 무료이고 가입이 필요 없어서, 누구나 열어 보고 이 페이지의 모든 내용을 직접 확인할 수 있어요.','Slugonomics 免费且无需注册，任何人都可以打开它，亲自核实本页的每一项说法。'],
+ p1t:['Learning you can measure','Aprendizaje que se puede medir','측정 가능한 학습 효과','可衡量的学习效果'],
+ p1d:['Players answer the same six questions before their first run and after they finish. Results show what changed for each question, plus a short survey.','Los jugadores responden las mismas seis preguntas antes de su primera partida y al terminar. Los resultados muestran qué cambió en cada pregunta, además de una breve encuesta.','플레이어는 첫 플레이 전과 끝난 뒤에 같은 6개 질문에 답해요. 결과는 질문별로 무엇이 달라졌는지와 짧은 설문 결과를 보여 줍니다.','玩家在第一次游戏前和结束后回答同样的六道题。结果会逐题显示变化，并附上一份简短问卷。'],
+ p2t:['Real 2026 numbers','Cifras reales de 2026','2026년 실제 숫자','真实的 2026 年数据'],
+ p2d:['The 6.52% federal loan rate, California\'s $16.90 minimum wage, current UCSC tuition, housing and UC SHIP costs, and CalFresh income limits.','La tasa federal de préstamos de 6.52%, el salario mínimo de California de $16.90, la colegiatura actual de UCSC, los costos de vivienda y de UC SHIP, y los límites de ingreso de CalFresh.','연방 학자금 대출 금리 6.52%, 캘리포니아 최저임금 $16.90, 현재 UCSC 등록금·주거비·UC SHIP 보험료, CalFresh 소득 기준까지 반영했어요.','联邦学生贷款利率 6.52%、加州最低工资 $16.90、UCSC 当前的学费、住宿和 UC SHIP 保险费用，以及 CalFresh 收入上限。'],
+ p3t:['Local by design','Local desde el diseño','지역 맞춤 설계','为本地量身打造'],
+ p3d:['Quarters instead of semesters, Santa Cruz rent, and the campus offices that actually help: Financial Aid, SlugCents, Basic Needs and Slug Support.','Trimestres en lugar de semestres, rentas de Santa Cruz y las oficinas del campus que de verdad ayudan: Financial Aid, SlugCents, Basic Needs y Slug Support.','학기제가 아닌 쿼터제, 산타크루즈 월세, 그리고 실제로 도움을 주는 캠퍼스 기관들: Financial Aid, SlugCents, Basic Needs, Slug Support.','采用学季制而非学期制，使用圣克鲁兹的真实房租，并介绍真正能提供帮助的校园部门：Financial Aid、SlugCents、Basic Needs 和 Slug Support。'],
+ p4t:['Decisions, not a library','Decisiones, no una biblioteca','자료실이 아닌 결정 가이드','是决定，而不是资料库'],
+ p4d:['Students start from the moment they\'re in, like an aid offer, a lease or a card offer, and leave with steps for this week.','Los estudiantes empiezan desde el momento que están viviendo, como una oferta de ayuda, un contrato de renta o una oferta de tarjeta, y salen con pasos para esta semana.','학생들은 학자금 제안, 임대 계약, 카드 권유처럼 지금 마주한 순간에서 시작해, 이번 주에 할 일을 들고 나가요.','学生从自己正面对的时刻出发，比如助学金通知、租约或信用卡推销，离开时带走本周就能做的事。'],
+ p5t:['Private by default','Privado desde el inicio','기본은 개인정보 보호','默认保护隐私'],
+ p5d:['No sign-up. Progress, plans and real budgets stay in the student\'s own browser.','Sin registro. El progreso, los planes y los presupuestos reales se quedan en el navegador de cada estudiante.','가입이 필요 없어요. 진행 상황, 계획, 실제 예산은 모두 학생 본인의 브라우저에만 저장돼요.','无需注册。进度、计划和真实预算都只保存在学生自己的浏览器里。'],
+ founder_h:['Made by Sungjun Lee','Creado por Sungjun Lee','Sungjun Lee가 만들었어요','由 Sungjun Lee 创建'],
+ founder_p:['A UC Santa Cruz Business Economics student who has worked as a financial accounting analyst since 2023. Slugonomics is shaped by interviews with UCSC students about the money decisions they actually face.','Estudiante de Business Economics en UC Santa Cruz que trabaja como analista de contabilidad financiera desde 2023. Slugonomics se basa en entrevistas con estudiantes de UCSC sobre las decisiones de dinero que realmente enfrentan.','UC Santa Cruz에서 경영경제학(Business Economics)을 전공하며 2023년부터 재무회계 분석가로 일하고 있어요. Slugonomics는 UCSC 학생들이 실제로 겪는 돈 문제에 대한 인터뷰를 바탕으로 만들어졌어요.','UC Santa Cruz 商业经济学（Business Economics）专业学生，自 2023 年起担任财务会计分析师。Slugonomics 的内容来自对 UCSC 学生的访谈，聚焦他们真正面对的理财决定。'],
+ contact:['Contact Sungjun','Contactar a Sungjun','Sungjun에게 연락하기','联系 Sungjun'],
+
+ /* games */
+ g1_kind:['Life simulator','Simulador de vida','인생 시뮬레이터','人生模拟'],
+ g1_what:['Start at 18 in Santa Cruz County and play a whole life. School, jobs, rent, credit and scams all compound, one year at a time.','Empieza a los 18 en el condado de Santa Cruz y juega una vida completa. La escuela, el trabajo, la renta, el crédito y las estafas se van sumando, un año a la vez.','산타크루즈 카운티에서 18살로 시작해 인생 전체를 플레이해요. 학업, 일, 월세, 신용, 사기까지 한 해 한 해 쌓여 갑니다.','从 18 岁在圣克鲁兹县开始，玩完整个人生。学业、工作、房租、信用和诈骗，一年一年累积影响。'],
+ g_start:['Start','Inicio','시작','开局'],
+ g1_start:['At 18, as a random character or with your real numbers','A los 18, con un personaje al azar o con tus números reales','18살, 랜덤 캐릭터 또는 내 실제 숫자로','18 岁，随机角色或使用你的真实数字'],
+ g_covers:['Covers','Incluye','다루는 내용','涵盖'],
+ g1_covers:['UCSC or Cabrillo, about 30 local careers, debt and investing','UCSC o Cabrillo, unas 30 carreras locales, deudas e inversiones','UCSC 또는 Cabrillo, 약 30개의 지역 직업, 부채와 투자','UCSC 或 Cabrillo 学院、约 30 种本地职业、债务与投资'],
+ g_teaches:['Teaches','Enseña','배우는 것','学到什么'],
+ g1_teaches:['24 money lessons that unlock when they happen to you','24 lecciones de dinero que se desbloquean cuando te pasan','그 일이 일어날 때 열리는 24가지 돈 교훈','24 条理财知识，在相关情况发生时解锁'],
+ g1_play:['Play Slug Life','Jugar Slug Life','Slug Life 플레이','开始玩 Slug Life'],
+ g2_kind:['The school-focused version of Slug Life','La versión de Slug Life enfocada en la escuela','학교생활에 집중한 Slug Life 버전','专注校园生活的 Slug Life 版本'],
+ g2_what:['Four years at UC Santa Cruz, one month per turn. Aid arrives each quarter, rent arrives every month, and your grades decide whether you keep your aid.','Cuatro años en UC Santa Cruz, un mes por turno. La ayuda llega cada trimestre, la renta cada mes, y tus calificaciones deciden si conservas tu ayuda.','UC Santa Cruz에서의 4년을 한 턴에 한 달씩. 학자금은 쿼터마다, 월세는 매달 나가고, 성적에 따라 학자금 유지 여부가 결정돼요.','在 UC Santa Cruz 的四年，每回合一个月。助学金每学季到账，房租每月要付，你的成绩决定能否保住助学金。'],
+ g_length:['Length','Duración','기간','时长'],
+ g2_length:['48 months, from move-in day to your loan grace period','48 meses, desde el día de mudanza hasta tu periodo de gracia del préstamo','입주일부터 학자금 대출 유예 기간까지 48개월','48 个月，从入住第一天到贷款宽限期'],
+ g2_covers:['GPA and aid rules, CalFresh, credit cards, leases and internships','Reglas de GPA y de ayuda, CalFresh, tarjetas de crédito, contratos de renta y prácticas','학점과 학자금 규정, CalFresh, 신용카드, 임대 계약, 인턴십','GPA 与助学金规则、CalFresh、信用卡、租约和实习'],
+ g_measures:['Measures','Mide','측정','衡量'],
+ g2_measures:['The same six questions before and after, with results by question','Las mismas seis preguntas antes y después, con resultados por pregunta','시작 전후 같은 6개 질문, 질문별 결과 제공','前后回答同样的六道题，逐题显示结果'],
+ g2_play:['Play Slug College','Jugar Slug College','Slug College 플레이','开始玩 Slug College'],
+ workshop:['<b>Running a workshop?</b> A Day in the Life of a Banana Slug has a One Week mode that fits a 15-minute class or club session.','<b>¿Vas a dar un taller?</b> A Day in the Life of a Banana Slug tiene un modo One Week que cabe en una clase o reunión de club de 15 minutos.','<b>워크숍을 진행하나요?</b> A Day in the Life of a Banana Slug의 One Week 모드는 15분짜리 수업이나 동아리 모임에 딱 맞아요.','<b>要办工作坊吗？</b>A Day in the Life of a Banana Slug 的 One Week 模式正好适合 15 分钟的课堂或社团活动。'],
+ workshop_btn:['Open the workshop simulator','Abrir el simulador para talleres','워크숍 시뮬레이터 열기','打开工作坊模拟游戏'],
+ play_p:['Reading about money only gets you so far. Here you make the choices, live with them and start over.','Leer sobre dinero solo te lleva hasta cierto punto. Aquí tomas las decisiones, vives con ellas y vuelves a empezar.','돈에 대해 읽기만 해서는 한계가 있어요. 여기서는 직접 선택하고, 그 결과를 겪고, 다시 시작할 수 있어요.','光读理财知识是不够的。在这里，你亲自做选择、承担后果，然后重新开始。'],
+
+ /* decisions list */
+ pt_aid:['Accept my financial aid offer','Aceptar mi oferta de ayuda financiera','학자금 지원 제안 수락하기','接受我的助学金方案'],
+ pq_aid:['Which parts of my aid should I say yes to?','¿Qué partes de mi ayuda debo aceptar?','어떤 지원을 받아들여야 할까요?','我应该接受哪些助学金项目？'],
+ pt_credit:['Get my first credit card','Sacar mi primera tarjeta de crédito','첫 신용카드 만들기','办我的第一张信用卡'],
+ pq_credit:['Should I get one, and which one?','¿Debo sacar una y cuál?','만들어야 할까요, 만든다면 어떤 카드로?','该不该办？办哪一张？'],
+ pt_paycheck:['Understand my first paycheck','Entender mi primer cheque de pago','첫 월급 이해하기','看懂我的第一份工资单'],
+ pq_paycheck:['Why is my check smaller than I expected?','¿Por qué mi cheque es menor de lo que esperaba?','왜 생각보다 월급이 적을까요?','为什么实发工资比预期少？'],
+ pt_lease:['Move off campus','Mudarme fuera del campus','캠퍼스 밖으로 이사하기','搬出校园'],
+ pq_lease:['Can I afford an apartment, and what do I sign?','¿Me alcanza para un departamento y qué firmo?','아파트를 감당할 수 있을까요? 무엇에 서명하나요?','我租得起公寓吗？要签些什么？'],
+ pt_quarter:['Make it through the quarter','Llegar al final del trimestre','쿼터 끝까지 버티기','撑过这个学季'],
+ pq_quarter:['My aid came in one lump. How do I make it last?','Mi ayuda llegó de golpe. ¿Cómo hago que me alcance?','학자금이 한꺼번에 들어왔어요. 어떻게 오래 쓸까요?','助学金一次性到账，怎么让它撑得更久？'],
+ pt_habit:['Small spending, big numbers','Gastos pequeños, cifras grandes','작은 지출, 큰 숫자','小花费，大数字'],
+ pq_habit:['Do my daily habits actually matter?','¿De verdad importan mis hábitos diarios?','매일의 습관이 정말 중요할까요?','日常小习惯真的重要吗？'],
+ mins:[n=>n+' min',n=>n+' min',n=>n+'분',n=>n+' 分钟'],
+ st_done:['Finished','Terminada','완료','已完成'],
+ st_prog:['In progress','En progreso','진행 중','进行中'],
+ paths_p:['Six money moments almost every UCSC student hits. Each one ends with steps you can take this week.','Seis momentos de dinero que casi todo estudiante de UCSC enfrenta. Cada uno termina con pasos que puedes dar esta semana.','거의 모든 UCSC 학생이 겪는 돈 문제 여섯 가지. 각 가이드는 이번 주에 실천할 단계로 마무리돼요.','几乎每个 UCSC 学生都会遇到的六个理财时刻。每一个都以本周就能执行的步骤结束。'],
+ paths_next:['<b>Not sure where to start?</b> Five quick questions will point you to the one that matters most right now.','<b>¿No sabes por dónde empezar?</b> Cinco preguntas rápidas te dirán cuál importa más ahora mismo.','<b>어디서 시작할지 모르겠나요?</b> 간단한 질문 다섯 개로 지금 가장 중요한 가이드를 찾아 드려요.','<b>不知道从哪里开始？</b>回答五个简单问题，帮你找到眼下最重要的那一个。'],
+ take_checkup:['Take the checkup','Hacer el chequeo','진단 받기','开始小测'],
+ all_decisions:['All decisions','Todas las decisiones','모든 결정 가이드','所有决定'],
+ about_time:[t=>`About ${t}.`,t=>`Unos ${t}.`,t=>`약 ${t}.`,t=>`约 ${t}。`],
+
+ /* checkup */
+ ck_q:[(i,n)=>`Question ${i} of ${n}`,(i,n)=>`Pregunta ${i} de ${n}`,(i,n)=>`질문 ${i} / ${n}`,(i,n)=>`第 ${i} 题，共 ${n} 题`],
+ ck_note:['No dollar amounts and no names. Your answers stay in this browser.','Sin montos ni nombres. Tus respuestas se quedan en este navegador.','금액이나 이름은 묻지 않아요. 답변은 이 브라우저에만 저장돼요.','不涉及金额，也不需要姓名。你的回答只保存在这个浏览器里。'],
+ ck_res:['Your checkup result','Tu resultado','진단 결과','你的小测结果'],
+ ck_start:[x=>`Start with: ${x}`,x=>`Empieza con: ${x}`,x=>`먼저 시작하세요: ${x}`,x=>`从这里开始：${x}`],
+ ck_why:['Based on your answers, this is the decision most likely to save you money or stress this quarter.','Según tus respuestas, esta es la decisión que más probablemente te ahorre dinero o estrés este trimestre.','답변을 바탕으로, 이번 쿼터에 돈이나 스트레스를 가장 많이 줄여 줄 가이드예요.','根据你的回答，这是本学季最可能帮你省钱或减压的决定。'],
+ ck_go:['Start this decision','Empezar esta decisión','이 가이드 시작하기','开始这个决定'],
+ ck_redo:['Retake the checkup','Repetir el chequeo','다시 진단하기','重新做小测'],
+ ck_also:['Also worth doing','También vale la pena','이것도 해 보세요','也值得一做'],
+
+ /* calculators: page */
+ tools_p:['Each one answers a question students actually ask. All of them use 2026 federal and California rules.','Cada una responde una pregunta que los estudiantes de verdad hacen. Todas usan las reglas federales y de California de 2026.','학생들이 실제로 궁금해하는 질문에 하나씩 답해 줘요. 모두 2026년 연방 및 캘리포니아 기준을 사용해요.','每个计算器都回答一个学生真正关心的问题，全部采用 2026 年联邦和加州规定。'],
+ tools_next:[(x,tm)=>`<b>Turn these numbers into a decision.</b> ${x} takes about ${tm} and ends with a plan.`,(x,tm)=>`<b>Convierte estos números en una decisión.</b> ${x} toma unos ${tm} y termina con un plan.`,(x,tm)=>`<b>이 숫자를 결정으로 바꿔 보세요.</b> ${x}는 약 ${tm} 정도 걸리고 계획으로 마무리돼요.`,(x,tm)=>`<b>把这些数字变成决定。</b>${x} 大约需要 ${tm}，最后会得到一份计划。`],
+ start_dec:['Start the decision','Empezar la decisión','가이드 시작하기','开始这个决定'],
+ slide_hint:['Slide, or type any amount in the box. Typing a bigger number stretches the slider.','Desliza o escribe cualquier cantidad en la casilla. Si escribes un número mayor, el control se amplía.','슬라이더를 움직이거나 칸에 금액을 직접 입력하세요. 더 큰 숫자를 입력하면 슬라이더 범위가 늘어나요.','拖动滑块，或在框中直接输入任意金额。输入更大的数字时，滑块范围会自动扩大。'],
+ type_any:['type any amount','escribe cualquier cantidad','금액 직접 입력','输入任意金额'],
+ yes:['Yes','Sí','예','是'],no:['No','No','아니요','否'],
+ u_y:['y','años','년','年'],u_h:['h','h','시간','小时'],u_w:['w','sem.','주','周'],u_mo:['mo','meses','개월','个月'],'u_×':['×','×','회','次'],
+ calc_of:[n=>`${n} calculator`,n=>`Calculadora: ${n}`,n=>`${n} 계산기`,n=>`${n}计算器`],
+ per_week:['/week','/semana','/주','/周'],per_mo:['/mo','/mes','/월','/月'],per_year:['/year','/año','/년','/年'],
+
+ /* plan */
+ plan_empty_p:['Your next steps show up here once you finish a decision.','Tus próximos pasos aparecen aquí cuando terminas una decisión.','결정 가이드를 마치면 다음 할 일이 여기에 나타나요.','完成一个决定后，你的下一步行动会显示在这里。'],
+ plan_none:['Nothing here yet','Aún no hay nada','아직 아무것도 없어요','这里还是空的'],
+ plan_none_p:['Finish any decision and choose at least one step. It takes about 7 minutes.','Termina cualquier decisión y elige al menos un paso. Toma unos 7 minutos.','아무 결정 가이드나 마치고 할 일을 하나 이상 고르세요. 약 7분 걸려요.','完成任意一个决定，并至少选择一个步骤，大约需要 7 分钟。'],
+ plan_first:['Find my first decision','Encontrar mi primera decisión','첫 번째 가이드 찾기','找到我的第一个决定'],
+ plan_browse:['Browse decisions','Ver decisiones','결정 가이드 둘러보기','浏览所有决定'],
+ plan_p:['The steps you chose. Check them off as you go.','Los pasos que elegiste. Márcalos conforme avances.','내가 고른 할 일이에요. 하나씩 체크해 나가세요.','你选择的步骤，完成一项就勾选一项。'],
+ of:[(a,b)=>`${a} of ${b}`,(a,b)=>`${a} de ${b}`,(a,b)=>`${b}개 중 ${a}개`,(a,b)=>`${a} / ${b}`],
+ to:[(a,b)=>`${a} to ${b}`,(a,b)=>`${a} a ${b}`,(a,b)=>`${a} → ${b}`,(a,b)=>`${a} → ${b}`],
+ none_yet:['None yet','Aún nada','아직 없음','暂无'],
+ s_dec:['decisions finished','decisiones terminadas','마친 결정 가이드','已完成的决定'],
+ s_steps:['steps done','pasos hechos','완료한 할 일','已完成的步骤'],
+ s_conf:['average confidence, before to after','confianza promedio, antes y después','평균 자신감 (전 → 후)','平均信心（前 → 后）'],
+ s_guess:['first guesses that were right','primeras respuestas correctas','처음 추측이 맞은 횟수','第一次就猜对的题目'],
+ plan_copy:['Copy plan as text','Copiar el plan como texto','계획을 텍스트로 복사','复制计划文本'],
+ plan_another:['Do another decision','Hacer otra decisión','다른 가이드 하기','再做一个决定'],
+ plan_clear:['Clear everything','Borrar todo','모두 지우기','全部清除'],
+ plan_note:['Your plan is saved only in this browser. Copy it into your notes or calendar so you don\'t lose it.','Tu plan solo se guarda en este navegador. Cópialo a tus notas o calendario para no perderlo.','계획은 이 브라우저에만 저장돼요. 잃어버리지 않도록 메모나 캘린더에 복사해 두세요.','你的计划只保存在这个浏览器里。复制到笔记或日历里，以免丢失。'],
+ plan_copied:['Plan copied','Plan copiado','계획을 복사했어요','计划已复制'],
+ plan_title:['My Slugonomics plan','Mi plan de Slugonomics','나의 Slugonomics 계획','我的 Slugonomics 计划'],
+ plan_nocopy:['Copying isn\'t available here. Select the text above and copy it.','Aquí no se puede copiar automáticamente. Selecciona el texto de arriba y cópialo.','여기서는 자동 복사가 안 돼요. 위 텍스트를 선택해서 복사하세요.','这里无法自动复制，请选中上面的文字后手动复制。'],
+ plan_sure:['Clear all progress and your plan?','¿Borrar todo tu progreso y tu plan?','모든 진행 상황과 계획을 지울까요?','清除所有进度和计划吗？'],
+ plan_undo:['This can\'t be undone.','No se puede deshacer.','되돌릴 수 없어요.','此操作无法撤销。'],
+ plan_cleared:['Everything cleared','Todo borrado','모두 지웠어요','已全部清除'],
+
+ /* about */
+ why_h:['About Slugonomics','Acerca de Slugonomics','Slugonomics 소개','关于 Slugonomics'],
+ why_p:['Most college financial wellness platforms are large libraries. iGrad, which hundreds of universities license, offers articles, videos, courses, calculators and games, personalized by a sign-up checkup. That breadth is useful. Students usually arrive at one specific moment, though: an aid offer, a lease, a card offer. Slugonomics is built for that moment.',
+  'La mayoría de las plataformas de bienestar financiero universitario son grandes bibliotecas. iGrad, que cientos de universidades usan con licencia, ofrece artículos, videos, cursos, calculadoras y juegos, personalizados con un chequeo al registrarte. Esa variedad es útil. Pero los estudiantes casi siempre llegan en un momento específico: una oferta de ayuda, un contrato de renta, una oferta de tarjeta. Slugonomics está hecho para ese momento.',
+  '대부분의 대학 금융 웰니스 플랫폼은 거대한 자료실이에요. 수백 개 대학이 라이선스로 쓰는 iGrad는 가입 진단을 바탕으로 맞춤 기사, 영상, 강좌, 계산기, 게임을 제공해요. 그런 폭넓음도 유용하지만, 학생들은 보통 학자금 제안, 임대 계약, 카드 권유 같은 특정한 순간에 찾아와요. Slugonomics는 바로 그 순간을 위해 만들어졌어요.',
+  '大多数大学理财健康平台就像一座大型资料库。被数百所大学采用的 iGrad 提供文章、视频、课程、计算器和游戏，并根据注册时的测评进行个性化推荐。这种广度很有用，但学生通常是在某个具体时刻来找答案的：一份助学金通知、一份租约、一个信用卡推销。Slugonomics 正是为那个时刻而打造的。'],
+ cmp_typ:['Typical platform (e.g. iGrad)','Plataforma típica (p. ej., iGrad)','일반 플랫폼 (예: iGrad)','典型平台（如 iGrad）'],
+ cmp:[[['Where you start','Por dónde empiezas','시작점','起点'],['A wellness checkup, then recommended content','Un chequeo de bienestar y luego contenido recomendado','웰니스 진단 후 추천 콘텐츠','先做健康测评，再看推荐内容'],['The decision you\'re facing right now','La decisión que enfrentas ahora mismo','지금 마주한 결정','你此刻面对的决定']],
+  [['Main format','Formato principal','주요 형식','主要形式'],['Articles, videos and mini-courses','Artículos, videos y minicursos','기사, 영상, 미니 강좌','文章、视频和微课程'],['Five-step decision walkthroughs','Guías de decisión en cinco pasos','5단계 결정 가이드','五步决策演练']],
+  [['Practice','Práctica','연습','练习'],['Calculators and short games','Calculadoras y juegos cortos','계산기와 짧은 게임','计算器和小游戏'],['A calculator inside every decision, plus full life simulators','Una calculadora dentro de cada decisión, además de simuladores de vida completos','모든 결정 가이드 안의 계산기, 그리고 본격적인 인생 시뮬레이터','每个决定都内置计算器，另有完整的人生模拟游戏']],
+  [['Local detail','Detalle local','지역 정보','本地细节'],['National content with school branding','Contenido nacional con la marca de la escuela','학교 로고만 붙인 전국 공통 콘텐츠','套上学校品牌的全国通用内容'],['Santa Cruz rent, UCSC quarters and aid timing, named campus offices','Rentas de Santa Cruz, trimestres y fechas de ayuda de UCSC, oficinas del campus con nombre','산타크루즈 월세, UCSC 쿼터와 학자금 지급 시기, 실제 캠퍼스 기관 이름','圣克鲁兹房租、UCSC 学季与助学金发放时间、具体的校园部门']],
+  [['What you leave with','Con qué te vas','얻어 가는 것','带走什么'],['Points, badges and completed modules','Puntos, insignias y módulos completados','포인트, 배지, 완료한 모듈','积分、徽章和完成的模块'],['A personal list of next steps','Una lista personal de próximos pasos','나만의 다음 할 일 목록','一份属于你的下一步清单']],
+  [['Measuring learning','Medir el aprendizaje','학습 측정','学习成效衡量'],['Usage reports for administrators','Reportes de uso para administradores','관리자용 이용 보고서','给管理员的使用报告'],['A guess before and after, plus confidence ratings','Una respuesta antes y después, más niveles de confianza','학습 전후 추측 비교와 자신감 평가','学习前后的猜测对比，以及信心评分']],
+  [['Access','Acceso','이용 방법','使用方式'],['School-paid license with campus sign-in','Licencia pagada por la escuela con inicio de sesión del campus','학교가 비용을 내는 라이선스, 캠퍼스 로그인 필요','学校付费授权，需校园账号登录'],['Free, open link, no account','Gratis, enlace abierto, sin cuenta','무료, 누구나 접속, 가입 불필요','免费、公开链接、无需账号']],
+  [['Who makes it','Quién lo hace','만든 사람','谁打造的'],['A fintech company','Una empresa fintech','핀테크 기업','一家金融科技公司'],['Sungjun Lee, a UCSC student who just made these decisions','Sungjun Lee, un estudiante de UCSC que acaba de vivir estas decisiones','이런 결정을 직접 겪어 본 UCSC 학생 Sungjun Lee','刚亲身经历过这些决定的 UCSC 学生 Sungjun Lee']]],
+ next_h:['What\'s next','Lo que sigue','앞으로의 계획','下一步'],
+ nx:[[['More decisions','Más decisiones','더 많은 결정 가이드','更多决定'],['Six decisions today. New ones get chosen from what students ask for in interviews.','Hoy hay seis decisiones. Las nuevas se eligen según lo que piden los estudiantes en entrevistas.','지금은 6개예요. 새 가이드는 인터뷰에서 학생들이 요청한 주제로 정해요.','目前有六个决定，新增内容将根据学生在访谈中的需求来选择。']],
+  [['Campus dashboard','Panel para el campus','캠퍼스 대시보드','校园数据看板'],['A privacy-reviewed view for campus staff to see learning results across students, without tracking individuals.','Una vista revisada en privacidad para que el personal del campus vea resultados de aprendizaje de los estudiantes, sin rastrear a nadie individualmente.','개인을 추적하지 않고, 캠퍼스 직원이 학생 전체의 학습 결과를 볼 수 있는 개인정보 검토 완료 화면.','经过隐私审查的视图，让校园工作人员查看学生整体的学习成果，而不追踪个人。']],
+  [['Official review','Revisión oficial','공식 검토','官方审核'],['Our numbers follow 2026 federal and California rules. The next step is a review by UCSC Financial Aid.','Nuestras cifras siguen las reglas federales y de California de 2026. El siguiente paso es una revisión de UCSC Financial Aid.','수치는 2026년 연방 및 캘리포니아 규정을 따라요. 다음 단계는 UCSC Financial Aid의 검토예요.','我们的数据遵循 2026 年联邦和加州规定，下一步是请 UCSC Financial Aid 审核。']]],
+ us_h:['About us','Sobre nosotros','만든 사람','关于我们'],
+ us_p:['Slugonomics is created by Sungjun Lee, UC Santa Cruz.','Slugonomics es creado por Sungjun Lee, UC Santa Cruz.','Slugonomics는 UC Santa Cruz의 Sungjun Lee가 만들었어요.','Slugonomics 由 UC Santa Cruz 的 Sungjun Lee 创建。']
+};
+const pathTitle=id=>STR['pt_'+id]?t('pt_'+id):PATH[id].title;
+const pathQ=id=>STR['pq_'+id]?t('pq_'+id):PATH[id].q;
+const pathTime=p=>t('mins',parseInt(p.time)||p.time);
+const row4=r=>r[LIDX[LANG]]||r[0];
+
+function langPicker(){return `<label class="langpick" title="${t('lang')}"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></svg><select id="langsel" aria-label="${t('lang')} / Language">${LANGS.map(([k,n])=>`<option value="${k}" lang="${HTML_LANG[k]}" ${k===LANG?'selected':''}>${n}</option>`).join('')}</select></label>`;}
+function applyChrome(){
+ document.documentElement.lang=HTML_LANG[LANG];document.title=t('title');
+ $$('.links a[data-nav]').forEach(a=>{const k=a.dataset.nav,ct=a.querySelector('.ct');a.firstChild&&a.firstChild.nodeType===3?a.firstChild.textContent=t('nav_'+k):a.prepend(t('nav_'+k));if(ct)a.appendChild(ct);});
+ const mb=$('#menubtn');if(mb)mb.textContent=t('menu');
+ const br=$('.top .brand');if(br)br.setAttribute('aria-label',t('home_aria'));
+ const lp=$('#langslot');if(lp&&!$('#langsel')){lp.innerHTML=langPicker();$('#langsel').onchange=e=>{LANG=e.target.value;store.set('lang',LANG);render();};}
+ const ls=$('#langsel');if(ls){ls.value=LANG;ls.setAttribute('aria-label',t('lang')+' / Language');}
+ const f=k=>{const el=$('#'+k);if(el)el.innerHTML=t(k);};['foot1','foot_copy','foot2','foot3'].forEach(f);
+}
 const IC={
  cap:'<path d="M2 9.5 12 4.5l10 5-10 5z"/><path d="M6 11.5V16c3.3 2.2 8.7 2.2 12 0v-4.5"/><path d="M22 9.5V15"/>',
  card:'<rect x="2.5" y="5" width="19" height="14" rx="2"/><path d="M2.5 10h19M6.5 15h4"/>',
@@ -467,173 +685,250 @@ const caTax=inc=>Math.max(0,brTax(Math.max(0,inc-CA_STD),CA_BR)-CA_CREDIT);
 function pmt(P,ratePct,months){const r=ratePct/100/12;if(P<=0)return 0;if(r===0)return P/months;return P*r/(1-Math.pow(1+r,-months));}
 
 /* ==================== tools ==================== */
-// Each tool: id, name, blurb, fields, calc(v) -> html
+Object.assign(STR,{
+ tn_budget:['Quarter Budget','Presupuesto trimestral','쿼터 예산','学季预算'],
+ tb_budget:['Your aid arrives in one lump each quarter. See how many weeks it actually lasts.','Tu ayuda llega de una sola vez cada trimestre. Mira cuántas semanas te dura de verdad.','학자금은 쿼터마다 한꺼번에 들어와요. 실제로 몇 주나 버틸 수 있는지 확인해 보세요.','助学金每学季一次性到账。看看它实际能撑几周。'],
+ f_budget_aid:['Aid refund this quarter (after tuition & housing)','Reembolso de ayuda este trimestre (después de colegiatura y vivienda)','이번 쿼터 학자금 환급액 (등록금·기숙사비 제외 후)','本学季助学金退款（扣除学费和住宿后）'],
+ f_budget_savings:['Money already in checking','Dinero que ya tienes en tu cuenta','현재 통장 잔고','账户里现有的钱'],
+ f_budget_job:['Take-home pay per week','Pago neto por semana','주당 실수령액','每周到手工资'],
+ f_budget_family:['Help from family per month','Ayuda de tu familia por mes','가족 지원 (월)','家人每月资助'],
+ f_budget_rent:['Rent per month (0 if it’s in your aid)','Renta por mes (0 si ya está incluida en tu ayuda)','월세 (학자금에 포함되면 0)','每月房租（若已包含在助学金中填 0）'],
+ f_budget_food:['Groceries & food per week','Comida y supermercado por semana','주당 식비','每周伙食'],
+ f_budget_phone:['Phone, subscriptions per month','Teléfono y suscripciones por mes','휴대폰·구독료 (월)','每月手机和订阅费'],
+ f_budget_transport:['Transport per week','Transporte por semana','주당 교통비','每周交通费'],
+ f_budget_fun:['Going out & fun per week','Salidas y diversión por semana','주당 외출·여가비','每周外出娱乐'],
+ b_weekly:['Weekly spending','Gasto semanal','주당 지출','每周花费'],
+ b_q11:['Quarter = 11 weeks (10 of classes + finals).','Trimestre = 11 semanas (10 de clases + finales).','쿼터 = 11주 (수업 10주 + 기말고사 주).','一个学季 = 11 周（10 周上课 + 期末周）。'],
+ b_week:[i=>`Week ${i}`,i=>`Semana ${i}`,i=>`${i}주차`,i=>`第 ${i} 周`],
+ b_legend:['Green weeks you\'re in the positive. Red weeks you\'re out of money.','En las semanas verdes tienes saldo positivo. En las rojas te quedaste sin dinero.','초록색 주는 잔고가 남아 있고, 빨간색 주는 돈이 바닥난 주예요.','绿色表示这一周还有余额，红色表示钱已经用完。'],
+ b_in:['Money coming in this quarter','Dinero que entra este trimestre','이번 쿼터 들어오는 돈','本学季收入'],
+ b_out:['Money going out this quarter','Dinero que sale este trimestre','이번 쿼터 나가는 돈','本学季支出'],
+ b_left:['Left at finals week','Lo que queda en la semana de finales','기말고사 주에 남는 돈','期末周剩余'],
+ b_good:[x=>`You make it through all 11 weeks with ${x} left over. Move some of it to savings for next quarter's books.`,x=>`Llegas al final de las 11 semanas con ${x} de sobra. Pasa una parte a tus ahorros para los libros del próximo trimestre.`,x=>`11주를 모두 버티고 ${x}가 남아요. 일부는 다음 쿼터 교재비로 저축해 두세요.`,x=>`你能撑完全部 11 周，还剩 ${x}。把一部分存起来，留作下学季的书本费。`],
+ b_bad:[(w,x)=>`You run out in week ${w}. You're ${x} short for the quarter.`,(w,x)=>`Te quedas sin dinero en la semana ${w}. Te faltan ${x} para el trimestre.`,(w,x)=>`${w}주차에 돈이 바닥나요. 이번 쿼터에 ${x}가 부족해요.`,(w,x)=>`你会在第 ${w} 周用完钱，本学季缺口为 ${x}。`],
+ b_even:[x=>`To break even, food + fun can total about <b>${x}</b> a week.`,x=>`Para no quedar en negativo, comida + diversión pueden sumar unos <b>${x}</b> por semana.`,x=>`적자를 피하려면 식비+여가비를 주당 약 <b>${x}</b> 이내로 맞추세요.`,x=>`想要收支平衡，伙食加娱乐每周大约可花 <b>${x}</b>。`],
+ b_help:[' Before you reach for a credit card, check <a href="#resources">CalFresh and Slug Support</a>: many students qualify and don\'t know it.',' Antes de usar una tarjeta de crédito, revisa <a href="#resources">CalFresh y Slug Support</a>: muchos estudiantes califican y no lo saben.',' 신용카드를 쓰기 전에 <a href="#resources">CalFresh와 Slug Support</a>를 확인하세요. 자격이 되는데 모르는 학생이 많아요.',' 在动用信用卡之前，先看看<a href="#resources"> CalFresh 和 Slug Support</a>：很多学生符合条件却不知道。'],
+
+ tn_loancost:['Loan Cost','Costo del préstamo','대출 비용','贷款成本'],
+ tb_loancost:['What a student loan really costs, and what borrowing less saves you.','Lo que de verdad cuesta un préstamo estudiantil y cuánto te ahorras si pides menos.','학자금 대출의 진짜 비용, 그리고 덜 빌리면 얼마나 아낄 수 있는지 알아보세요.','学生贷款的真实成本，以及少借一点能省多少。'],
+ f_loancost_amt:['Amount you borrow','Cantidad que pides prestada','빌리는 금액','借款金额'],
+ f_loancost_rate:['Interest rate','Tasa de interés','금리','利率'],
+ h_loancost_rate:['2026–27 federal undergraduate rate: 6.52% fixed. Private loans vary.','Tasa federal de pregrado 2026–27: 6.52% fija. Los préstamos privados varían.','2026–27 연방 학부 대출 금리: 6.52% 고정. 사설 대출은 다를 수 있어요.','2026–27 学年联邦本科贷款利率：6.52% 固定。私人贷款利率各不相同。'],
+ f_loancost_years:['Repayment term (years)','Plazo de pago (años)','상환 기간 (년)','还款期限（年）'],
+ f_loancost_school:['Years until repayment starts (school + 6-mo grace)','Años hasta que empiezas a pagar (escuela + 6 meses de gracia)','상환 시작까지 남은 기간 (재학 + 6개월 유예)','距开始还款的年数（在校期间 + 6 个月宽限期）'],
+ f_loancost_sub:['Subsidized? (1 = yes, 0 = no)','¿Subsidiado? (1 = sí, 0 = no)','보조금 대출인가요? (1 = 예, 0 = 아니요)','是否为补贴贷款？（1 = 是，0 = 否）'],
+ h_loancost_sub:['Government pays the interest on subsidized loans while you\'re in school.','El gobierno paga los intereses de los préstamos subsidiados mientras estudias.','보조금 대출(subsidized)은 재학 중 이자를 정부가 내 줘요.','补贴贷款在你在校期间的利息由政府支付。'],
+ l_monthly:['Monthly payment after school','Pago mensual después de la escuela','졸업 후 월 상환액','毕业后每月还款'],
+ l_for:[n=>`/mo for ${n} yrs`,n=>`/mes durante ${n} años`,n=>`/월, ${n}년간`,n=>`/月，共 ${n} 年`],
+ l_borrow:['You borrow','Pides prestado','빌린 금액','借款金额'],
+ l_fee:['Origination fee (taken out up front)','Comisión de originación (se descuenta al inicio)','대출 수수료 (처음에 차감)','贷款手续费（预先扣除）'],
+ l_cash:['Cash that actually reaches you','Dinero que de verdad recibes','실제로 받는 금액','实际到手的钱'],
+ l_accr:['Interest that piles up during school','Intereses que se acumulan mientras estudias','재학 중 쌓이는 이자','在校期间累积的利息'],
+ l_bal:['Balance when repayment starts','Saldo cuando empiezas a pagar','상환 시작 시 잔액','开始还款时的余额'],
+ l_total:['Total you pay back','Total que devuelves','총 상환액','还款总额'],
+ l_got:['You received','Recibiste','받은 돈','你拿到的'],
+ l_repay:['You repay','Devuelves','갚는 돈','你要还的'],
+ l_ratio:[x=>`Every $1 that reached you costs ${x} to repay.`,x=>`Cada $1 que recibiste te cuesta ${x} devolverlo.`,x=>`받은 $1마다 ${x}를 갚아야 해요.`,x=>`你拿到的每 $1，都要还 ${x}。`],
+ l_less:[(a,b,c)=>`Borrow 30% less (${a}) and your payment drops to <b>${b}</b>/mo, saving ${c} overall.`,(a,b,c)=>`Pide 30% menos (${a}) y tu pago baja a <b>${b}</b>/mes, con un ahorro total de ${c}.`,(a,b,c)=>`30% 덜 빌리면(${a}) 월 상환액이 <b>${b}</b>로 줄고, 총 ${c}를 아껴요.`,(a,b,c)=>`少借 30%（${a}），每月还款降到 <b>${b}</b>，总共可省 ${c}。`],
+ l_int:[x=>` Paying just the interest while in school (about ${x}/mo) stops it from piling up.`,x=>` Pagar solo los intereses mientras estudias (unos ${x}/mes) evita que se acumulen.`,x=>` 재학 중 이자만 내도(월 약 ${x}) 이자가 쌓이지 않아요.`,x=>` 在校期间只还利息（每月约 ${x}），就能避免利息越滚越多。`],
+
+ tn_cardpayoff:['Credit Card Payoff','Pagar tu tarjeta','신용카드 상환','信用卡还款'],
+ tb_cardpayoff:['The minimum-payment trap, in numbers.','La trampa del pago mínimo, en números.','최소 결제의 함정을 숫자로 보여 드려요.','用数字看清"最低还款"陷阱。'],
+ f_cardpayoff_bal:['Card balance','Saldo de la tarjeta','카드 잔액','信用卡欠款'],
+ f_cardpayoff_apr:['APR','APR (tasa anual)','연이율 (APR)','年利率（APR）'],
+ h_cardpayoff_apr:['New card offers averaged about 24% APR in late 2026. Student cards are often lower.','Las nuevas ofertas de tarjetas promediaron cerca de 24% APR a fines de 2026. Las tarjetas para estudiantes suelen ser más bajas.','2026년 말 신규 카드의 평균 연이율은 약 24%였어요. 학생 카드는 대개 더 낮아요.','2026 年底新信用卡的平均年利率约为 24%，学生卡通常更低。'],
+ f_cardpayoff_pay:['Your monthly payment','Tu pago mensual','월 상환액','你每月的还款'],
+ c_never:['never','nunca','갚지 못함','永远还不清'],
+ c_yrs:[n=>n+' yrs',n=>n+' años',n=>n+'년',n=>n+' 年'],
+ c_mo:[n=>n+' mo',n=>n+' meses',n=>n+'개월',n=>n+' 个月'],
+ c_free:[x=>`At ${x}/mo you're debt-free in`,x=>`Pagando ${x}/mes, quedas libre de deudas en`,x=>`월 ${x}씩 갚으면 빚을 다 갚기까지`,x=>`每月还 ${x}，还清债务需要`],
+ c_neverv:['Your payment doesn\'t even cover the interest. The balance will never shrink.','Tu pago ni siquiera cubre los intereses. El saldo nunca va a bajar.','상환액이 이자도 못 따라가요. 잔액이 절대 줄지 않아요.','你的还款连利息都不够，欠款永远不会减少。'],
+ c_andpay:[(i,b)=>`and pay <b>${i}</b> in interest on a ${b} balance.`,(i,b)=>`y pagas <b>${i}</b> en intereses por un saldo de ${b}.`,(i,b)=>`${b} 잔액에 대해 이자로 <b>${i}</b>를 내요.`,(i,b)=>`而 ${b} 的欠款要付 <b>${i}</b> 利息。`],
+ c_by:['Interest paid by strategy','Intereses pagados según la estrategia','상환 방법별 이자','不同还款方式的利息'],
+ c_min:['Minimum only','Solo el mínimo','최소 금액만','只还最低'],
+ c_plan:['Your plan','Tu plan','내 계획','你的方案'],
+ c_paying:[x=>`Paying ${x}/mo`,x=>`Pagando ${x}/mes`,x=>`월 ${x} 상환`,x=>`每月还 ${x}`],
+ c_why:['The real move: pay the <b>statement balance</b> in full every month and you pay $0 in interest. Set autopay for the statement balance, not the minimum.','La jugada real: paga el <b>saldo del estado de cuenta</b> completo cada mes y pagas $0 de intereses. Programa el pago automático por el saldo del estado de cuenta, no por el mínimo.','정답은 이거예요: 매달 <b>청구서 금액</b>을 전액 갚으면 이자는 $0. 자동이체를 최소 금액이 아니라 청구서 전액으로 설정하세요.','真正的做法是：每月全额还清<b>账单金额</b>，利息就是 $0。自动还款要设成账单全额，而不是最低还款额。'],
+
+ tn_paycalc:['Paycheck','Cheque de pago','월급 계산','工资单'],
+ tb_paycalc:['Gross vs. net: where your paycheck goes, and why filing taxes can pay you back.','Bruto vs. neto: a dónde se va tu cheque y por qué declarar impuestos te puede devolver dinero.','세전 vs. 실수령: 월급이 어디로 빠져나가는지, 그리고 세금 신고로 돈을 돌려받을 수 있는 이유.','税前与到手：你的工资去了哪里，以及为什么报税可能让你拿回钱。'],
+ f_paycalc_wage:['Hourly wage','Salario por hora','시급','时薪'],
+ h_paycalc_wage:['California minimum wage in 2026: $16.90/hr.','Salario mínimo de California en 2026: $16.90/hora.','2026년 캘리포니아 최저임금: 시간당 $16.90.','2026 年加州最低工资：每小时 $16.90。'],
+ f_paycalc_hours:['Hours per week','Horas por semana','주당 근무 시간','每周工时'],
+ f_paycalc_weeks:['Weeks worked this year','Semanas trabajadas este año','올해 일한 주 수','今年工作周数'],
+ f_paycalc_campus:['Campus job while enrolled? (1 = yes)','¿Trabajo en el campus mientras estudias? (1 = sí)','재학 중 교내 근무인가요? (1 = 예)','在校期间的校内工作？（1 = 是）'],
+ h_paycalc_campus:['Students working for their own school while enrolled at least half-time are usually exempt from Social Security & Medicare (FICA).','Los estudiantes que trabajan para su propia escuela mientras estudian al menos medio tiempo normalmente están exentos de Social Security y Medicare (FICA).','최소 하프타임 이상 재학하며 자기 학교에서 일하는 학생은 보통 Social Security와 Medicare(FICA)가 면제돼요.','至少半日制在读、并在本校工作的学生，通常免缴 Social Security 和 Medicare（FICA）。'],
+ p_take:['Take-home every two weeks','Pago neto cada dos semanas','2주마다 실수령액','每两周到手'],
+ p_from:[(g,h,w)=>`from ${g} gross (${h} hrs × 2 weeks × ${w})`,(g,h,w)=>`de ${g} brutos (${h} h × 2 semanas × ${w})`,(g,h,w)=>`세전 ${g} (${h}시간 × 2주 × ${w})`,(g,h,w)=>`税前 ${g}（${h} 小时 × 2 周 × ${w}）`],
+ p_gross:['Gross pay','Pago bruto','세전 급여','税前工资'],
+ p_fed:['Federal income tax withheld','Impuesto federal retenido','연방 소득세 원천징수','预扣联邦所得税'],
+ p_ca:['CA income tax withheld','Impuesto estatal de CA retenido','캘리포니아 소득세 원천징수','预扣加州所得税'],
+ p_exempt:['exempt','exento','면제','免缴'],
+ p_net:['Net pay','Pago neto','실수령액','实发工资'],
+ p_year:[x=>`This year you earn about <b>${x}</b>.`,x=>`Este año ganas unos <b>${x}</b>.`,x=>`올해 약 <b>${x}</b>를 벌어요.`,x=>`你今年大约收入 <b>${x}</b>。`],
+ p_year_low:[x=>`This year you earn about <b>${x}</b>, which is under the $16,100 standard deduction, so you likely owe no federal income tax at all.`,x=>`Este año ganas unos <b>${x}</b>, lo cual está por debajo de la deducción estándar de $16,100, así que probablemente no debas nada de impuesto federal.`,x=>`올해 약 <b>${x}</b>를 벌어요. 표준공제 $16,100보다 적으니 연방 소득세는 아마 전혀 내지 않을 거예요.`,x=>`你今年大约收入 <b>${x}</b>，低于 $16,100 的标准扣除额，所以很可能完全不用缴联邦所得税。`],
+ p_refund:[x=>`Estimated refund if you file: ${x}. It only comes back if you file.`,x=>`Reembolso estimado si declaras: ${x}. Solo te lo devuelven si declaras.`,x=>`신고하면 예상 환급액: ${x}. 신고해야만 돌려받아요.`,x=>`如果报税，预计退税：${x}。只有报税才能拿回来。`],
+ p_close:['Withholding is close to what you owe. Filing still builds a record and may unlock credits.','Lo retenido es parecido a lo que debes. Declarar igual crea un historial y puede darte acceso a créditos.','원천징수액이 내야 할 세금과 비슷해요. 그래도 신고하면 기록이 남고 세액공제를 받을 수도 있어요.','预扣金额与应缴税额接近。即便如此，报税也能留下记录，还可能获得抵税额。'],
+ p_why:['Payroll withholds as if every paycheck lasts all year. If you only work part of the year, you\'re often over-withheld. Estimates use single-filer 2026 brackets and no other income.','La nómina retiene como si cada cheque durara todo el año. Si solo trabajas parte del año, a menudo te retienen de más. Las estimaciones usan los tramos de 2026 para declarantes solteros y sin otros ingresos.','급여 원천징수는 모든 월급이 1년 내내 이어진다고 가정해요. 1년 중 일부만 일하면 보통 더 많이 떼여요. 추정치는 2026년 단독 신고자 세율 구간과 다른 소득이 없다는 가정을 사용해요.','工资预扣是按每份工资持续一整年来计算的。如果你只工作了一年中的一部分，通常会被多扣。估算采用 2026 年单身报税人税率，且假设没有其他收入。'],
+
+ tn_habitcost:['Habit Cost','Costo de un hábito','습관 비용','习惯成本'],
+ tb_habitcost:['What a small daily spend becomes if you invest it instead.','En qué se convierte un pequeño gasto diario si lo inviertes.','작은 일상 지출을 투자했다면 얼마가 됐을지 보여 줘요.','每天的小花费如果拿去投资，会变成多少。'],
+ f_habitcost_amt:['Amount per purchase','Monto por compra','1회 지출액','每次花费'],
+ f_habitcost_days:['Times per week','Veces por semana','주당 횟수','每周次数'],
+ f_habitcost_years:['Years','Años','기간 (년)','年数'],
+ f_habitcost_ret:['Yearly return if invested','Rendimiento anual si lo inviertes','투자 시 연 수익률','投资年回报率'],
+ h_habitcost_ret:['Long-run stock index average is often cited near 7% after inflation, but it\'s never guaranteed.','El promedio a largo plazo de los índices bursátiles suele citarse cerca de 7% después de la inflación, pero nunca está garantizado.','주가지수의 장기 평균 수익률은 물가 상승을 뺀 뒤 약 7%로 자주 언급되지만, 절대 보장되지는 않아요.','股票指数的长期平均回报（扣除通胀后）常被引用为约 7%，但从无保证。'],
+ hb_costs:['That habit costs','Ese hábito cuesta','이 습관의 비용','这个习惯花费'],
+ hb_spent:[n=>`Spent over ${n} yrs`,n=>`Gastado en ${n} años`,n=>`${n}년간 지출`,n=>`${n} 年花掉`],
+ hb_inv:['If invested','Si lo inviertes','투자했다면','如果拿去投资'],
+ hb_40:[x=>`Invested from age 18 to 40 instead, it could grow to about <b>${x}</b>.`,x=>`Si lo inviertes de los 18 a los 40 años, podría crecer a unos <b>${x}</b>.`,x=>`18살부터 40살까지 대신 투자하면 약 <b>${x}</b>까지 불어날 수 있어요.`,x=>`如果从 18 岁投资到 40 岁，可能增长到约 <b>${x}</b>。`],
+ hb_half:[x=>`You don't have to quit. Cut it in half and you'd still keep about ${x}.`,x=>`No tienes que dejarlo. Redúcelo a la mitad y aun así te quedarías con unos ${x}.`,x=>`끊을 필요는 없어요. 절반만 줄여도 약 ${x}를 지킬 수 있어요.`,x=>`不必完全戒掉。减半的话，你仍能留下约 ${x}。`],
+
+ tn_rent:['Off-Campus Move','Mudanza fuera del campus','캠퍼스 밖 이사','搬出校园'],
+ tb_rent:['The real monthly cost of an apartment, including what the listing leaves out.','El costo mensual real de un departamento, incluido lo que el anuncio no dice.','매물 광고에 안 나오는 비용까지 포함한 아파트의 실제 월 비용.','公寓真实的每月成本，包括房源广告没写的部分。'],
+ f_rent_rent:['Your share of rent per month','Tu parte de la renta por mes','내 몫의 월세','你每月分摊的房租'],
+ f_rent_util:['Utilities & internet (your share)','Servicios e internet (tu parte)','공과금·인터넷 (내 몫)','水电和网费（你的份额）'],
+ f_rent_deposit:['Security deposit (your share)','Depósito de garantía (tu parte)','보증금 (내 몫)','押金（你的份额）'],
+ f_rent_lease:['Months on the lease','Meses del contrato','임대 계약 기간 (개월)','租约月数'],
+ f_rent_school:['Months you\'re actually in Santa Cruz','Meses que de verdad estás en Santa Cruz','실제로 산타크루즈에 있는 개월 수','你实际在圣克鲁兹的月数'],
+ f_rent_commute:['Extra transport per month','Transporte extra por mes','추가 교통비 (월)','每月额外交通费'],
+ f_rent_ins:['Renters insurance per month','Seguro de inquilino por mes','세입자 보험 (월)','每月租客保险'],
+ r_true:['True cost per month you\'re here','Costo real por mes que estás aquí','실제로 지내는 달의 실질 월 비용','你在这里的每月真实成本'],
+ r_vs:[x=>`vs. ${x} on the listing`,x=>`vs. ${x} en el anuncio`,x=>`광고 금액 ${x} 대비`,x=>`房源广告标价 ${x}`],
+ r_all:['Rent + utilities + insurance + transport','Renta + servicios + seguro + transporte','월세 + 공과금 + 보험 + 교통비','房租 + 水电 + 保险 + 交通'],
+ r_year:['Total for the lease year','Total del año de contrato','계약 기간 총액','租约期总额'],
+ r_empty:['Rent for months you\'re not here','Renta de los meses que no estás','없는 달에 내는 월세','你不在时的房租'],
+ r_movein:['Cash needed on move-in day','Dinero que necesitas el día de la mudanza','입주일에 필요한 현금','入住当天需要的现金'],
+ r_meh:[(l,s,x)=>`A ${l}-month lease for a ${s}-month school year means ${x} for an empty room, unless you sublet (check the lease allows it).`,(l,s,x)=>`Un contrato de ${l} meses para un año escolar de ${s} meses significa ${x} por un cuarto vacío, a menos que lo subarriendes (revisa que el contrato lo permita).`,(l,s,x)=>`${s}개월 학년에 ${l}개월 계약이면 빈방에 ${x}를 내는 셈이에요. 전대(sublet)하지 않는 한요 (계약서에서 허용되는지 확인하세요).`,(l,s,x)=>`学年 ${s} 个月却签了 ${l} 个月的租约，意味着要为空房付 ${x}，除非转租（先确认租约允许）。`],
+ r_good:['Your lease matches the time you\'re here. No summer rent wasted.','Tu contrato coincide con el tiempo que estás aquí. No desperdicias renta en verano.','계약 기간이 실제 거주 기간과 맞아요. 여름 월세 낭비가 없어요.','你的租约与在这里的时间吻合，暑假房租不会浪费。'],
+ r_why:['Move-in cash usually lands before your next aid disbursement. Plan for it a quarter ahead. Your deposit should come back if you document the unit\'s condition on move-in day.','El dinero para mudarte suele necesitarse antes de tu siguiente pago de ayuda. Planéalo con un trimestre de anticipación. Tu depósito debería regresarte si documentas el estado del lugar el día que te mudas.','입주 비용은 보통 다음 학자금 지급 전에 필요해요. 한 쿼터 전부터 준비하세요. 입주일에 집 상태를 기록해 두면 보증금을 돌려받을 수 있어요.','入住所需的钱通常在下一次助学金发放之前就要用到，请提前一个学季做准备。入住当天记录好房屋状况，押金才更有可能拿回来。']
+});
+function F(tool,o){const f={...o};Object.defineProperty(f,'l',{get(){return t('f_'+tool+'_'+o.k)}});if(STR['h_'+tool+'_'+o.k])Object.defineProperty(f,'hint',{get(){return t('h_'+tool+'_'+o.k)}});return f;}
+function TOOL(id,o){Object.defineProperty(o,'name',{get(){return t('tn_'+id)}});Object.defineProperty(o,'blurb',{get(){return t('tb_'+id)}});o.fields=o.fields.map(f=>F(id,f));return o;}
 const TOOLS={
- budget:{name:'Quarter Budget',ico:'🗓️',blurb:'Your aid arrives in one lump each quarter. See how many weeks it actually lasts.',
-  fields:[
-   {k:'aid',l:'Aid refund this quarter (after tuition & housing)',min:0,max:25000,step:50,v:1800,fmt:'$'},
-   {k:'savings',l:'Money already in checking',min:0,max:50000,step:50,v:400,fmt:'$'},
-   {k:'job',l:'Take-home pay per week',min:0,max:3000,step:10,v:150,fmt:'$'},
-   {k:'family',l:'Help from family per month',min:0,max:5000,step:25,v:0,fmt:'$'},
-   {k:'rent',l:'Rent per month (0 if it’s in your aid)',min:0,max:6000,step:25,v:0,fmt:'$'},
-   {k:'food',l:'Groceries & food per week',min:0,max:800,step:5,v:85,fmt:'$'},
-   {k:'phone',l:'Phone, subscriptions per month',min:0,max:800,step:5,v:60,fmt:'$'},
-   {k:'transport',l:'Transport per week',min:0,max:500,step:5,v:15,fmt:'$'},
-   {k:'fun',l:'Going out & fun per week',min:0,max:1000,step:5,v:60,fmt:'$'},
-  ],
+ budget:TOOL('budget',{ico:'🗓️',
+  fields:[{k:'aid',min:0,max:25000,step:50,v:1800,fmt:'$'},{k:'savings',min:0,max:50000,step:50,v:400,fmt:'$'},{k:'job',min:0,max:3000,step:10,v:150,fmt:'$'},{k:'family',min:0,max:5000,step:25,v:0,fmt:'$'},{k:'rent',min:0,max:6000,step:25,v:0,fmt:'$'},{k:'food',min:0,max:800,step:5,v:85,fmt:'$'},{k:'phone',min:0,max:800,step:5,v:60,fmt:'$'},{k:'transport',min:0,max:500,step:5,v:15,fmt:'$'},{k:'fun',min:0,max:1000,step:5,v:60,fmt:'$'}],
   calc(v){
    const W=11, months=W/4.33;
    const income=v.aid+v.savings+v.job*W+v.family*months;
    const wk=v.food+v.transport+v.fun+(v.rent+v.phone)/4.33;
    const spend=wk*W, left=income-spend;
    let bal=v.aid+v.savings, cells='', shortWeek=null;
-   for(let i=1;i<=W;i++){bal+=v.job+v.family/4.33-wk;const s=bal<0;if(s&&shortWeek==null)shortWeek=i;cells+=`<div class="${s?'short':''}" title="Week ${i}: ${money(bal)}">${i}</div>`;}
+   for(let i=1;i<=W;i++){bal+=v.job+v.family/4.33-wk;const s=bal<0;if(s&&shortWeek==null)shortWeek=i;cells+=`<div class="${s?'short':''}" title="${t('b_week',i)}: ${money(bal)}">${i}</div>`;}
    const safe=(income-(v.rent+v.phone)*months)/W - v.transport;
-   let verdict=left>=0?`<div class="verdict good">You make it through all 11 weeks with ${money(left)} left over. Move some of it to savings for next quarter's books.</div>`
-     :`<div class="verdict bad">You run out in week ${shortWeek}. You're ${money(-left)} short for the quarter.</div>`;
-   return `<div class="eyebrow">Weekly spending</div><div class="big num">${money(wk)}<span class="small muted"> /week</span></div>
-   <p class="small muted" style="margin-top:6px">Quarter = 11 weeks (10 of classes + finals).</p>
-   <div class="weeks" aria-label="Week by week balance">${cells}</div><p class="small muted">Green weeks you're in the positive. Red weeks you're out of money.</p>
-   <table class="rows"><tr><td>Money coming in this quarter</td><td class="n">${money(income)}</td></tr>
-   <tr><td>Money going out this quarter</td><td class="n">${money(spend)}</td></tr>
-   <tr class="tot"><td>Left at finals week</td><td class="n">${money(left)}</td></tr></table>${verdict}
-   <p class="why" style="margin-top:12px">To break even, food + fun can total about <b>${money(Math.max(0,safe))}</b> a week.${left<0?' Before you reach for a credit card, check <a href="#resources">CalFresh and Slug Support</a>: many students qualify and don\'t know it.':''}</p>`;
-  }},
- loancost:{name:'Loan Cost',ico:'🎓',blurb:'What a student loan really costs, and what borrowing less saves you.',
-  fields:[
-   {k:'amt',l:'Amount you borrow',min:500,max:150000,step:250,v:5500,fmt:'$'},
-   {k:'rate',l:'Interest rate',min:0,max:20,step:.01,v:LOAN_RATE,fmt:'%',hint:'2026–27 federal undergraduate rate: 6.52% fixed. Private loans vary.'},
-   {k:'years',l:'Repayment term (years)',min:5,max:30,step:1,v:10,fmt:'y'},
-   {k:'school',l:'Years until repayment starts (school + 6-mo grace)',min:0,max:10,step:.5,v:4,fmt:'y'},
-   {k:'sub',l:'Subsidized? (1 = yes, 0 = no)',min:0,max:1,step:1,v:0,fmt:'',hint:'Government pays the interest on subsidized loans while you\'re in school.'},
-  ],
+   const verdict=left>=0?`<div class="verdict good">${t('b_good',money(left))}</div>`:`<div class="verdict bad">${t('b_bad',shortWeek,money(-left))}</div>`;
+   return `<div class="eyebrow">${t('b_weekly')}</div><div class="big num">${money(wk)}<span class="small muted"> ${t('per_week')}</span></div>
+   <p class="small muted" style="margin-top:6px">${t('b_q11')}</p>
+   <div class="weeks" aria-label="${t('b_legend')}">${cells}</div><p class="small muted">${t('b_legend')}</p>
+   <table class="rows"><tr><td>${t('b_in')}</td><td class="n">${money(income)}</td></tr>
+   <tr><td>${t('b_out')}</td><td class="n">${money(spend)}</td></tr>
+   <tr class="tot"><td>${t('b_left')}</td><td class="n">${money(left)}</td></tr></table>${verdict}
+   <p class="why" style="margin-top:12px">${t('b_even',money(Math.max(0,safe)))}${left<0?t('b_help'):''}</p>`;
+  }}),
+ loancost:TOOL('loancost',{ico:'🎓',
+  fields:[{k:'amt',min:500,max:150000,step:250,v:5500,fmt:'$'},{k:'rate',min:0,max:20,step:.01,v:LOAN_RATE,fmt:'%'},{k:'years',min:5,max:30,step:1,v:10,fmt:'y'},{k:'school',min:0,max:10,step:.5,v:4,fmt:'y'},{k:'sub',min:0,max:1,step:1,v:0,fmt:''}],
   calc(v){
    const fee=v.amt*ORIG_FEE, got=v.amt-fee;
    const accrued=v.sub?0:v.amt*v.rate/100*v.school;
    const P=v.amt+accrued, n=v.years*12, m=pmt(P,v.rate,n), total=m*n;
    const less=v.amt*0.7, Pl=less+(v.sub?0:less*v.rate/100*v.school), ml=pmt(Pl,v.rate,n);
    const ratio=total/got;
-   return `<div class="eyebrow">Monthly payment after school</div><div class="big num">${money(m)}<span class="small muted"> /mo for ${v.years} yrs</span></div>
-   <table class="rows"><tr><td>You borrow</td><td class="n">${money(v.amt)}</td></tr>
-   <tr><td>Origination fee (taken out up front)</td><td class="n">−${money(fee)}</td></tr>
-   <tr><td>Cash that actually reaches you</td><td class="n">${money(got)}</td></tr>
-   <tr><td>Interest that piles up during school</td><td class="n">${money(accrued)}</td></tr>
-   <tr><td>Balance when repayment starts</td><td class="n">${money(P)}</td></tr>
-   <tr class="tot"><td>Total you pay back</td><td class="n">${money(total)}</td></tr></table>
-   <div class="bars"><div class="bar"><span>You received</span><div class="track"><div class="fill good" style="width:${Math.min(100,got/total*100)}%"></div></div><b>${money(got)}</b></div>
-   <div class="bar"><span>You repay</span><div class="track"><div class="fill bad" style="width:100%"></div></div><b>${money(total)}</b></div></div>
-   <div class="verdict ${ratio>1.6?'bad':'meh'}">Every $1 that reached you costs ${money(ratio,2)} to repay.</div>
-   <p class="why" style="margin-top:12px">Borrow 30% less (${money(less)}) and your payment drops to <b>${money(ml)}</b>/mo, saving ${money((m-ml)*n)} overall.${v.sub?'':' Paying just the interest while in school (about '+money(v.amt*v.rate/100/12)+'/mo) stops it from piling up.'}</p>`;
-  }},
- cardpayoff:{name:'Credit Card Payoff',ico:'💳',blurb:'The minimum-payment trap, in numbers.',
-  fields:[
-   {k:'bal',l:'Card balance',min:100,max:50000,step:50,v:1200,fmt:'$'},
-   {k:'apr',l:'APR',min:0,max:35,step:.25,v:22.5,fmt:'%',hint:'New card offers averaged about 24% APR in late 2026. Student cards are often lower.'},
-   {k:'pay',l:'Your monthly payment',min:25,max:5000,step:5,v:40,fmt:'$'},
-  ],
+   return `<div class="eyebrow">${t('l_monthly')}</div><div class="big num">${money(m)}<span class="small muted"> ${t('l_for',v.years)}</span></div>
+   <table class="rows"><tr><td>${t('l_borrow')}</td><td class="n">${money(v.amt)}</td></tr>
+   <tr><td>${t('l_fee')}</td><td class="n">−${money(fee)}</td></tr>
+   <tr><td>${t('l_cash')}</td><td class="n">${money(got)}</td></tr>
+   <tr><td>${t('l_accr')}</td><td class="n">${money(accrued)}</td></tr>
+   <tr><td>${t('l_bal')}</td><td class="n">${money(P)}</td></tr>
+   <tr class="tot"><td>${t('l_total')}</td><td class="n">${money(total)}</td></tr></table>
+   <div class="bars"><div class="bar"><span>${t('l_got')}</span><div class="track"><div class="fill good" style="width:${Math.min(100,got/total*100)}%"></div></div><b>${money(got)}</b></div>
+   <div class="bar"><span>${t('l_repay')}</span><div class="track"><div class="fill bad" style="width:100%"></div></div><b>${money(total)}</b></div></div>
+   <div class="verdict ${ratio>1.6?'bad':'meh'}">${t('l_ratio',money(ratio,2))}</div>
+   <p class="why" style="margin-top:12px">${t('l_less',money(less),money(ml),money((m-ml)*n))}${v.sub?'':t('l_int',money(v.amt*v.rate/100/12))}</p>`;
+  }}),
+ cardpayoff:TOOL('cardpayoff',{ico:'💳',
+  fields:[{k:'bal',min:100,max:50000,step:50,v:1200,fmt:'$'},{k:'apr',min:0,max:36,step:.25,v:22.5,fmt:'%'},{k:'pay',min:25,max:5000,step:5,v:40,fmt:'$'}],
   calc(v){
    const r=v.apr/100/12;
    function run(payFn){let b=v.bal,i=0,m=0;while(b>0.005&&m<600){const int=b*r;i+=int;b+=int;const p=Math.min(b,payFn(b));if(p<=int&&m>0){return{m:Infinity,i};}b-=p;m++;}return{m,i};}
    const mine=run(()=>v.pay);
    const minimum=run(b=>Math.max(25,b*.01+b*r));
-   const fast=run(()=>Math.max(v.pay*2,v.pay+50));
-   const fmtM=m=>m===Infinity?'never':m>=24?(m/12).toFixed(1)+' yrs':m+' mo';
+   const fastPay=Math.max(v.pay*2,v.pay+50),fast=run(()=>fastPay);
+   const fmtM=m=>m===Infinity?t('c_never'):m>=24?t('c_yrs',(m/12).toFixed(1)):t('c_mo',m);
    const maxI=Math.max(mine.i,minimum.i,fast.i,1);
    const row=(label,o,cls)=>`<div class="bar"><span>${label}</span><div class="track"><div class="fill ${cls}" style="width:${o.m===Infinity?100:Math.max(3,o.i/maxI*100)}%"></div></div><b>${o.m===Infinity?'∞':money(o.i)}</b></div>`;
-   return `<div class="eyebrow">At ${money(v.pay)}/mo you're debt-free in</div><div class="big num">${fmtM(mine.m)}</div>
-   ${mine.m===Infinity?'<div class="verdict bad">Your payment doesn\'t even cover the interest. The balance will never shrink.</div>':`<p class="muted" style="margin-top:6px">and pay <b>${money(mine.i)}</b> in interest on a ${money(v.bal)} balance.</p>`}
-   <div class="eyebrow" style="margin-top:16px">Interest paid by strategy</div>
-   <div class="bars">${row('Minimum only',minimum,'bad')}${row('Your plan',mine,'')}${row(money(Math.max(v.pay*2,v.pay+50))+'/mo',fast,'good')}</div>
-   <table class="rows"><tr><td>Minimum only</td><td class="n">${fmtM(minimum.m)}</td></tr><tr><td>Your plan</td><td class="n">${fmtM(mine.m)}</td></tr><tr><td>Paying ${money(Math.max(v.pay*2,v.pay+50))}/mo</td><td class="n">${fmtM(fast.m)}</td></tr></table>
-   <p class="why">The real move: pay the <b>statement balance</b> in full every month and you pay $0 in interest. Set autopay for the statement balance, not the minimum.</p>`;
-  }},
- paycalc:{name:'Paycheck',ico:'💵',blurb:'Gross vs. net: where your paycheck goes, and why filing taxes can pay you back.',
-  fields:[
-   {k:'wage',l:'Hourly wage',min:MIN_WAGE,max:150,step:.1,v:18,fmt:'$',hint:'California minimum wage in 2026: $16.90/hr.'},
-   {k:'hours',l:'Hours per week',min:1,max:80,step:1,v:12,fmt:'h'},
-   {k:'weeks',l:'Weeks worked this year',min:1,max:52,step:1,v:40,fmt:'w'},
-   {k:'campus',l:'Campus job while enrolled? (1 = yes)',min:0,max:1,step:1,v:1,fmt:'',hint:'Students working for their own school while enrolled at least half-time are usually exempt from Social Security & Medicare (FICA).'},
-  ],
+   return `<div class="eyebrow">${t('c_free',money(v.pay))}</div><div class="big num">${fmtM(mine.m)}</div>
+   ${mine.m===Infinity?`<div class="verdict bad">${t('c_neverv')}</div>`:`<p class="muted" style="margin-top:6px">${t('c_andpay',money(mine.i),money(v.bal))}</p>`}
+   <div class="eyebrow" style="margin-top:16px">${t('c_by')}</div>
+   <div class="bars">${row(t('c_min'),minimum,'bad')}${row(t('c_plan'),mine,'')}${row(money(fastPay)+t('per_mo'),fast,'good')}</div>
+   <table class="rows"><tr><td>${t('c_min')}</td><td class="n">${fmtM(minimum.m)}</td></tr><tr><td>${t('c_plan')}</td><td class="n">${fmtM(mine.m)}</td></tr><tr><td>${t('c_paying',money(fastPay))}</td><td class="n">${fmtM(fast.m)}</td></tr></table>
+   <p class="why">${t('c_why')}</p>`;
+  }}),
+ paycalc:TOOL('paycalc',{ico:'💵',
+  fields:[{k:'wage',min:MIN_WAGE,max:150,step:.1,v:18,fmt:'$'},{k:'hours',min:1,max:80,step:1,v:12,fmt:'h'},{k:'weeks',min:1,max:52,step:1,v:40,fmt:'w'},{k:'campus',min:0,max:1,step:1,v:1,fmt:''}],
   calc(v){
    const gw=v.wage*v.hours*2, annual=v.wage*v.hours*v.weeks;
-   // withholding uses annualized biweekly pay (how payroll does it), actual tax uses real annual earnings
    const ann=gw*26;
    const wFed=fedTax(ann)/26, wSt=caTax(ann)/26, sdi=gw*SDI_R, ss=v.campus?0:gw*.062, med=v.campus?0:gw*.0145;
    const net=gw-wFed-wSt-sdi-ss-med;
    const periods=v.weeks/2;
-   const withheldFed=wFed*periods, withheldSt=wSt*periods;
-   const owedFed=fedTax(annual), owedSt=caTax(annual);
-   const refund=(withheldFed-owedFed)+(withheldSt-owedSt);
-   return `<div class="eyebrow">Take-home every two weeks</div><div class="big num">${money(net,2)}</div><p class="small muted" style="margin-top:6px">from ${money(gw,2)} gross (${v.hours} hrs × 2 weeks × ${money(v.wage,2)})</p>
-   <table class="rows"><tr><td>Gross pay</td><td class="n">${money(gw,2)}</td></tr>
-   <tr><td>Federal income tax withheld</td><td class="n">−${money(wFed,2)}</td></tr>
-   <tr><td>CA income tax withheld</td><td class="n">−${money(wSt,2)}</td></tr>
+   const refund=(wFed*periods-fedTax(annual))+(wSt*periods-caTax(annual));
+   return `<div class="eyebrow">${t('p_take')}</div><div class="big num">${money(net,2)}</div><p class="small muted" style="margin-top:6px">${t('p_from',money(gw,2),v.hours,money(v.wage,2))}</p>
+   <table class="rows"><tr><td>${t('p_gross')}</td><td class="n">${money(gw,2)}</td></tr>
+   <tr><td>${t('p_fed')}</td><td class="n">−${money(wFed,2)}</td></tr>
+   <tr><td>${t('p_ca')}</td><td class="n">−${money(wSt,2)}</td></tr>
    <tr><td>CA SDI (1.3%)</td><td class="n">−${money(sdi,2)}</td></tr>
-   <tr><td>Social Security (6.2%)</td><td class="n">${v.campus?'exempt':'−'+money(ss,2)}</td></tr>
-   <tr><td>Medicare (1.45%)</td><td class="n">${v.campus?'exempt':'−'+money(med,2)}</td></tr>
-   <tr class="tot"><td>Net pay</td><td class="n">${money(net,2)}</td></tr></table>
-   <p>This year you earn about <b>${money(annual)}</b>${annual<FED_STD?', which is under the $16,100 standard deduction, so you likely owe no federal income tax at all':''}.</p>
-   <div class="verdict ${refund>1?'good':'meh'}">${refund>1?`Estimated refund if you file: ${money(refund)}. It only comes back if you file.`:'Withholding is close to what you owe. Filing still builds a record and may unlock credits.'}</div>
-   <p class="why" style="margin-top:12px">Payroll withholds as if every paycheck lasts all year. If you only work part of the year, you're often over-withheld. Estimates use single-filer 2026 brackets and no other income.</p>`;
-  }},
- habitcost:{name:'Habit Cost',ico:'☕',blurb:'What a small daily spend becomes if you invest it instead.',
-  fields:[
-   {k:'amt',l:'Amount per purchase',min:1,max:200,step:.5,v:7,fmt:'$'},
-   {k:'days',l:'Times per week',min:1,max:7,step:1,v:5,fmt:'×'},
-   {k:'years',l:'Years',min:1,max:50,step:1,v:10,fmt:'y'},
-   {k:'ret',l:'Yearly return if invested',min:0,max:15,step:.5,v:7,fmt:'%',hint:'Long-run stock index average is often cited near 7% after inflation, but it\'s never guaranteed.'},
-  ],
+   <tr><td>Social Security (6.2%)</td><td class="n">${v.campus?t('p_exempt'):'−'+money(ss,2)}</td></tr>
+   <tr><td>Medicare (1.45%)</td><td class="n">${v.campus?t('p_exempt'):'−'+money(med,2)}</td></tr>
+   <tr class="tot"><td>${t('p_net')}</td><td class="n">${money(net,2)}</td></tr></table>
+   <p>${annual<FED_STD?t('p_year_low',money(annual)):t('p_year',money(annual))}</p>
+   <div class="verdict ${refund>1?'good':'meh'}">${refund>1?t('p_refund',money(refund)):t('p_close')}</div>
+   <p class="why" style="margin-top:12px">${t('p_why')}</p>`;
+  }}),
+ habitcost:TOOL('habitcost',{ico:'☕',
+  fields:[{k:'amt',min:1,max:200,step:.5,v:7,fmt:'$'},{k:'days',min:1,max:7,step:1,v:5,fmt:'×'},{k:'years',min:1,max:50,step:1,v:10,fmt:'y'},{k:'ret',min:0,max:15,step:.5,v:7,fmt:'%'}],
   calc(v){
    const yr=v.amt*v.days*52, mo=yr/12, r=v.ret/100/12, n=v.years*12;
    const fv=r===0?mo*n:mo*((Math.pow(1+r,n)-1)/r);
    const spent=yr*v.years;
    const at40=r===0?mo*12*22:mo*((Math.pow(1+r,264)-1)/r);
-   return `<div class="eyebrow">That habit costs</div><div class="big num">${money(yr)}<span class="small muted"> /year</span></div>
-   <div class="bars" style="margin-top:16px"><div class="bar"><span>Spent over ${v.years} yrs</span><div class="track"><div class="fill bad" style="width:${spent/fv*100}%"></div></div><b>${money(spent)}</b></div>
-   <div class="bar"><span>If invested</span><div class="track"><div class="fill good" style="width:100%"></div></div><b>${money(fv)}</b></div></div>
-   <p>Invested from age 18 to 40 instead, it could grow to about <b>${money(at40)}</b>.</p>
-   <div class="verdict meh">You don't have to quit. Cut it in half and you'd still keep about ${money(fv/2)}.</div>`;
-  }},
- rent:{name:'Off-Campus Move',ico:'🏠',blurb:'The real monthly cost of an apartment, including what the listing leaves out.',
-  fields:[
-   {k:'rent',l:'Your share of rent per month',min:400,max:6000,step:25,v:1150,fmt:'$'},
-   {k:'util',l:'Utilities & internet (your share)',min:0,max:800,step:5,v:90,fmt:'$'},
-   {k:'deposit',l:'Security deposit (your share)',min:0,max:12000,step:50,v:1150,fmt:'$'},
-   {k:'lease',l:'Months on the lease',min:6,max:12,step:1,v:12,fmt:'mo'},
-   {k:'school',l:'Months you\'re actually in Santa Cruz',min:6,max:12,step:1,v:9,fmt:'mo'},
-   {k:'commute',l:'Extra transport per month',min:0,max:1000,step:5,v:30,fmt:'$'},
-   {k:'ins',l:'Renters insurance per month',min:0,max:100,step:1,v:15,fmt:'$'},
-  ],
+   return `<div class="eyebrow">${t('hb_costs')}</div><div class="big num">${money(yr)}<span class="small muted"> ${t('per_year')}</span></div>
+   <div class="bars" style="margin-top:16px"><div class="bar"><span>${t('hb_spent',v.years)}</span><div class="track"><div class="fill bad" style="width:${spent/fv*100}%"></div></div><b>${money(spent)}</b></div>
+   <div class="bar"><span>${t('hb_inv')}</span><div class="track"><div class="fill good" style="width:100%"></div></div><b>${money(fv)}</b></div></div>
+   <p>${t('hb_40',money(at40))}</p>
+   <div class="verdict meh">${t('hb_half',money(fv/2))}</div>`;
+  }}),
+ rent:TOOL('rent',{ico:'🏠',
+  fields:[{k:'rent',min:400,max:6000,step:25,v:1150,fmt:'$'},{k:'util',min:0,max:800,step:5,v:90,fmt:'$'},{k:'deposit',min:0,max:12000,step:50,v:1150,fmt:'$'},{k:'lease',min:6,max:12,step:1,v:12,fmt:'mo'},{k:'school',min:6,max:12,step:1,v:9,fmt:'mo'},{k:'commute',min:0,max:1000,step:5,v:30,fmt:'$'},{k:'ins',min:0,max:100,step:1,v:15,fmt:'$'}],
   calc(v){
    const monthly=v.rent+v.util+v.commute+v.ins;
    const year=monthly*v.lease - (v.lease>v.school?v.commute*(v.lease-v.school):0);
    const perSchoolMonth=year/v.school;
    const moveIn=v.deposit+v.rent+(v.util>0?50:0);
    const empty=v.rent*Math.max(0,v.lease-v.school);
-   return `<div class="eyebrow">True cost per month you're here</div><div class="big num">${money(perSchoolMonth)}</div><p class="small muted" style="margin-top:6px">vs. ${money(v.rent)} on the listing</p>
-   <table class="rows"><tr><td>Rent + utilities + insurance + transport</td><td class="n">${money(monthly)}/mo</td></tr>
-   <tr><td>Total for the lease year</td><td class="n">${money(year)}</td></tr>
-   <tr><td>Rent for months you're not here</td><td class="n">${money(empty)}</td></tr>
-   <tr class="tot"><td>Cash needed on move-in day</td><td class="n">${money(moveIn)}</td></tr></table>
-   ${empty>0?`<div class="verdict meh">A ${v.lease}-month lease for a ${v.school}-month school year means ${money(empty)} for an empty room, unless you sublet (check the lease allows it).</div>`:'<div class="verdict good">Your lease matches the time you\'re here. No summer rent wasted.</div>'}
-   <p class="why" style="margin-top:12px">Move-in cash usually lands before your next aid disbursement. Plan for it a quarter ahead. Your deposit should come back if you document the unit's condition on move-in day.</p>`;
-  }}
+   return `<div class="eyebrow">${t('r_true')}</div><div class="big num">${money(perSchoolMonth)}</div><p class="small muted" style="margin-top:6px">${t('r_vs',money(v.rent))}</p>
+   <table class="rows"><tr><td>${t('r_all')}</td><td class="n">${money(monthly)}${t('per_mo')}</td></tr>
+   <tr><td>${t('r_year')}</td><td class="n">${money(year)}</td></tr>
+   <tr><td>${t('r_empty')}</td><td class="n">${money(empty)}</td></tr>
+   <tr class="tot"><td>${t('r_movein')}</td><td class="n">${money(moveIn)}</td></tr></table>
+   ${empty>0?`<div class="verdict meh">${t('r_meh',v.lease,v.school,money(empty))}</div>`:`<div class="verdict good">${t('r_good')}</div>`}
+   <p class="why" style="margin-top:12px">${t('r_why')}</p>`;
+  }})
 };
 
-function fieldHTML(t,f,val){
+function fieldHTML(t_,f,val){
  const v=val??f.v,bool=f.fmt==='';
- const pre=f.fmt==='$'?'$':'',suf=f.fmt==='%'?'%':f.fmt==='$'||bool?'':f.fmt;
- const box=bool?`<output id="${t}-${f.k}-o">${v?'Yes':'No'}</output>`
-  :`<span class="numwrap">${pre?`<span aria-hidden="true">${pre}</span>`:''}<input type="number" inputmode="decimal" class="numbox" id="${t}-${f.k}-n" data-n="${f.k}" min="${f.min}" step="any" value="${+(+v).toFixed(2)}" aria-label="${esc(f.l)}, type any amount">${suf?`<span aria-hidden="true">${suf}</span>`:''}</span>`;
- return `<div class="field"><label for="${t}-${f.k}"><span>${f.l}</span>${box}</label>
- <input type="range" id="${t}-${f.k}" data-k="${f.k}" min="${f.min}" max="${Math.max(f.max,v)}" step="${f.step}" value="${v}">${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;
+ const pre=f.fmt==='$'?'$':'',suf=f.fmt==='%'?'%':f.fmt==='$'||bool?'':t('u_'+f.fmt);
+ const box=bool?`<output id="${t_}-${f.k}-o">${v?t('yes'):t('no')}</output>`
+  :`<span class="numwrap">${pre?`<span aria-hidden="true">${pre}</span>`:''}<input type="number" inputmode="decimal" class="numbox" id="${t_}-${f.k}-n" data-n="${f.k}" min="${f.min}" step="any" value="${+(+v).toFixed(2)}" aria-label="${esc(f.l)}, ${t('type_any')}">${suf?`<span aria-hidden="true">${suf}</span>`:''}</span>`;
+ return `<div class="field"><label for="${t_}-${f.k}"><span>${f.l}</span>${box}</label>
+ <input type="range" id="${t_}-${f.k}" data-k="${f.k}" min="${f.min}" max="${Math.max(f.max,v)}" step="${f.step}" value="${v}">${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;
 }
 function mountTool(el,id,preset={}){
  const T=TOOLS[id];
- el.innerHTML=`<div class="tool"><div class="card">${T.fields.map(f=>fieldHTML(id,f,preset[f.k])).join('')}<p class="hint" style="margin-top:14px">Slide, or type any amount in the box. Typing a bigger number stretches the slider.</p></div><div class="out" aria-live="polite"></div></div>`;
+ el.innerHTML=`<div class="tool"><div class="card">${T.fields.map(f=>fieldHTML(id,f,preset[f.k])).join('')}<p class="hint" style="margin-top:14px">${t('slide_hint')}</p></div><div class="out" aria-live="polite"></div></div>`;
  const out=$('.out',el);
  const read=()=>{const v={};T.fields.forEach(f=>{const n=$('#'+id+'-'+f.k+'-n',el),r=$('#'+id+'-'+f.k,el);let x=parseFloat(n?n.value:r.value);if(!isFinite(x))x=parseFloat(r.value);v[f.k]=Math.max(f.min,x);});return v;};
- const upd=()=>{out.innerHTML=T.calc(read());T.fields.forEach(f=>{if(f.fmt==='')$('#'+id+'-'+f.k+'-o',el).textContent=+$('#'+id+'-'+f.k,el).value?'Yes':'No';});};
+ const upd=()=>{out.innerHTML=T.calc(read());T.fields.forEach(f=>{if(f.fmt==='')$('#'+id+'-'+f.k+'-o',el).textContent=+$('#'+id+'-'+f.k,el).value?t('yes'):t('no');});};
  T.fields.forEach(f=>{const r=$('#'+id+'-'+f.k,el),n=$('#'+id+'-'+f.k+'-n',el);
   r.addEventListener('input',()=>{if(n)n.value=+(+r.value).toFixed(2);upd();});
   if(n)n.addEventListener('input',()=>{const x=parseFloat(n.value);if(!isFinite(x))return;if(x>+r.max)r.max=x;r.value=Math.max(f.min,x);upd();});
@@ -765,94 +1060,87 @@ const STEPS=['Guess','Learn','Run the numbers','Decide','Plan'];
 /* ==================== views ==================== */
 const V={};
 const L='ABCD';
-function statusOf(id){const st=S.paths[id]||{};return st.done?'<span class="st done">Finished</span>':st.step?'<span class="st prog">In progress</span>':'';}
-function rowHTML(p){return `<a class="row" href="#${p.id}"><span class="badge">${icon(PICON[p.id])}</span><span><h3>${p.title}</h3><p>${p.q}</p></span><span class="meta">${p.time}${statusOf(p.id)}</span>${icon('chev','ic chev')}</a>`;}
+function statusOf(id){const st=S.paths[id]||{};return st.done?`<span class="st done">${t('st_done')}</span>`:st.step?`<span class="st prog">${t('st_prog')}</span>`:'';}
+function rowHTML(p){return `<a class="row" href="#${p.id}"><span class="badge">${icon(PICON[p.id])}</span><span><h3>${pathTitle(p.id)}</h3><p>${pathQ(p.id)}</p></span><span class="meta">${pathTime(p)}${statusOf(p.id)}</span>${icon('chev','ic chev')}</a>`;}
 
 const SLUG_SVG=(fill='#F4C21B',cls='')=>`<svg class="${cls}" viewBox="0 0 120 70" aria-hidden="true"><path d="M4 62C4 56 14 54 28 52C44 50 52 36 68 31C86 26 102 32 107 45C111 55 106 62 96 62Z" fill="${fill}"/><path d="M90 31 93 9M98 33 110 14" stroke="${fill}" stroke-width="4.5" stroke-linecap="round"/><circle cx="93" cy="8" r="5" fill="${fill}"/><circle cx="110.5" cy="13" r="5" fill="${fill}"/><path d="M38 50C50 46 58 38 70 35" stroke="#fff" stroke-opacity=".5" stroke-width="3.5" stroke-linecap="round" fill="none"/></svg>`;
 V.home=()=>{
  const done=PATHS.filter(p=>S.paths[p.id]?.done).length;
  return `<div class="wrap"><section class="hero">
-  <h1>Practice the money decisions of college before they cost you.</h1>
+  <h1>${t('h1')}</h1>
   <div>
-   <p class="lead">Your aid offer, first credit card, first lease, first paycheck. Work through each one with real 2026 numbers and leave with a plan for this week.</p>
-   <div class="btnrow"><a class="btn slug" href="#checkup">Find where to start</a><a class="btn line" href="#play">Play the simulators</a></div>
-   <p class="who">${done?`You've finished <b>${done} of ${PATHS.length}</b> decisions. <a href="#plan">Open your plan</a>`:'Free for every student. No account needed.'}</p>
+   <p class="lead">${t('lead')}</p>
+   <div class="btnrow"><a class="btn slug" href="#checkup">${t('cta_start')}</a><a class="btn line" href="#play">${t('cta_play')}</a></div>
+   <p class="who">${done?t('done_n',done,PATHS.length):t('free')}</p>
   </div>
  </section>
- <section class="trail" aria-label="Quarter budget demo">
+ <section class="trail" aria-label="${t('trail_h')}">
   <div class="trail-top">
-   <div><h2>Your aid lands once a quarter. Will it last until finals?</h2>
-    <p class="given"><b>$1,800</b> aid refund plus <b>$400</b> in checking, for 11 weeks including finals.</p></div>
-   <div><label for="demo-spend"><span>You spend per week</span><output id="demo-out">$240</output></label>
+   <div><h2>${t('trail_h')}</h2>
+    <p class="given">${t('trail_given')}</p></div>
+   <div><label for="demo-spend"><span>${t('spend_wk')}</span><output id="demo-out">$240</output></label>
     <input type="range" id="demo-spend" min="120" max="360" step="10" value="240"></div>
   </div>
   <svg class="path" id="demo-path" viewBox="0 0 1100 150" role="img" aria-labelledby="demo-res"></svg>
   <div class="result" aria-live="polite"><b id="demo-res"></b><span id="demo-sub"></span></div>
  </section>
- <p class="small muted" style="margin:0 4px 0">Try it with your own numbers in the <a href="#budget">quarter budget calculator</a>.</p>
+ <p class="small muted" style="margin:0 4px 0">${t('trail_try')}</p>
  </div>
 
  <section class="sec"><div class="wrap">
-  <div class="sechead"><div><h2>Start with the decision in front of you</h2><p>Six money moments almost every UCSC student hits. Each takes 5 to 8 minutes: guess first, learn what matters, run your own numbers, decide on a real Santa Cruz scenario, and leave with next steps.</p></div><a class="btn line" href="#checkup">Take the 2-minute checkup</a></div>
+  <div class="sechead"><div><h2>${t('dec_h')}</h2><p>${t('dec_p')}</p></div><a class="btn line" href="#checkup">${t('checkup2')}</a></div>
   <div class="index">${PATHS.map(rowHTML).join('')}</div>
  </div></section>
 
  <section class="band"><div class="wrap">
-  <div class="sechead"><div><h2>Then live with your choices for years</h2><p>Two simulators set in Santa Cruz. Mistakes cost fake money, and each money lesson appears the moment it happens to you.</p></div></div>
+  <div class="sechead"><div><h2>${t('band_h')}</h2><p>${t('band_p')}</p></div></div>
   ${gamesHTML()}
  </div></section>
 
  <section class="sec"><div class="wrap proof">
-  <aside><h2>Built so a campus can see it working</h2><p>Slugonomics is free and needs no account, so anyone can open it and check every claim on this page.</p></aside>
-  <dl>
-   <div><dt>Learning you can measure</dt><dd>Players answer the same six questions before their first run and after they finish. Results show what changed for each question, plus a short survey.</dd></div>
-   <div><dt>Real 2026 numbers</dt><dd>The 6.52% federal loan rate, California's $16.90 minimum wage, current UCSC tuition, housing and UC SHIP costs, and CalFresh income limits.</dd></div>
-   <div><dt>Local by design</dt><dd>Quarters instead of semesters, Santa Cruz rent, and the campus offices that actually help: Financial Aid, SlugCents, Basic Needs and Slug Support.</dd></div>
-   <div><dt>Decisions, not a library</dt><dd>Students start from the moment they're in, like an aid offer, a lease or a card offer, and leave with steps for this week.</dd></div>
-   <div><dt>Private by default</dt><dd>No sign-up. Progress, plans and real budgets stay in the student's own browser.</dd></div>
-  </dl>
+  <aside><h2>${t('proof_h')}</h2><p>${t('proof_p')}</p></aside>
+  <dl>${[1,2,3,4,5].map(i=>`<div><dt>${t('p'+i+'t')}</dt><dd>${t('p'+i+'d')}</dd></div>`).join('')}</dl>
  </div></section>
 
  <section class="sec" style="padding-top:0;border-top:0"><div class="wrap">
   <div class="founder"><div class="mark">${SLUG_SVG()}</div>
-   <div><h3>Made by Sungjun Lee</h3><p>A UC Santa Cruz Business Economics student who has worked as a financial accounting analyst since 2023. Slugonomics is shaped by interviews with UCSC students about the money decisions they actually face.</p></div>
-   <a class="btn" href="https://www.linkedin.com/in/sungjun-lee-572283340" target="_blank" rel="noopener">Contact Sungjun</a></div>
+   <div><h3>${t('founder_h')}</h3><p>${t('founder_p')}</p></div>
+   <a class="btn" href="https://www.linkedin.com/in/sungjun-lee-572283340" target="_blank" rel="noopener">${t('contact')}</a></div>
  </div></section>`;
 };
 function bindHome(){
  const r=$('#demo-spend');if(!r)return;
  const svg=$('#demo-path'),N=11,narrow=svg.getBoundingClientRect().width<640,VW=narrow?560:1100,X0=24,X1=VW-24,Y=74;svg.setAttribute('viewBox',`0 0 ${VW} 150`);
- const pts=[];for(let i=0;i<=220;i++){const t=i/220;pts.push([X0+t*(X1-X0),Y+(narrow?10:15)*Math.sin(t*Math.PI*3.2+.4)-(narrow?3:6)*Math.sin(t*Math.PI*9)]);}
+ const pts=[];for(let i=0;i<=220;i++){const tt=i/220;pts.push([X0+tt*(X1-X0),Y+(narrow?10:15)*Math.sin(tt*Math.PI*3.2+.4)-(narrow?3:6)*Math.sin(tt*Math.PI*9)]);}
  const d='M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L');
- const at=t=>pts[Math.round(t*220)];
+ const at=tt=>pts[Math.round(tt*220)];
  let ticks='',labels='';
  for(let i=1;i<=N;i++){const p=at(i/N);ticks+=`<circle class="tick" data-w="${i}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${narrow?5:7}"/>`;
-  const m=at((i-.5)/N);labels+=`<text class="wk${i===N?' fin':''}" x="${m[0].toFixed(1)}" y="138" text-anchor="middle">${i===N?'Finals':(narrow?i:'Wk '+i)}</text>`;}
+  const m=at((i-.5)/N);labels+=`<text class="wk${i===N?' fin':''}" x="${m[0].toFixed(1)}" y="138" text-anchor="middle">${i===N?t('finals'):(narrow?i:t('wk',i))}</text>`;}
  svg.innerHTML=`<path class="dry" d="${d}"/><path class="wet" id="wet" d="${d}" pathLength="1000" stroke-dasharray="1000"/><path class="sheen" id="sheen" d="${d}" pathLength="1000" stroke-dasharray="1000" transform="translate(0 -3)"/>${ticks}${labels}<g id="slug"><g transform="${narrow?'translate(-63 -35) scale(.6)':'translate(-84 -46) scale(.8)'}">${SLUG_SVG('#F4C21B')}</g></g>`;
- svg.querySelector('#slug svg').setAttribute('width','120');svg.querySelector('#slug svg').setAttribute('height','70');
- svg.querySelector('#slug svg').innerHTML=svg.querySelector('#slug svg').innerHTML.replace('<path d="M4','<path stroke="#B98C00" stroke-width="2.5" d="M4');
+ const sv=svg.querySelector('#slug svg');sv.setAttribute('width','120');sv.setAttribute('height','70');sv.innerHTML=sv.innerHTML.replace('<path d="M4','<path stroke="#B98C00" stroke-width="2.5" d="M4');
  const upd=()=>{const w=+r.value,total=2200,lasts=total/w,f=Math.min(lasts/N,1);
   $('#demo-out').textContent=money(w);
   $('#wet').style.strokeDashoffset=1000*(1-f);$('#sheen').style.strokeDashoffset=1000*(1-f*.97);
   const p=at(f);$('#slug').style.transform=`translate(${p[0]}px,${p[1]}px)`;
   svg.querySelectorAll('.tick').forEach(c=>c.classList.toggle('on',+c.dataset.w<=lasts));
   const res=$('#demo-res'),sub=$('#demo-sub');
-  if(lasts>=N){res.textContent=`You reach finals with ${money(total-w*N)} left.`;res.classList.remove('short');sub.textContent=`Spread evenly, it covers ${money(total/N)} a week.`;}
-  else{res.textContent=`Your money runs out in week ${Math.floor(lasts)+1}.`;res.classList.add('short');sub.textContent=`To reach finals, keep spending to ${money(total/N)} a week.`;}};
+  if(lasts>=N){res.textContent=t('res_ok',money(total-w*N));res.classList.remove('short');sub.textContent=t('res_ok2',money(total/N));}
+  else{res.textContent=t('res_short',Math.floor(lasts)+1);res.classList.add('short');sub.textContent=t('res_short2',money(total/N));}};
  r.addEventListener('input',upd);upd();
 }
 
-V.paths=()=>`<div class="wrap page"><div class="pagehead"><h1>Decisions</h1><p>Six money moments almost every UCSC student hits. Each one ends with steps you can take this week.</p></div>
+V.paths=()=>`<div class="wrap page"><div class="pagehead"><h1>${t('nav_paths')}</h1><p>${t('paths_p')}</p></div>
  <div class="index">${PATHS.map(rowHTML).join('')}</div>
- <div class="next"><p><b>Not sure where to start?</b> Five quick questions will point you to the one that matters most right now.</p><a class="btn" href="#checkup">Take the checkup</a></div></div>`;
+ <div class="next"><p>${t('paths_next')}</p><a class="btn" href="#checkup">${t('take_checkup')}</a></div></div>`;
 
 /* ----- checkup ----- */
 const CHECK=[
- {q:'Where do you live this year?',o:[['On campus','quarter'],['Off campus','lease'],['At home','habit'],['Moving off campus soon','lease']]},
- {q:'Are there student loans in your aid offer?',o:[['Yes, and I understand them','quarter'],['Yes, and I\'m not sure what I accepted','aid'],['No','credit'],['I haven\'t looked at my offer','aid']]},
- {q:'Do you have a credit card?',o:[['Yes, and I pay it in full','habit'],['Yes, and I carry a balance','credit'],['No, but I want one','credit'],['No, and I\'m not interested','quarter']]},
- {q:'Do you have a job?',o:[['Yes, on campus','paycheck'],['Yes, off campus','paycheck'],['I\'m looking for one','paycheck'],['No','quarter']]},
- {q:'Last quarter, did you run low on money before finals?',o:[['Never','habit'],['Once or twice','quarter'],['Most quarters','quarter'],['I don\'t keep track','quarter']]},
+ {q:['Where do you live this year?','¿Dónde vives este año?','올해 어디에 살아요?','你今年住在哪里？'],o:[[['On campus','En el campus','캠퍼스 안','校内'],'quarter'],[['Off campus','Fuera del campus','캠퍼스 밖','校外'],'lease'],[['At home','Con mi familia','본가','家里'],'habit'],[['Moving off campus soon','Pronto me mudo fuera del campus','곧 캠퍼스 밖으로 이사해요','快要搬出校园了'],'lease']]},
+ {q:['Are there student loans in your aid offer?','¿Tu oferta de ayuda incluye préstamos estudiantiles?','학자금 지원 제안에 학자금 대출이 있나요?','你的助学金方案里有学生贷款吗？'],o:[[['Yes, and I understand them','Sí, y los entiendo','네, 내용을 이해하고 있어요','有，我了解它们'],'quarter'],[['Yes, and I\'m not sure what I accepted','Sí, y no estoy seguro de qué acepté','네, 그런데 뭘 수락했는지 잘 모르겠어요','有，但我不确定自己接受了什么'],'aid'],[['No','No','아니요','没有'],'credit'],[['I haven\'t looked at my offer','No he revisado mi oferta','아직 제안서를 안 봤어요','我还没看过我的方案'],'aid']]},
+ {q:['Do you have a credit card?','¿Tienes tarjeta de crédito?','신용카드가 있나요?','你有信用卡吗？'],o:[[['Yes, and I pay it in full','Sí, y la pago completa','네, 매달 전액 갚아요','有，每月全额还清'],'habit'],[['Yes, and I carry a balance','Sí, y tengo saldo pendiente','네, 잔액이 남아 있어요','有，还有未还余额'],'credit'],[['No, but I want one','No, pero quiero una','아니요, 하나 만들고 싶어요','没有，但想办一张'],'credit'],[['No, and I\'m not interested','No, y no me interesa','아니요, 관심 없어요','没有，也不感兴趣'],'quarter']]},
+ {q:['Do you have a job?','¿Tienes trabajo?','일을 하고 있나요?','你有工作吗？'],o:[[['Yes, on campus','Sí, en el campus','네, 캠퍼스 안에서','有，在校内'],'paycheck'],[['Yes, off campus','Sí, fuera del campus','네, 캠퍼스 밖에서','有，在校外'],'paycheck'],[['I\'m looking for one','Estoy buscando','구하는 중이에요','正在找'],'paycheck'],[['No','No','아니요','没有'],'quarter']]},
+ {q:['Last quarter, did you run low on money before finals?','El trimestre pasado, ¿te quedaste corto de dinero antes de los finales?','지난 쿼터에 기말고사 전에 돈이 부족했나요?','上个学季，期末前你的钱紧张过吗？'],o:[[['Never','Nunca','전혀요','从来没有'],'habit'],[['Once or twice','Una o dos veces','한두 번','一两次'],'quarter'],[['Most quarters','Casi todos los trimestres','거의 매 쿼터','大多数学季都会'],'quarter'],[['I don\'t keep track','No llevo la cuenta','신경 안 써 봤어요','我没留意过'],'quarter']]},
 ];
 let ck={i:0,a:[]};
 V.checkup=()=>{
@@ -861,14 +1149,14 @@ V.checkup=()=>{
   const ranked=Object.entries(tally).sort((a,b)=>b[1]-a[1]).map(x=>x[0]);
   S.checkup=ranked;save();
   const top=PATH[ranked[0]];
-  return `<div class="wrap page ck"><div class="pagehead" style="margin-bottom:24px"><span class="label">Your checkup result</span><h1>Start with: ${top.title}</h1><p>Based on your answers, this is the decision most likely to save you money or stress this quarter.</p></div>
-  <div class="btnrow"><a class="btn slug" href="#${top.id}">Start this decision</a><button class="btn line" id="ck-redo">Retake the checkup</button></div>
-  ${ranked.length>1?`<h3 style="margin:44px 0 12px">Also worth doing</h3><div class="index">${ranked.slice(1,4).map(id=>rowHTML(PATH[id])).join('')}</div>`:''}</div>`;
+  return `<div class="wrap page ck"><div class="pagehead" style="margin-bottom:24px"><span class="label">${t('ck_res')}</span><h1>${t('ck_start',pathTitle(top.id))}</h1><p>${t('ck_why')}</p></div>
+  <div class="btnrow"><a class="btn slug" href="#${top.id}">${t('ck_go')}</a><button class="btn line" id="ck-redo">${t('ck_redo')}</button></div>
+  ${ranked.length>1?`<h3 style="margin:44px 0 12px">${t('ck_also')}</h3><div class="index">${ranked.slice(1,4).map(id=>rowHTML(PATH[id])).join('')}</div>`:''}</div>`;
  }
  const c=CHECK[ck.i];
- return `<div class="wrap page ck"><span class="label">Question ${ck.i+1} of ${CHECK.length}</span><div class="meter"><div style="width:${ck.i/CHECK.length*100}%"></div></div>
- <h2 style="margin-bottom:20px">${c.q}</h2><div class="opts">${c.o.map((o,j)=>`<button class="opt" data-ck="${j}"><i>${L[j]}</i><span>${o[0]}</span></button>`).join('')}</div>
- <p class="note" style="margin-top:18px">No dollar amounts and no names. Your answers stay in this browser.</p></div>`;
+ return `<div class="wrap page ck"><span class="label">${t('ck_q',ck.i+1,CHECK.length)}</span><div class="meter"><div style="width:${ck.i/CHECK.length*100}%"></div></div>
+ <h2 style="margin-bottom:20px">${row4(c.q)}</h2><div class="opts">${c.o.map((o,j)=>`<button class="opt" data-ck="${j}"><i>${L[j]}</i><span>${row4(o[0])}</span></button>`).join('')}</div>
+ <p class="note" style="margin-top:18px">${t('ck_note')}</p></div>`;
 };
 function bindCheckup(){
  $$('[data-ck]').forEach(b=>b.onclick=()=>{ck.a.push(CHECK[ck.i].o[+b.dataset.ck][1]);ck.i++;render();});
@@ -904,8 +1192,8 @@ function pathView(p){
  }
  const canNext=step===0?(st.gut!=null&&!!st.c0):step===3?st.pick!=null:true;
  const reach=st.done?4:(st.step||0);
- return `<div class="wrap page"><a class="back" href="#paths">${icon('left')}All decisions</a>
- <div class="dtitle"><span class="badge">${icon(PICON[p.id])}</span><div><h1>${p.title}</h1><p class="muted" style="margin-top:4px">${p.q} About ${p.time}.</p></div></div>
+ return `<div class="wrap page"><a class="back" href="#paths">${icon('left')}${t('all_decisions')}</a>${LANG!=='en'?`<p class="enonly">${t('en_only')}</p>`:''}
+ <div class="dtitle"><span class="badge">${icon(PICON[p.id])}</span><div><h1>${pathTitle(p.id)}</h1><p class="muted" style="margin-top:4px">${pathQ(p.id)} ${t('about_time',pathTime(p))}</p></div></div>
  <div class="player"><nav class="stepper" aria-label="Steps">${STEPS.map((s,i)=>`<button data-go="${i}" class="${i===step?'on':i<reach||st.done?'done':''}" ${i>reach?'disabled':''} ${i===step?'aria-current="step"':''}><i>${i+1}</i>${s}</button>`).join('')}</nav>
  <div class="stage">${body}
  <div class="btnrow" style="margin-top:8px">${step>0?'<button class="btn line" id="pv-back">Back</button>':''}
@@ -935,10 +1223,10 @@ function bindPath(p){
 const TOOL_IDS=Object.keys(TOOLS);
 function toolsView(active){
  const id=active||'budget',T=TOOLS[id],rel=PATHS.find(p=>p.tool===id);
- return `<div class="wrap page"><div class="pagehead"><h1>Calculators</h1><p>Each one answers a question students actually ask. All of them use 2026 federal and California rules.</p></div>
- <div class="toolwrap"><nav class="toolnav" aria-label="Calculators">${TOOL_IDS.map(k=>`<a href="#${k}" class="${k===id?'on':''}" ${k===id?'aria-current="page"':''}>${icon(TICON[k])}${TOOLS[k].name}</a>`).join('')}</nav>
+ return `<div class="wrap page"><div class="pagehead"><h1>${t('nav_tools')}</h1><p>${t('tools_p')}</p></div>
+ <div class="toolwrap"><nav class="toolnav" aria-label="${t('nav_tools')}">${TOOL_IDS.map(k=>`<a href="#${k}" class="${k===id?'on':''}" ${k===id?'aria-current="page"':''}>${icon(TICON[k])}${TOOLS[k].name}</a>`).join('')}</nav>
  <div><div class="toolhead"><h2>${T.name}</h2><p>${T.blurb}</p></div><div id="toolmount"></div>
- ${rel?`<div class="next"><p><b>Turn these numbers into a decision.</b> ${rel.title} takes about ${rel.time} and ends with a plan.</p><a class="btn" href="#${rel.id}">Start the decision</a></div>`:''}</div></div></div>`;
+ ${rel?`<div class="next"><p>${t('tools_next',pathTitle(rel.id),pathTime(rel))}</p><a class="btn" href="#${rel.id}">${t('start_dec')}</a></div>`:''}</div></div></div>`;
 }
 
 /* ----- simulators ----- */
@@ -946,190 +1234,255 @@ const shot=(f,alt)=>`<div class="phone"><img src="assets/screens/${f}.webp" alt=
 function gamesHTML(){return `<div class="games">
  <article class="game">
   <div class="phones">${shot('life-money','Slug Life money screen: net worth, debts, and a prompt to plug in your real budget')}${shot('life-event','Slug Life: a text message says your bank account is locked and asks you to log in through a link')}</div>
-  <div><p class="kind">Life simulator</p><h3>Slug Life</h3>
-   <p class="what">Start at 18 in Santa Cruz County and play a whole life. School, jobs, rent, credit and scams all compound, one year at a time.</p>
-   <dl><dt>Start</dt><dd>At 18, as a random character or with your real numbers</dd><dt>Covers</dt><dd>UCSC or Cabrillo, about 30 local careers, debt and investing</dd><dt>Teaches</dt><dd>24 money lessons that unlock when they happen to you</dd></dl>
-   <a class="btn slug" href="slug-life.html">Play Slug Life</a></div>
+  <div><p class="kind">${t('g1_kind')}</p><h3>Slug Life</h3>
+   <p class="what">${t('g1_what')}</p>
+   <dl><dt>${t('g_start')}</dt><dd>${t('g1_start')}</dd><dt>${t('g_covers')}</dt><dd>${t('g1_covers')}</dd><dt>${t('g_teaches')}</dt><dd>${t('g1_teaches')}</dd></dl>
+   <a class="btn slug" href="slug-life.html" hreflang="en">${t('g1_play')}</a></div>
  </article>
  <article class="game">
   <div class="phones">${shot('college-diary','Slug College diary: July of year 1, card paid in full, a summer job, spring grades')}${shot('college-event','Slug College money lesson card explaining gross versus net pay')}</div>
-  <div><p class="kind">The school-focused version of Slug Life</p><h3>Slug College</h3>
-   <p class="what">Four years at UC Santa Cruz, one month per turn. Aid arrives each quarter, rent arrives every month, and your grades decide whether you keep your aid.</p>
-   <dl><dt>Length</dt><dd>48 months, from move-in day to your loan grace period</dd><dt>Covers</dt><dd>GPA and aid rules, CalFresh, credit cards, leases and internships</dd><dt>Measures</dt><dd>The same six questions before and after, with results by question</dd></dl>
-   <a class="btn slug" href="slug-college.html">Play Slug College</a></div>
+  <div><p class="kind">${t('g2_kind')}</p><h3>Slug College</h3>
+   <p class="what">${t('g2_what')}</p>
+   <dl><dt>${t('g_length')}</dt><dd>${t('g2_length')}</dd><dt>${t('g_covers')}</dt><dd>${t('g2_covers')}</dd><dt>${t('g_measures')}</dt><dd>${t('g2_measures')}</dd></dl>
+   <a class="btn slug" href="slug-college.html" hreflang="en">${t('g2_play')}</a></div>
  </article>
 </div>
-<div class="workshop"><p><b>Running a workshop?</b> A Day in the Life of a Banana Slug has a One Week mode that fits a 15-minute class or club session.</p><a class="btn line" href="college-sim.html">Open the workshop simulator</a></div>`;}
+<div class="workshop"><p>${t('workshop')}${LANG!=='en'?` <span class="enonly">${t('games_en')}</span>`:''}</p><a class="btn line" href="college-sim.html" hreflang="en">${t('workshop_btn')}</a></div>`;}
 V.play=()=>`<section class="band" style="padding-top:72px"><div class="wrap">
- <div class="sechead"><div><h1 style="color:#fff">Simulators</h1><p>Reading about money only gets you so far. Here you make the choices, live with them and start over.</p></div></div>
+ <div class="sechead"><div><h1 style="color:#fff">${t('nav_play')}</h1><p>${t('play_p')}</p></div></div>
  ${gamesHTML()}</div></section>`;
 
-/* ----- campus help: situation-first, English / Spanish -----
+/* ----- campus help: situation-first -----
    Every contact below was checked against the office's official page on CHECKED.
-   Office names stay in English in both languages because that's what students will see on signs and websites. */
+   Office names stay in English in every language because that's what students see on signs and websites. */
 const CHECKED='2026-11-19';
-let HL=store.get('lang','en');if(HL!=='es')HL='en';
 let helpSel=null;
 const tel=(n,d)=>`<a class="tel" href="tel:+1${n}">${d}</a>`;
-const ext=(u,l)=>`<a href="${u}" target="_blank" rel="noopener">${l}</a>`;
-const T2=o=>typeof o==='string'?o:(o[HL]??o.en);
 
 const HC={
- slugcrisis:{n:'Slug Support crisis line',d:{en:'Urgent food or housing crisis. They can arrange emergency meal help, grocery cards and emergency housing.',es:'Crisis urgente de comida o vivienda. Pueden ayudarte con comidas de emergencia, tarjetas para el supermercado y vivienda de emergencia.'},
-  ph:['8314597003','(831) 459-7003'],when:{en:'Weekdays during business hours. Not for life-threatening emergencies.',es:'Días hábiles en horario de oficina. No es para emergencias que ponen en riesgo la vida.'},u:'https://deanofstudents.ucsc.edu/slug-support/program/contact.html'},
- dos:{n:'Dean of Students Office (Slug Support)',d:{en:'Case managers who help you make a plan, plus a need-based emergency fund for students facing an emergency gap in basic needs.',es:'Gestores de casos que te ayudan a armar un plan, y un fondo de emergencia según necesidad para estudiantes con una falta urgente de lo básico.'},
-  ph:['8314594446','(831) 459-4446'],em:'deanofstudents@ucsc.edu',where:'Hahn Student Services, Suite 245',when:{en:'Mon–Fri, 9 a.m.–5 p.m.',es:'Lun–vie, 9 a.m.–5 p.m.'},u:'https://deanofstudents.ucsc.edu/slug-support/program/contact.html'},
- finaid:{n:'Financial Aid & Scholarship Office',d:{en:'Your aid offer, disbursement dates, appeals, holds and loans. If you\'ve used all your aid options, they may help with an immediate need.',es:'Tu oferta de ayuda, fechas de pago, apelaciones, retenciones y préstamos. Si ya usaste todas tus opciones de ayuda, quizás puedan apoyarte con una necesidad inmediata.'},
-  ph:['8314592963','(831) 459-2963'],where:'205 Hahn Student Services',when:{en:'Virtual advising Mon–Fri 9 a.m.–noon. In person Mon–Fri 1–5 p.m.',es:'Asesoría virtual lun–vie 9 a.m.–12 p.m. En persona lun–vie 1–5 p.m.'},u:'https://financialaid.ucsc.edu'},
- slugcents:{n:'SlugCents',d:{en:'Free peer money mentors and a certified personal finance counselor. Help with UCSC bills, enrollment holds, budgets, credit and aid questions.',es:'Mentores financieros estudiantiles gratuitos y un consejero certificado en finanzas personales. Ayuda con cobros de UCSC, retenciones de inscripción, presupuestos, crédito y preguntas de ayuda financiera.'},
-  ph:['8315020781','(831) 502-0781'],em:'slugcents@ucsc.edu',where:'Hahn Student Services, Room 203 (next to Financial Aid)',when:{en:'Drop-in Mon–Fri, 1–4 p.m. Hours can change.',es:'Sin cita lun–vie, 1–4 p.m. El horario puede cambiar.'},u:'https://slugcents.ucsc.edu/meet-with-us/'},
- uss:{n:'Undocumented Student Services (EOP)',d:{en:'Help with the California Dream Act Application, scholarships and emergency support for undocumented and DACAmented students.',es:'Ayuda con la Solicitud del California Dream Act, becas y apoyo de emergencia para estudiantes indocumentados y con DACA.'},
+ slugcrisis:{n:'Slug Support crisis line',
+  d:{en:'Urgent food or housing crisis. They can arrange emergency meal help, grocery cards and emergency housing.',es:'Crisis urgente de comida o vivienda. Pueden ayudarte con comidas de emergencia, tarjetas para el supermercado y vivienda de emergencia.',ko:'긴급한 식량·주거 위기. 비상 식사 지원, 식료품 카드, 긴급 숙소를 마련해 줄 수 있어요.',zh:'紧急的吃饭或住房危机。可以帮你安排紧急餐食、超市购物卡和紧急住处。'},
+  ph:['8314597003','(831) 459-7003'],
+  when:{en:'Weekdays during business hours. Not for life-threatening emergencies.',es:'Días hábiles en horario de oficina. No es para emergencias que ponen en riesgo la vida.',ko:'평일 업무 시간. 생명이 위급한 응급 상황용은 아니에요.',zh:'工作日办公时间。不用于危及生命的紧急情况。'},
+  u:'https://deanofstudents.ucsc.edu/slug-support/program/contact.html'},
+ dos:{n:'Dean of Students Office (Slug Support)',
+  d:{en:'Case managers who help you make a plan, plus a need-based emergency fund for students facing an emergency gap in basic needs.',es:'Gestores de casos que te ayudan a armar un plan, y un fondo de emergencia según necesidad para estudiantes con una falta urgente de lo básico.',ko:'함께 계획을 세워 주는 케이스 매니저와, 기본 생활비가 급히 부족한 학생을 위한 필요 기반 긴급 기금.',zh:'个案经理帮你制定计划，另有按需发放的紧急基金，帮助基本生活出现紧急缺口的学生。'},
+  ph:['8314594446','(831) 459-4446'],em:'deanofstudents@ucsc.edu',
+  where:{en:'Hahn Student Services, Suite 245',es:'Hahn Student Services, oficina 245',ko:'Hahn Student Services 245호',zh:'Hahn Student Services 245 室'},
+  when:{en:'Mon–Fri, 9 a.m.–5 p.m.',es:'Lun–vie, 9 a.m.–5 p.m.',ko:'월–금, 오전 9시–오후 5시',zh:'周一至周五，上午 9 点至下午 5 点'},
+  u:'https://deanofstudents.ucsc.edu/slug-support/program/contact.html'},
+ finaid:{n:'Financial Aid & Scholarship Office',
+  d:{en:'Your aid offer, disbursement dates, appeals, holds and loans. If you\'ve used all your aid options, they may help with an immediate need.',es:'Tu oferta de ayuda, fechas de pago, apelaciones, retenciones y préstamos. Si ya usaste todas tus opciones de ayuda, quizás puedan apoyarte con una necesidad inmediata.',ko:'학자금 제안, 지급일, 이의 신청, 홀드, 대출 관련. 학자금 옵션을 모두 사용했다면 급한 필요를 도와줄 수도 있어요.',zh:'助学金方案、发放日期、申诉、账户冻结和贷款。如果你已用尽所有助学金选项，他们可能可以帮你解决燃眉之急。'},
+  ph:['8314592963','(831) 459-2963'],
+  where:{en:'205 Hahn Student Services',es:'205 Hahn Student Services',ko:'Hahn Student Services 205호',zh:'Hahn Student Services 205 室'},
+  when:{en:'Virtual advising Mon–Fri 9 a.m.–noon. In person Mon–Fri 1–5 p.m.',es:'Asesoría virtual lun–vie 9 a.m.–12 p.m. En persona lun–vie 1–5 p.m.',ko:'온라인 상담 월–금 오전 9시–정오. 대면 상담 월–금 오후 1–5시.',zh:'线上咨询周一至周五上午 9 点至中午；现场咨询周一至周五下午 1–5 点。'},
+  u:'https://financialaid.ucsc.edu'},
+ slugcents:{n:'SlugCents',
+  d:{en:'Free peer money mentors and a certified personal finance counselor. Help with UCSC bills, enrollment holds, budgets, credit and aid questions.',es:'Mentores financieros estudiantiles gratuitos y un consejero certificado en finanzas personales. Ayuda con cobros de UCSC, retenciones de inscripción, presupuestos, crédito y preguntas de ayuda financiera.',ko:'무료 또래 금융 멘토와 공인 개인 재무 상담사. UCSC 청구서, 수강 등록 홀드, 예산, 신용, 학자금 질문을 도와줘요.',zh:'免费的学生理财导师和持证个人理财顾问，帮你处理 UCSC 账单、选课冻结、预算、信用和助学金问题。'},
+  ph:['8315020781','(831) 502-0781'],em:'slugcents@ucsc.edu',
+  where:{en:'Hahn Student Services, Room 203 (next to Financial Aid)',es:'Hahn Student Services, salón 203 (junto a Financial Aid)',ko:'Hahn Student Services 203호 (Financial Aid 옆)',zh:'Hahn Student Services 203 室（Financial Aid 旁边）'},
+  when:{en:'Drop-in Mon–Fri, 1–4 p.m. Hours can change.',es:'Sin cita lun–vie, 1–4 p.m. El horario puede cambiar.',ko:'예약 없이 방문 월–금 오후 1–4시. 시간은 바뀔 수 있어요.',zh:'无需预约，周一至周五下午 1–4 点。时间可能变动。'},
+  u:'https://slugcents.ucsc.edu/meet-with-us/'},
+ uss:{n:'Undocumented Student Services (EOP)',
+  d:{en:'Help with the California Dream Act Application, scholarships and emergency support for undocumented and DACAmented students.',es:'Ayuda con la Solicitud del California Dream Act, becas y apoyo de emergencia para estudiantes indocumentados y con DACA.',ko:'서류 미비 학생과 DACA 학생을 위한 California Dream Act 신청, 장학금, 긴급 지원 도움.',zh:'为无证学生和 DACA 学生提供 California Dream Act 申请、奖学金和紧急援助方面的帮助。'},
   ph:['8314594055','(831) 459-4055'],u:'https://eop.ucsc.edu/undocumented_student_services/'},
- cowell:{n:'Cowell Coffee Shop pantry',d:{en:'Free groceries. Open to all UCSC students.',es:'Comida gratis. Abierto para todos los estudiantes de UCSC.'},where:{en:'Near the Cowell/Stevenson Dining Hall',es:'Cerca del comedor de Cowell/Stevenson'},when:{en:'Mon–Fri, 10 a.m.–3:30 p.m.',es:'Lun–vie, 10 a.m.–3:30 p.m.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
- rfm:{n:'Redwood Free Market',d:{en:'Free groceries at the Basic Needs Hub.',es:'Comida gratis en el centro de Basic Needs.'},where:{en:'Rachel Carson College Café',es:'Café de Rachel Carson College'},when:{en:'Mon 2–5 p.m. · Tue & Thu 9 a.m.–1 p.m. and 2–5 p.m. · Fri 9 a.m.–noon',es:'Lun 2–5 p.m. · Mar y jue 9 a.m.–1 p.m. y 2–5 p.m. · Vie 9 a.m.–12 p.m.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
- produce:{n:'Produce Pop-Up',d:{en:'Fresh fruit and vegetables at low or no cost.',es:'Frutas y verduras frescas a bajo costo o gratis.'},where:{en:'McHenry Library (Wed) · Science & Engineering Library (Fri)',es:'McHenry Library (miércoles) · Science & Engineering Library (viernes)'},when:{en:'Wed and Fri, 11 a.m.–3 p.m.',es:'Miércoles y viernes, 11 a.m.–3 p.m.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
- swipes:{n:'Swipes for Slugs',d:{en:'Emergency dining hall meal swipes through an online form, up to two times per academic year.',es:'Comidas de emergencia en los comedores mediante un formulario en línea, hasta dos veces por año académico.'},u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
- calfresh:{n:'UCSC CalFresh Outreach',d:{en:'Help applying for CalFresh, California\'s monthly grocery money on an EBT card. Book a session or email them.',es:'Ayuda para solicitar CalFresh, el dinero mensual de California para comida en una tarjeta EBT. Haz una cita o escríbeles.'},em:'calfresh@ucsc.edu',u:'https://basicneeds.ucsc.edu/food-security/calfresh/'},
- tenant:{n:'Tenant Sanctuary',d:{en:'Tenant counselors and a staff attorney who explain your rights: rent increases, repairs, deposits, harassment, evictions and lease terms.',es:'Consejeros para inquilinos y un abogado que explican tus derechos: aumentos de renta, reparaciones, depósitos, acoso, desalojos y contratos.'},
-  ph:['8312000740','(831) 200-0740'],where:{en:'703 Pacific Ave, downtown Santa Cruz. During the school year, also Wednesday mornings on campus at Redwood Free Market or the Cowell Coffee Shop.',es:'703 Pacific Ave, centro de Santa Cruz. Durante el año escolar, también los miércoles por la mañana en el campus, en Redwood Free Market o Cowell Coffee Shop.'},when:{en:'Downtown drop-in Mon & Wed, 9 a.m.–3 p.m. (closed noon–1). Check their calendar before you go.',es:'Sin cita en el centro lun y mié, 9 a.m.–3 p.m. (cerrado de 12 a 1). Revisa su calendario antes de ir.'},u:'https://tenantsanctuary.org'},
- cro:{n:'Community Rentals Office',d:{en:'UCSC\'s off-campus housing office: rental listings, the free Renters Workshop, and advice on leases and landlords.',es:'La oficina de vivienda fuera del campus de UCSC: anuncios de renta, el Renters Workshop gratuito y consejos sobre contratos y caseros.'},
-  ph:['8314594435','(831) 459-4435'],em:'communityrentals@ucsc.edu',where:'Hahn Student Services',when:{en:'Mon–Fri, 10 a.m.–noon and 1–4 p.m. Zoom front desk Mon–Fri, 1–3 p.m.',es:'Lun–vie, 10 a.m.–12 p.m. y 1–4 p.m. Recepción por Zoom lun–vie, 1–3 p.m.'},u:'https://communityrentals.ucsc.edu'},
- caps:{n:'CAPS (Counseling & Psychological Services)',d:{en:'Free, confidential support for UCSC students, 24 hours a day. After hours, weekends and holidays, press 3 to talk to a crisis counselor.',es:'Apoyo gratuito y confidencial para estudiantes de UCSC, las 24 horas. Fuera de horario, fines de semana y días festivos, marca 3 para hablar con un consejero de crisis.'},
-  ph:['8314592628','(831) 459-2628'],where:{en:'Cowell Student Health Center, East Wing, 2nd floor',es:'Cowell Student Health Center, ala este, 2.º piso'},when:{en:'24/7 by phone',es:'24/7 por teléfono'},u:'https://caps.ucsc.edu'},
- its:{n:'UCSC ITS',d:{en:'Forward suspicious emails to phishing@ucsc.edu. If you entered your UCSC password or approved a Duo push you didn\'t start, contact the ITS Support Center right away.',es:'Reenvía los correos sospechosos a phishing@ucsc.edu. Si escribiste tu contraseña de UCSC o aprobaste un aviso de Duo que no iniciaste, contacta de inmediato al ITS Support Center.'},em:'phishing@ucsc.edu',em2:'help@ucsc.edu',u:'https://its.ucsc.edu/security/scams.html'},
- ftc:{n:'ReportFraud.ftc.gov',d:{en:'The federal government\'s place to report scams. If someone is using your identity, go to IdentityTheft.gov for a recovery plan.',es:'El sitio del gobierno federal para denunciar estafas. Si alguien usa tu identidad, entra a IdentityTheft.gov para un plan de recuperación.'},u:'https://reportfraud.ftc.gov'},
- cfpb:{n:'Consumer Financial Protection Bureau',d:{en:'File a complaint about a debt collector, bank or credit card company. Companies have to respond.',es:'Presenta una queja sobre un cobrador de deudas, banco o compañía de tarjetas de crédito. Las compañías tienen que responder.'},u:'https://www.consumerfinance.gov/complaint/'}
+ cowell:{n:'Cowell Coffee Shop pantry',
+  d:{en:'Free groceries. Open to all UCSC students.',es:'Comida gratis. Abierto para todos los estudiantes de UCSC.',ko:'무료 식료품. 모든 UCSC 학생 이용 가능.',zh:'免费食品，所有 UCSC 学生都可以使用。'},
+  where:{en:'Near the Cowell/Stevenson Dining Hall',es:'Cerca del comedor de Cowell/Stevenson',ko:'Cowell/Stevenson 식당 근처',zh:'Cowell/Stevenson 食堂附近'},
+  when:{en:'Mon–Fri, 10 a.m.–3:30 p.m.',es:'Lun–vie, 10 a.m.–3:30 p.m.',ko:'월–금, 오전 10시–오후 3시 30분',zh:'周一至周五，上午 10 点至下午 3:30'},
+  u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ rfm:{n:'Redwood Free Market',
+  d:{en:'Free groceries at the Basic Needs Hub.',es:'Comida gratis en el centro de Basic Needs.',ko:'Basic Needs 허브의 무료 식료품.',zh:'Basic Needs 中心提供的免费食品。'},
+  where:{en:'Rachel Carson College Café',es:'Café de Rachel Carson College',ko:'Rachel Carson College 카페',zh:'Rachel Carson College 咖啡馆'},
+  when:{en:'Mon 2–5 p.m. · Tue & Thu 9 a.m.–1 p.m. and 2–5 p.m. · Fri 9 a.m.–noon',es:'Lun 2–5 p.m. · Mar y jue 9 a.m.–1 p.m. y 2–5 p.m. · Vie 9 a.m.–12 p.m.',ko:'월 오후 2–5시 · 화·목 오전 9시–오후 1시, 오후 2–5시 · 금 오전 9시–정오',zh:'周一下午 2–5 点 · 周二、周四上午 9 点至下午 1 点及下午 2–5 点 · 周五上午 9 点至中午'},
+  u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ produce:{n:'Produce Pop-Up',
+  d:{en:'Fresh fruit and vegetables at low or no cost.',es:'Frutas y verduras frescas a bajo costo o gratis.',ko:'저렴하거나 무료인 신선한 과일과 채소.',zh:'低价或免费的新鲜水果蔬菜。'},
+  where:{en:'McHenry Library (Wed) · Science & Engineering Library (Fri)',es:'McHenry Library (miércoles) · Science & Engineering Library (viernes)',ko:'McHenry Library (수) · Science & Engineering Library (금)',zh:'McHenry Library（周三）· Science & Engineering Library（周五）'},
+  when:{en:'Wed and Fri, 11 a.m.–3 p.m.',es:'Miércoles y viernes, 11 a.m.–3 p.m.',ko:'수·금 오전 11시–오후 3시',zh:'周三、周五上午 11 点至下午 3 点'},
+  u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ swipes:{n:'Swipes for Slugs',
+  d:{en:'Emergency dining hall meal swipes through an online form, up to two times per academic year.',es:'Comidas de emergencia en los comedores mediante un formulario en línea, hasta dos veces por año académico.',ko:'온라인 신청서로 받는 식당 비상 식권. 학년당 최대 2회.',zh:'通过线上表格申请的食堂紧急餐次，每学年最多两次。'},
+  u:'https://basicneeds.ucsc.edu/food-security/on-campus/'},
+ calfresh:{n:'UCSC CalFresh Outreach',
+  d:{en:'Help applying for CalFresh, California\'s monthly grocery money on an EBT card. Book a session or email them.',es:'Ayuda para solicitar CalFresh, el dinero mensual de California para comida en una tarjeta EBT. Haz una cita o escríbeles.',ko:'매달 EBT 카드로 식비를 지원하는 캘리포니아 CalFresh 신청을 도와줘요. 상담을 예약하거나 이메일을 보내세요.',zh:'帮你申请 CalFresh——加州每月通过 EBT 卡发放的食品补助。可以预约咨询或发邮件联系。'},
+  em:'calfresh@ucsc.edu',u:'https://basicneeds.ucsc.edu/food-security/calfresh/'},
+ tenant:{n:'Tenant Sanctuary',
+  d:{en:'Tenant counselors and a staff attorney who explain your rights: rent increases, repairs, deposits, harassment, evictions and lease terms.',es:'Consejeros para inquilinos y un abogado que explican tus derechos: aumentos de renta, reparaciones, depósitos, acoso, desalojos y contratos.',ko:'세입자 상담사와 전속 변호사가 월세 인상, 수리, 보증금, 괴롭힘, 퇴거, 계약 조건에 관한 권리를 설명해 줘요.',zh:'租客顾问和专职律师为你解释权利：涨租、维修、押金、骚扰、驱逐和租约条款。'},
+  ph:['8312000740','(831) 200-0740'],
+  where:{en:'703 Pacific Ave, downtown Santa Cruz. During the school year, also Wednesday mornings on campus at Redwood Free Market or the Cowell Coffee Shop.',es:'703 Pacific Ave, centro de Santa Cruz. Durante el año escolar, también los miércoles por la mañana en el campus, en Redwood Free Market o Cowell Coffee Shop.',ko:'703 Pacific Ave, 산타크루즈 다운타운. 학기 중에는 수요일 오전에 캠퍼스 Redwood Free Market이나 Cowell Coffee Shop에서도 상담해요.',zh:'圣克鲁兹市中心 703 Pacific Ave。学期期间，周三上午也会在校内 Redwood Free Market 或 Cowell Coffee Shop 提供咨询。'},
+  when:{en:'Downtown drop-in Mon & Wed, 9 a.m.–3 p.m. (closed noon–1). Check their calendar before you go.',es:'Sin cita en el centro lun y mié, 9 a.m.–3 p.m. (cerrado de 12 a 1). Revisa su calendario antes de ir.',ko:'다운타운 예약 없이 방문 월·수 오전 9시–오후 3시 (정오–1시 점심시간). 방문 전 일정을 확인하세요.',zh:'市中心办公室周一、周三上午 9 点至下午 3 点无需预约（中午 12 点至 1 点休息）。前往前请先查看他们的日程。'},
+  u:'https://tenantsanctuary.org'},
+ cro:{n:'Community Rentals Office',
+  d:{en:'UCSC\'s off-campus housing office: rental listings, the free Renters Workshop, and advice on leases and landlords.',es:'La oficina de vivienda fuera del campus de UCSC: anuncios de renta, el Renters Workshop gratuito y consejos sobre contratos y caseros.',ko:'UCSC 캠퍼스 밖 주거 담당 부서: 임대 매물, 무료 Renters Workshop, 계약과 집주인 관련 조언.',zh:'UCSC 的校外住房办公室：租房信息、免费的 Renters Workshop，以及关于租约和房东的建议。'},
+  ph:['8314594435','(831) 459-4435'],em:'communityrentals@ucsc.edu',where:'Hahn Student Services',
+  when:{en:'Mon–Fri, 10 a.m.–noon and 1–4 p.m. Zoom front desk Mon–Fri, 1–3 p.m.',es:'Lun–vie, 10 a.m.–12 p.m. y 1–4 p.m. Recepción por Zoom lun–vie, 1–3 p.m.',ko:'월–금, 오전 10시–정오, 오후 1–4시. Zoom 안내 데스크 월–금 오후 1–3시.',zh:'周一至周五上午 10 点至中午、下午 1–4 点；Zoom 线上前台周一至周五下午 1–3 点。'},
+  u:'https://communityrentals.ucsc.edu'},
+ caps:{n:'CAPS (Counseling & Psychological Services)',
+  d:{en:'Free, confidential support for UCSC students, 24 hours a day. After hours, weekends and holidays, press 3 to talk to a crisis counselor.',es:'Apoyo gratuito y confidencial para estudiantes de UCSC, las 24 horas. Fuera de horario, fines de semana y días festivos, marca 3 para hablar con un consejero de crisis.',ko:'UCSC 학생을 위한 무료·비밀 보장 상담, 24시간. 업무 시간 외, 주말, 공휴일에는 3번을 누르면 위기 상담사와 연결돼요.',zh:'为 UCSC 学生提供免费、保密的心理支持，24 小时服务。非工作时间、周末和节假日，按 3 即可与危机咨询师通话。'},
+  ph:['8314592628','(831) 459-2628'],
+  where:{en:'Cowell Student Health Center, East Wing, 2nd floor',es:'Cowell Student Health Center, ala este, 2.º piso',ko:'Cowell Student Health Center 동관 2층',zh:'Cowell Student Health Center 东翼二楼'},
+  when:{en:'24/7 by phone',es:'24/7 por teléfono',ko:'전화로 24시간 연중무휴',zh:'电话 24 小时全年无休'},
+  u:'https://caps.ucsc.edu'},
+ its:{n:'UCSC ITS',
+  d:{en:'Forward suspicious emails to phishing@ucsc.edu. If you entered your UCSC password or approved a Duo push you didn\'t start, contact the ITS Support Center right away.',es:'Reenvía los correos sospechosos a phishing@ucsc.edu. Si escribiste tu contraseña de UCSC o aprobaste un aviso de Duo que no iniciaste, contacta de inmediato al ITS Support Center.',ko:'의심스러운 이메일은 phishing@ucsc.edu로 전달하세요. UCSC 비밀번호를 입력했거나 내가 시작하지 않은 Duo 알림을 승인했다면 바로 ITS Support Center에 연락하세요.',zh:'把可疑邮件转发到 phishing@ucsc.edu。如果你输入了 UCSC 密码，或批准了不是你发起的 Duo 推送，请立即联系 ITS Support Center。'},
+  em:'phishing@ucsc.edu',em2:'help@ucsc.edu',u:'https://its.ucsc.edu/security/scams.html'},
+ ftc:{n:'ReportFraud.ftc.gov',
+  d:{en:'The federal government\'s place to report scams. If someone is using your identity, go to IdentityTheft.gov for a recovery plan.',es:'El sitio del gobierno federal para denunciar estafas. Si alguien usa tu identidad, entra a IdentityTheft.gov para un plan de recuperación.',ko:'사기를 신고하는 연방 정부 사이트. 누군가 내 신원을 도용하고 있다면 IdentityTheft.gov에서 복구 계획을 받으세요.',zh:'美国联邦政府的诈骗举报网站。如果有人盗用你的身份，请到 IdentityTheft.gov 获取恢复方案。'},
+  u:'https://reportfraud.ftc.gov'},
+ cfpb:{n:'Consumer Financial Protection Bureau',
+  d:{en:'File a complaint about a debt collector, bank or credit card company. Companies have to respond.',es:'Presenta una queja sobre un cobrador de deudas, banco o compañía de tarjetas de crédito. Las compañías tienen que responder.',ko:'추심 업체, 은행, 카드사에 대한 민원을 제기할 수 있어요. 회사는 반드시 답변해야 해요.',zh:'可以投诉债务催收机构、银行或信用卡公司，这些公司必须作出回应。'},
+  u:'https://www.consumerfinance.gov/complaint/'}
 };
 
 const SIT=[
- {id:'food',ic:'cup',t:{en:'I\'m out of food or money for food',es:'Me quedé sin comida o sin dinero para comida'},
+ {id:'food',ic:'cup',t:{en:'I\'m out of food or money for food',es:'Me quedé sin comida o sin dinero para comida',ko:'음식이 떨어졌거나 식비가 없어요',zh:'我没有吃的了，或没钱买吃的'},
   first:['cowell','rfm','slugcrisis'],also:['produce','swipes','calfresh'],
-  bring:{en:['Your student ID number','A free PantrySoft account (make it before your first pantry visit)','A reusable bag'],es:['Tu número de estudiante','Una cuenta gratuita de PantrySoft (créala antes de tu primera visita a la despensa)','Una bolsa reutilizable']},
-  say:{en:'Hi, I\'m a UCSC student and I\'m short on food this week. What can I get today, and what should I sign up for so this doesn\'t happen again?',es:'Hola, soy estudiante de UCSC y esta semana no me alcanza para la comida. ¿Qué puedo recibir hoy y a qué me debo inscribir para que no me vuelva a pasar?'},
-  know:{en:['Pantries are for exactly this. You don\'t have to prove anything beyond being a student.','Grants, scholarships and student loans used for school usually don\'t count as income for CalFresh, and CalFresh doesn\'t reduce your financial aid.','CalFresh has immigration rules. Undocumented students can still use every campus pantry listed here.'],es:['Las despensas existen justo para esto. No tienes que demostrar nada más que ser estudiante.','Las becas, subvenciones y préstamos estudiantiles para la escuela normalmente no cuentan como ingreso para CalFresh, y CalFresh no reduce tu ayuda financiera.','CalFresh tiene reglas migratorias. Los estudiantes indocumentados igual pueden usar todas las despensas del campus de esta lista.']},
-  site:[['#quarter','Make it through the quarter'],['#budget','Quarter budget calculator']]},
- {id:'rent',ic:'house',t:{en:'I can\'t pay rent or might lose my housing',es:'No puedo pagar la renta o podría perder mi vivienda'},
+  bring:{en:['Your student ID number','A free PantrySoft account (make it before your first pantry visit)','A reusable bag'],es:['Tu número de estudiante','Una cuenta gratuita de PantrySoft (créala antes de tu primera visita a la despensa)','Una bolsa reutilizable'],ko:['학생 번호','무료 PantrySoft 계정 (첫 방문 전에 만들어 두세요)','장바구니'],zh:['你的学生号','免费的 PantrySoft 账号（第一次去食品站前先注册）','可重复使用的购物袋']},
+  say:{en:'Hi, I\'m a UCSC student and I\'m short on food this week. What can I get today, and what should I sign up for so this doesn\'t happen again?',es:'Hola, soy estudiante de UCSC y esta semana no me alcanza para la comida. ¿Qué puedo recibir hoy y a qué me debo inscribir para que no me vuelva a pasar?',ko:'안녕하세요, UCSC 학생인데 이번 주 식비가 부족해요. 오늘 받을 수 있는 게 있을까요? 그리고 다시 이런 일이 없도록 신청해 둘 만한 게 있을까요?',zh:'你好，我是 UCSC 的学生，这周吃饭的钱不够了。今天我能领到什么？我该报名什么，才能避免以后再发生这种情况？'},
+  know:{en:['Pantries are for exactly this. You don\'t have to prove anything beyond being a student.','Grants, scholarships and student loans used for school usually don\'t count as income for CalFresh, and CalFresh doesn\'t reduce your financial aid.','CalFresh has immigration rules. Undocumented students can still use every campus pantry listed here.'],es:['Las despensas existen justo para esto. No tienes que demostrar nada más que ser estudiante.','Las becas, subvenciones y préstamos estudiantiles para la escuela normalmente no cuentan como ingreso para CalFresh, y CalFresh no reduce tu ayuda financiera.','CalFresh tiene reglas migratorias. Los estudiantes indocumentados igual pueden usar todas las despensas del campus de esta lista.'],ko:['푸드 팬트리는 바로 이럴 때를 위한 곳이에요. 학생이라는 것 외에는 증명할 게 없어요.','학교 비용에 쓰는 장학금, 보조금, 학자금 대출은 보통 CalFresh 소득으로 계산되지 않고, CalFresh를 받아도 학자금은 줄지 않아요.','CalFresh에는 이민 신분 관련 규정이 있어요. 서류 미비 학생도 여기 있는 캠퍼스 팬트리는 모두 이용할 수 있어요.'],zh:['食品站就是为这种情况而设的，你只需要是学生，不需要证明别的。','用于学业的助学金、奖学金和学生贷款通常不算作 CalFresh 的收入，领取 CalFresh 也不会减少你的助学金。','CalFresh 有移民身份方面的规定，但无证学生仍然可以使用这里列出的所有校园食品站。']},
+  site:['quarter','budget']},
+ {id:'rent',ic:'house',t:{en:'I can\'t pay rent or might lose my housing',es:'No puedo pagar la renta o podría perder mi vivienda',ko:'월세를 못 내거나 집을 잃을 수도 있어요',zh:'我付不起房租，或可能失去住处'},
   first:['slugcrisis','dos'],also:['finaid','tenant'],
-  bring:{en:['Your lease or housing contract','How much you owe and when it\'s due','Any notice from your landlord (a photo is fine)'],es:['Tu contrato de renta o de vivienda','Cuánto debes y para cuándo','Cualquier aviso de tu casero (una foto sirve)']},
-  say:{en:'I\'m a UCSC student and I can\'t cover my rent this month. I owe about [amount] by [date]. What options do I have?',es:'Soy estudiante de UCSC y no me alcanza para la renta de este mes. Debo aproximadamente [cantidad] para el [fecha]. ¿Qué opciones tengo?'},
-  know:{en:['Call before the due date if you can. There are more options before rent is late than after.','Tell your landlord in writing (text or email) when you expect to pay. Keep a copy.','If you get an eviction notice, don\'t ignore it and don\'t move out right away. Call Tenant Sanctuary first.'],es:['Si puedes, llama antes de la fecha de pago. Hay más opciones antes de atrasarte que después.','Avísale a tu casero por escrito (mensaje o correo) cuándo piensas pagar. Guarda una copia.','Si recibes un aviso de desalojo, no lo ignores y no te mudes de inmediato. Llama primero a Tenant Sanctuary.']},
-  site:[['#lease','Move off campus'],['#rent','Off-campus move calculator']]},
- {id:'aid',ic:'cap',t:{en:'My financial aid is late, short or confusing',es:'Mi ayuda financiera llegó tarde, no alcanza o no la entiendo'},
+  bring:{en:['Your lease or housing contract','How much you owe and when it\'s due','Any notice from your landlord (a photo is fine)'],es:['Tu contrato de renta o de vivienda','Cuánto debes y para cuándo','Cualquier aviso de tu casero (una foto sirve)'],ko:['임대 계약서 또는 기숙사 계약서','밀린 금액과 납부 기한','집주인에게 받은 통지서 (사진도 괜찮아요)'],zh:['你的租约或住宿合同','欠款金额和截止日期','房东发来的任何通知（拍照也可以）']},
+  say:{en:'I\'m a UCSC student and I can\'t cover my rent this month. I owe about [amount] by [date]. What options do I have?',es:'Soy estudiante de UCSC y no me alcanza para la renta de este mes. Debo aproximadamente [cantidad] para el [fecha]. ¿Qué opciones tengo?',ko:'UCSC 학생인데 이번 달 월세를 낼 수가 없어요. [날짜]까지 약 [금액]을 내야 해요. 어떤 방법이 있을까요?',zh:'我是 UCSC 的学生，这个月付不起房租。我需要在[日期]前支付大约[金额]。我有哪些选择？'},
+  know:{en:['Call before the due date if you can. There are more options before rent is late than after.','Tell your landlord in writing (text or email) when you expect to pay. Keep a copy.','If you get an eviction notice, don\'t ignore it and don\'t move out right away. Call Tenant Sanctuary first.'],es:['Si puedes, llama antes de la fecha de pago. Hay más opciones antes de atrasarte que después.','Avísale a tu casero por escrito (mensaje o correo) cuándo piensas pagar. Guarda una copia.','Si recibes un aviso de desalojo, no lo ignores y no te mudes de inmediato. Llama primero a Tenant Sanctuary.'],ko:['가능하면 납부일 전에 전화하세요. 연체되기 전이 연체된 후보다 선택지가 많아요.','언제 낼 수 있는지 집주인에게 문자나 이메일로 알리고, 사본을 보관하세요.','퇴거 통지를 받으면 무시하지도, 바로 이사하지도 마세요. 먼저 Tenant Sanctuary에 전화하세요.'],zh:['如果可以，在截止日期前就打电话。逾期前的选择比逾期后多。','用短信或邮件书面告诉房东你预计什么时候能付，并保留副本。','如果收到驱逐通知，不要置之不理，也不要马上搬走。先给 Tenant Sanctuary 打电话。']},
+  site:['lease','rent']},
+ {id:'aid',ic:'cap',t:{en:'My financial aid is late, short or confusing',es:'Mi ayuda financiera llegó tarde, no alcanza o no la entiendo',ko:'학자금이 늦거나, 부족하거나, 이해가 안 돼요',zh:'我的助学金迟到、不够用或看不懂'},
   first:['finaid','slugcents'],also:['uss'],
-  bring:{en:['Your student ID number','Your aid offer or a screenshot of your portal','Any email about a hold, missing document or change'],es:['Tu número de estudiante','Tu oferta de ayuda o una captura de pantalla de tu portal','Cualquier correo sobre una retención, un documento faltante o un cambio']},
-  say:{en:'I\'m trying to understand my aid for this quarter. It [hasn\'t arrived / is less than I expected / has a hold]. Can you walk me through what\'s happening and what I need to do?',es:'Estoy tratando de entender mi ayuda de este trimestre. [No ha llegado / es menos de lo que esperaba / tiene una retención]. ¿Me pueden explicar qué está pasando y qué tengo que hacer?'},
-  know:{en:['If your family\'s situation changed (a job loss, divorce, medical bills), you can ask Financial Aid to review your aid. It\'s called a special circumstances appeal.','You can accept part of a loan instead of all of it, and you can ask for more later in the year if you need it.','File the FAFSA or California Dream Act Application every year. The priority deadline is March 2.'],es:['Si la situación de tu familia cambió (pérdida de trabajo, divorcio, gastos médicos), puedes pedirle a Financial Aid que revise tu ayuda. Se llama apelación por circunstancias especiales.','Puedes aceptar solo una parte de un préstamo, y pedir más después en el año si lo necesitas.','Llena la FAFSA o la Solicitud del California Dream Act cada año. La fecha prioritaria es el 2 de marzo.']},
-  site:[['#aid','Accept my financial aid offer'],['#loancost','Loan cost calculator']]},
- {id:'landlord',ic:'house',t:{en:'I have a problem with my landlord, lease or deposit',es:'Tengo un problema con mi casero, mi contrato o mi depósito'},
+  bring:{en:['Your student ID number','Your aid offer or a screenshot of your portal','Any email about a hold, missing document or change'],es:['Tu número de estudiante','Tu oferta de ayuda o una captura de pantalla de tu portal','Cualquier correo sobre una retención, un documento faltante o un cambio'],ko:['학생 번호','학자금 제안서 또는 포털 화면 캡처','홀드, 누락 서류, 변경 사항에 관한 이메일'],zh:['你的学生号','助学金方案或学生门户的截图','任何关于账户冻结、缺少文件或方案变动的邮件']},
+  say:{en:'I\'m trying to understand my aid for this quarter. It [hasn\'t arrived / is less than I expected / has a hold]. Can you walk me through what\'s happening and what I need to do?',es:'Estoy tratando de entender mi ayuda de este trimestre. [No ha llegado / es menos de lo que esperaba / tiene una retención]. ¿Me pueden explicar qué está pasando y qué tengo que hacer?',ko:'이번 쿼터 학자금을 이해하려고 하는데요, [아직 안 들어왔어요 / 예상보다 적어요 / 홀드가 걸려 있어요]. 무슨 상황인지, 제가 뭘 해야 하는지 설명해 주실 수 있을까요?',zh:'我想弄清楚这个学季的助学金。它[还没到账 / 比我预期的少 / 被冻结了]。能帮我解释一下是怎么回事，以及我需要做什么吗？'},
+  know:{en:['If your family\'s situation changed (a job loss, divorce, medical bills), you can ask Financial Aid to review your aid. It\'s called a special circumstances appeal.','You can accept part of a loan instead of all of it, and you can ask for more later in the year if you need it.','File the FAFSA or California Dream Act Application every year. The priority deadline is March 2.'],es:['Si la situación de tu familia cambió (pérdida de trabajo, divorcio, gastos médicos), puedes pedirle a Financial Aid que revise tu ayuda. Se llama apelación por circunstancias especiales.','Puedes aceptar solo una parte de un préstamo, y pedir más después en el año si lo necesitas.','Llena la FAFSA o la Solicitud del California Dream Act cada año. La fecha prioritaria es el 2 de marzo.'],ko:['가족 상황이 바뀌었다면(실직, 이혼, 의료비 등) Financial Aid에 학자금 재검토를 요청할 수 있어요. 이를 특별 사정 이의 신청(special circumstances appeal)이라고 해요.','대출은 전액이 아니라 일부만 받을 수 있고, 필요하면 학년 중에 추가로 요청할 수도 있어요.','FAFSA 또는 California Dream Act 신청서는 매년 내야 해요. 우선 마감일은 3월 2일이에요.'],zh:['如果家庭情况发生变化（失业、离婚、医疗费用等），你可以请 Financial Aid 重新审核你的助学金，这叫作特殊情况申诉（special circumstances appeal）。','贷款可以只接受一部分，学年中如有需要还可以再申请更多。','每年都要提交 FAFSA 或 California Dream Act 申请。优先截止日期是 3 月 2 日。']},
+  site:['aid','loancost']},
+ {id:'landlord',ic:'house',t:{en:'I have a problem with my landlord, lease or deposit',es:'Tengo un problema con mi casero, mi contrato o mi depósito',ko:'집주인, 계약서, 보증금 문제가 있어요',zh:'我和房东、租约或押金有纠纷'},
   first:['tenant','cro'],also:[],
-  bring:{en:['Your lease','Texts and emails with your landlord','Dated photos of the problem or of the place at move-in','Rent receipts'],es:['Tu contrato','Mensajes y correos con tu casero','Fotos con fecha del problema o de cómo estaba el lugar al mudarte','Recibos de renta']},
-  say:{en:'I rent in Santa Cruz and my landlord [is keeping my deposit / raised my rent / won\'t fix something]. I\'d like to understand my rights before I respond.',es:'Rento en Santa Cruz y mi casero [se quiere quedar con mi depósito / me subió la renta / no quiere arreglar algo]. Quiero entender mis derechos antes de responder.'},
-  know:{en:['In California, a landlord has 21 days after you move out to return your deposit or send an itemized list of deductions.','During a fixed-term lease, rent usually can\'t go up unless your lease says it can.','Put requests in writing and keep copies. It protects you if there\'s a dispute later.'],es:['En California, el casero tiene 21 días después de que te mudas para devolverte el depósito o enviarte una lista detallada de los descuentos.','Durante un contrato de plazo fijo, normalmente la renta no puede subir a menos que el contrato lo permita.','Haz tus peticiones por escrito y guarda copias. Te protege si hay un problema después.']},
-  site:[['#lease','Move off campus'],['#rent','Off-campus move calculator']]},
- {id:'bill',ic:'cash',t:{en:'I got hit with a surprise bill or emergency cost',es:'Me llegó una factura inesperada o un gasto de emergencia'},
+  bring:{en:['Your lease','Texts and emails with your landlord','Dated photos of the problem or of the place at move-in','Rent receipts'],es:['Tu contrato','Mensajes y correos con tu casero','Fotos con fecha del problema o de cómo estaba el lugar al mudarte','Recibos de renta'],ko:['임대 계약서','집주인과 주고받은 문자와 이메일','문제나 입주 당시 상태를 찍은 날짜 있는 사진','월세 영수증'],zh:['你的租约','和房东往来的短信和邮件','带日期的照片：问题现状或入住时的房屋状况','房租收据']},
+  say:{en:'I rent in Santa Cruz and my landlord [is keeping my deposit / raised my rent / won\'t fix something]. I\'d like to understand my rights before I respond.',es:'Rento en Santa Cruz y mi casero [se quiere quedar con mi depósito / me subió la renta / no quiere arreglar algo]. Quiero entender mis derechos antes de responder.',ko:'산타크루즈에서 월세를 살고 있는데 집주인이 [보증금을 안 돌려줘요 / 월세를 올렸어요 / 수리를 안 해 줘요]. 답하기 전에 제 권리를 알고 싶어요.',zh:'我在圣克鲁兹租房，房东[不退我的押金 / 给我涨了房租 / 不肯修东西]。在回复之前，我想先了解自己的权利。'},
+  know:{en:['In California, a landlord has 21 days after you move out to return your deposit or send an itemized list of deductions.','During a fixed-term lease, rent usually can\'t go up unless your lease says it can.','Put requests in writing and keep copies. It protects you if there\'s a dispute later.'],es:['En California, el casero tiene 21 días después de que te mudas para devolverte el depósito o enviarte una lista detallada de los descuentos.','Durante un contrato de plazo fijo, normalmente la renta no puede subir a menos que el contrato lo permita.','Haz tus peticiones por escrito y guarda copias. Te protege si hay un problema después.'],ko:['캘리포니아에서는 퇴거 후 21일 안에 집주인이 보증금을 돌려주거나 공제 내역서를 보내야 해요.','정해진 기간의 임대 계약 중에는 계약서에 명시되지 않는 한 보통 월세를 올릴 수 없어요.','요청은 서면으로 하고 사본을 보관하세요. 나중에 분쟁이 생기면 나를 보호해 줘요.'],zh:['在加州，房东必须在你搬走后 21 天内退还押金，或寄给你一份扣款明细。','固定期限的租约期间，除非租约允许，房租通常不能上涨。','所有请求都用书面形式并保留副本，日后有纠纷时能保护你。']},
+  site:['lease','rent']},
+ {id:'bill',ic:'cash',t:{en:'I got hit with a surprise bill or emergency cost',es:'Me llegó una factura inesperada o un gasto de emergencia',ko:'갑자기 청구서나 긴급 비용이 생겼어요',zh:'突然收到一笔账单或紧急开支'},
   first:['dos','slugcents'],also:['finaid'],
-  bring:{en:['The bill or estimate','What you have in your account right now'],es:['La factura o el presupuesto','Cuánto tienes ahora en tu cuenta']},
-  say:{en:'I had an unexpected [repair / medical bill / travel] cost of about [amount] and I can\'t cover it without falling behind on rent or food. Is there emergency help I can apply for?',es:'Tuve un gasto inesperado de [reparación / factura médica / viaje] de aproximadamente [cantidad] y no puedo pagarlo sin atrasarme con la renta o la comida. ¿Hay ayuda de emergencia que pueda solicitar?'},
-  know:{en:['Before putting it on a credit card, ask the company for a payment plan. Many say yes, often with no interest.','Slug Support\'s emergency fund is need-based and for emergencies only. The intake form isn\'t for same-day crises; call the crisis line for those.'],es:['Antes de pagarlo con tarjeta de crédito, pídele a la compañía un plan de pagos. Muchas aceptan, a menudo sin intereses.','El fondo de emergencia de Slug Support es según necesidad y solo para emergencias. El formulario no es para crisis del mismo día; para eso llama a la línea de crisis.']},
-  site:[['#cardpayoff','Credit card payoff calculator']]},
- {id:'taxes',ic:'cal',t:{en:'I need help with taxes or tax forms',es:'Necesito ayuda con los impuestos o formularios'},
+  bring:{en:['The bill or estimate','What you have in your account right now'],es:['La factura o el presupuesto','Cuánto tienes ahora en tu cuenta'],ko:['청구서 또는 견적서','지금 통장에 있는 금액'],zh:['账单或报价单','你账户里现在有多少钱']},
+  say:{en:'I had an unexpected [repair / medical bill / travel] cost of about [amount] and I can\'t cover it without falling behind on rent or food. Is there emergency help I can apply for?',es:'Tuve un gasto inesperado de [reparación / factura médica / viaje] de aproximadamente [cantidad] y no puedo pagarlo sin atrasarme con la renta o la comida. ¿Hay ayuda de emergencia que pueda solicitar?',ko:'예상치 못한 [수리비 / 병원비 / 교통비]로 약 [금액]이 나왔는데, 이걸 내면 월세나 식비가 밀려요. 신청할 수 있는 긴급 지원이 있을까요?',zh:'我遇到一笔意外的[维修费 / 医疗费 / 路费]，大约[金额]，付了它就会拖欠房租或饭钱。有我可以申请的紧急援助吗？'},
+  know:{en:['Before putting it on a credit card, ask the company for a payment plan. Many say yes, often with no interest.','Slug Support\'s emergency fund is need-based and for emergencies only. The intake form isn\'t for same-day crises; call the crisis line for those.'],es:['Antes de pagarlo con tarjeta de crédito, pídele a la compañía un plan de pagos. Muchas aceptan, a menudo sin intereses.','El fondo de emergencia de Slug Support es según necesidad y solo para emergencias. El formulario no es para crisis del mismo día; para eso llama a la línea de crisis.'],ko:['신용카드로 결제하기 전에 업체에 분할 납부를 요청해 보세요. 이자 없이 해 주는 곳이 많아요.','Slug Support 긴급 기금은 필요 기반이며 긴급 상황에만 지원돼요. 접수 양식은 당일 위기용이 아니니, 급할 때는 위기 전화로 연락하세요.'],zh:['在刷信用卡之前，先请对方给你分期付款计划，很多机构会同意，而且通常不收利息。','Slug Support 紧急基金按需发放，仅用于紧急情况。申请表不适用于当天的危机，遇到这种情况请拨打危机热线。']},
+  site:['cardpayoff']},
+ {id:'taxes',ic:'cal',t:{en:'I need help with taxes or tax forms',es:'Necesito ayuda con los impuestos o formularios',ko:'세금이나 세금 서류 도움이 필요해요',zh:'我需要报税或税表方面的帮助'},
   first:['slugcents'],also:[],
-  extra:{en:'SlugCents has offered free, in-person tax preparation by IRS-certified student volunteers each spring, for students with incomes up to about $67,000. Check their site in January for this season\'s days. IRS Free File is the online option.',es:'SlugCents ha ofrecido cada primavera preparación de impuestos gratuita y en persona con voluntarios estudiantiles certificados por el IRS, para estudiantes con ingresos de hasta unos $67,000. Revisa su sitio en enero para ver los días de esta temporada. IRS Free File es la opción en línea.'},
-  bring:{en:['Photo ID','Your Social Security card or ITIN letter','Every W-2 and 1099 from last year','Your 1098-T from UCSC','Bank account and routing numbers for direct deposit'],es:['Identificación con foto','Tu tarjeta del Seguro Social o carta del ITIN','Todos tus W-2 y 1099 del año pasado','Tu 1098-T de UCSC','Números de cuenta y de ruta bancaria para el depósito directo']},
-  say:{en:'I worked part-time last year and I\'ve never filed on my own. Can you help me file and see if I get a refund?',es:'Trabajé medio tiempo el año pasado y nunca he declarado impuestos por mi cuenta. ¿Me pueden ayudar a declarar y ver si me toca un reembolso?'},
-  know:{en:['Students who earn a little often get back most of what was withheld, but only if they file.','Delivery and gig apps don\'t withhold taxes. Set aside about 20% of what you make.','Your 1098-T can help your family claim an education tax credit.'],es:['Los estudiantes que ganan poco a menudo recuperan casi todo lo que les retuvieron, pero solo si declaran.','Las apps de entregas y trabajos por encargo no retienen impuestos. Aparta cerca del 20% de lo que ganes.','Tu 1098-T puede ayudar a tu familia a pedir un crédito fiscal por educación.']},
-  site:[['#paycheck','Understand my first paycheck'],['#paycalc','Paycheck calculator']]},
- {id:'debt',ic:'card',t:{en:'I\'m behind on a credit card or a collector is calling',es:'Estoy atrasado con una tarjeta o me llama un cobrador'},
+  extra:{en:'SlugCents has offered free, in-person tax preparation by IRS-certified student volunteers each spring, for students with incomes up to about $67,000. Check their site in January for this season\'s days. IRS Free File is the online option.',es:'SlugCents ha ofrecido cada primavera preparación de impuestos gratuita y en persona con voluntarios estudiantiles certificados por el IRS, para estudiantes con ingresos de hasta unos $67,000. Revisa su sitio en enero para ver los días de esta temporada. IRS Free File es la opción en línea.',ko:'SlugCents는 매년 봄 IRS 공인 학생 자원봉사자가 소득 약 $67,000 이하 학생의 세금 신고를 대면으로 무료로 도와 왔어요. 이번 시즌 일정은 1월에 사이트에서 확인하세요. 온라인으로는 IRS Free File을 이용할 수 있어요.',zh:'SlugCents 每年春季都由 IRS 认证的学生志愿者，为收入约 $67,000 以下的学生提供免费的现场报税服务。本季的具体日期请在 1 月查看他们的网站。线上可以使用 IRS Free File。'},
+  bring:{en:['Photo ID','Your Social Security card or ITIN letter','Every W-2 and 1099 from last year','Your 1098-T from UCSC','Bank account and routing numbers for direct deposit'],es:['Identificación con foto','Tu tarjeta del Seguro Social o carta del ITIN','Todos tus W-2 y 1099 del año pasado','Tu 1098-T de UCSC','Números de cuenta y de ruta bancaria para el depósito directo'],ko:['사진이 있는 신분증','Social Security 카드 또는 ITIN 통지서','작년에 받은 모든 W-2와 1099','UCSC에서 받은 1098-T','직접 입금용 은행 계좌 번호와 라우팅 번호'],zh:['带照片的身份证件','你的 Social Security 卡或 ITIN 通知函','去年所有的 W-2 和 1099','UCSC 发的 1098-T','用于直接入账的银行账号和汇款路线号（routing number）']},
+  say:{en:'I worked part-time last year and I\'ve never filed on my own. Can you help me file and see if I get a refund?',es:'Trabajé medio tiempo el año pasado y nunca he declarado impuestos por mi cuenta. ¿Me pueden ayudar a declarar y ver si me toca un reembolso?',ko:'작년에 파트타임으로 일했는데 혼자 세금 신고를 해 본 적이 없어요. 신고를 도와주시고 환급받을 수 있는지 봐 주실 수 있을까요?',zh:'我去年做过兼职，但从来没有自己报过税。能帮我报税，看看能不能拿到退税吗？'},
+  know:{en:['Students who earn a little often get back most of what was withheld, but only if they file.','Delivery and gig apps don\'t withhold taxes. Set aside about 20% of what you make.','Your 1098-T can help your family claim an education tax credit.'],es:['Los estudiantes que ganan poco a menudo recuperan casi todo lo que les retuvieron, pero solo si declaran.','Las apps de entregas y trabajos por encargo no retienen impuestos. Aparta cerca del 20% de lo que ganes.','Tu 1098-T puede ayudar a tu familia a pedir un crédito fiscal por educación.'],ko:['소득이 적은 학생은 원천징수된 세금 대부분을 돌려받는 경우가 많지만, 신고를 해야만 받아요.','배달·긱 앱은 세금을 떼지 않아요. 번 돈의 약 20%는 따로 모아 두세요.','1098-T로 가족이 교육 세액공제를 받을 수 있어요.'],zh:['收入不高的学生通常能拿回大部分预扣税款，但前提是必须报税。','外卖和零工类应用不会预扣税款，请把收入的大约 20% 存起来。','你的 1098-T 可以帮家人申请教育类税收抵免。']},
+  site:['paycheck','paycalc']},
+ {id:'debt',ic:'card',t:{en:'I\'m behind on a credit card or a collector is calling',es:'Estoy atrasado con una tarjeta o me llama un cobrador',ko:'카드값이 밀렸거나 추심 전화가 와요',zh:'我信用卡还款逾期，或有催收打电话来'},
   first:['slugcents'],also:['cfpb'],
-  bring:{en:['Your latest statements','Any letters from a collector'],es:['Tus últimos estados de cuenta','Cualquier carta de un cobrador']},
-  say:{en:'I have about [amount] on a credit card and I\'m only making minimum payments. Can you help me make a plan to pay it down?',es:'Tengo unos [cantidad] en una tarjeta de crédito y solo hago los pagos mínimos. ¿Me pueden ayudar a armar un plan para pagarla?'},
-  know:{en:['Call the card company before you miss a payment. Ask about a hardship plan or a lower rate.','If a collector contacts you, ask them in writing to verify the debt before you pay anything.','Your credit reports are free every week at AnnualCreditReport.com.'],es:['Llama a la compañía de la tarjeta antes de atrasarte. Pregunta por un plan por dificultades o una tasa más baja.','Si te contacta un cobrador, pídele por escrito que verifique la deuda antes de pagar cualquier cosa.','Tus reportes de crédito son gratis cada semana en AnnualCreditReport.com.']},
-  site:[['#credit','Get my first credit card'],['#cardpayoff','Credit card payoff calculator']]},
- {id:'scam',ic:'card',t:{en:'I think I got scammed',es:'Creo que me estafaron'},
+  bring:{en:['Your latest statements','Any letters from a collector'],es:['Tus últimos estados de cuenta','Cualquier carta de un cobrador'],ko:['최근 카드 명세서','추심 업체에서 받은 편지'],zh:['最近的账单','催收机构寄来的任何信件']},
+  say:{en:'I have about [amount] on a credit card and I\'m only making minimum payments. Can you help me make a plan to pay it down?',es:'Tengo unos [cantidad] en una tarjeta de crédito y solo hago los pagos mínimos. ¿Me pueden ayudar a armar un plan para pagarla?',ko:'신용카드에 약 [금액]이 있는데 최소 금액만 갚고 있어요. 갚아 나갈 계획을 같이 세워 주실 수 있을까요?',zh:'我的信用卡欠了大约[金额]，一直只还最低还款额。能帮我制定一个还款计划吗？'},
+  know:{en:['Call the card company before you miss a payment. Ask about a hardship plan or a lower rate.','If a collector contacts you, ask them in writing to verify the debt before you pay anything.','Your credit reports are free every week at AnnualCreditReport.com.'],es:['Llama a la compañía de la tarjeta antes de atrasarte. Pregunta por un plan por dificultades o una tasa más baja.','Si te contacta un cobrador, pídele por escrito que verifique la deuda antes de pagar cualquier cosa.','Tus reportes de crédito son gratis cada semana en AnnualCreditReport.com.'],ko:['결제를 놓치기 전에 카드사에 전화하세요. 어려움 지원 프로그램이나 금리 인하를 물어보세요.','추심 업체가 연락하면, 돈을 내기 전에 채무를 서면으로 확인해 달라고 요구하세요.','신용 보고서는 AnnualCreditReport.com에서 매주 무료로 볼 수 있어요.'],zh:['在错过还款之前给信用卡公司打电话，问问有没有困难援助计划或降低利率。','如果催收机构联系你，在付任何钱之前，先书面要求对方核实这笔债务。','你可以每周在 AnnualCreditReport.com 免费查看信用报告。']},
+  site:['credit','cardpayoff']},
+ {id:'scam',ic:'card',t:{en:'I think I got scammed',es:'Creo que me estafaron',ko:'사기를 당한 것 같아요',zh:'我好像被骗了'},
   first:['its','ftc'],also:[],
-  bring:{en:['Screenshots of the messages','Any payment receipts or transaction IDs'],es:['Capturas de pantalla de los mensajes','Cualquier recibo de pago o número de transacción']},
-  say:{en:'I sent money / entered my login on a site I now think was fake. What should I do right now to protect my accounts?',es:'Mandé dinero / escribí mi usuario y contraseña en un sitio que ahora creo que era falso. ¿Qué debo hacer ahora mismo para proteger mis cuentas?'},
-  know:{en:['Call your bank using the number on the back of your card, not one from the message.','Change your passwords, starting with email and banking.','Freezing your credit at Equifax, Experian and TransUnion is free and stops anyone opening accounts in your name.'],es:['Llama a tu banco al número que aparece atrás de tu tarjeta, no al del mensaje.','Cambia tus contraseñas, empezando por tu correo y tu banco.','Congelar tu crédito en Equifax, Experian y TransUnion es gratis y evita que alguien abra cuentas a tu nombre.']},
+  bring:{en:['Screenshots of the messages','Any payment receipts or transaction IDs'],es:['Capturas de pantalla de los mensajes','Cualquier recibo de pago o número de transacción'],ko:['메시지 화면 캡처','결제 영수증이나 거래 번호'],zh:['相关消息的截图','付款收据或交易编号']},
+  say:{en:'I sent money / entered my login on a site I now think was fake. What should I do right now to protect my accounts?',es:'Mandé dinero / escribí mi usuario y contraseña en un sitio que ahora creo que era falso. ¿Qué debo hacer ahora mismo para proteger mis cuentas?',ko:'가짜로 보이는 사이트에 돈을 보냈어요 / 로그인 정보를 입력했어요. 계정을 지키려면 지금 바로 뭘 해야 하나요?',zh:'我在一个现在看来是假的网站上汇了钱 / 输入了登录信息。我现在应该马上做什么来保护我的账户？'},
+  know:{en:['Call your bank using the number on the back of your card, not one from the message.','Change your passwords, starting with email and banking.','Freezing your credit at Equifax, Experian and TransUnion is free and stops anyone opening accounts in your name.'],es:['Llama a tu banco al número que aparece atrás de tu tarjeta, no al del mensaje.','Cambia tus contraseñas, empezando por tu correo y tu banco.','Congelar tu crédito en Equifax, Experian y TransUnion es gratis y evita que alguien abra cuentas a tu nombre.'],ko:['메시지에 적힌 번호가 아니라 카드 뒷면의 번호로 은행에 전화하세요.','이메일과 은행 비밀번호부터 바꾸세요.','Equifax, Experian, TransUnion에서 신용 동결은 무료이고, 누군가 내 이름으로 계좌를 여는 걸 막아 줘요.'],zh:['用银行卡背面的电话号码联系银行，不要用消息里给的号码。','更改密码，先从邮箱和网银开始。','在 Equifax、Experian 和 TransUnion 冻结信用是免费的，可以防止别人用你的名义开户。']},
   site:[]},
- {id:'stress',ic:'cal',t:{en:'I\'m overwhelmed and need someone to talk to',es:'Estoy abrumado y necesito hablar con alguien'},
+ {id:'stress',ic:'cal',t:{en:'I\'m overwhelmed and need someone to talk to',es:'Estoy abrumado y necesito hablar con alguien',ko:'너무 힘들어서 누군가와 이야기하고 싶어요',zh:'我压力太大，想找人聊聊'},
   first:['caps'],also:[],
-  extra:{en:'You can also call or text 988, the national crisis line, any time. Or text HOME to 741741 to reach the Crisis Text Line.',es:'También puedes llamar o enviar un mensaje al 988, la línea nacional de crisis, a cualquier hora. O envía HOME al 741741 para comunicarte con la Crisis Text Line.'},
-  bring:{en:[],es:[]},
-  say:{en:'I\'m a UCSC student and I\'m really stressed about money and school. I\'d like to talk to someone.',es:'Soy estudiante de UCSC y estoy muy estresado por el dinero y la escuela. Me gustaría hablar con alguien.'},
-  know:{en:['Money stress is one of the most common reasons students reach out. You don\'t need to be in a crisis to call.'],es:['El estrés por dinero es una de las razones más comunes por las que los estudiantes buscan ayuda. No necesitas estar en crisis para llamar.']},
+  extra:{en:'You can also call or text 988, the national crisis line, any time. Or text HOME to 741741 to reach the Crisis Text Line.',es:'También puedes llamar o enviar un mensaje al 988, la línea nacional de crisis, a cualquier hora. O envía HOME al 741741 para comunicarte con la Crisis Text Line.',ko:'언제든 전국 위기 상담 전화 988에 전화하거나 문자를 보낼 수도 있어요. 또는 741741로 HOME이라고 문자를 보내면 Crisis Text Line과 연결돼요.',zh:'你也可以随时拨打或发短信到全国危机热线 988。或者发送 HOME 到 741741，联系 Crisis Text Line（危机短信热线）。'},
+  bring:{en:[],es:[],ko:[],zh:[]},
+  say:{en:'I\'m a UCSC student and I\'m really stressed about money and school. I\'d like to talk to someone.',es:'Soy estudiante de UCSC y estoy muy estresado por el dinero y la escuela. Me gustaría hablar con alguien.',ko:'UCSC 학생인데 돈과 학업 때문에 스트레스가 너무 심해요. 누군가와 이야기하고 싶어요.',zh:'我是 UCSC 的学生，钱和学业让我压力很大。我想找人聊聊。'},
+  know:{en:['Money stress is one of the most common reasons students reach out. You don\'t need to be in a crisis to call.'],es:['El estrés por dinero es una de las razones más comunes por las que los estudiantes buscan ayuda. No necesitas estar en crisis para llamar.'],ko:['돈 스트레스는 학생들이 도움을 청하는 가장 흔한 이유 중 하나예요. 위기 상황이 아니어도 전화해도 돼요.'],zh:['经济压力是学生寻求帮助最常见的原因之一。不必等到危机时刻才打电话。']},
   site:[]}
 ];
 
 const HDATES=[
- {d:'2027-03-02',t:{en:'FAFSA and California Dream Act priority deadline, and the Cal Grant deadline',es:'Fecha prioritaria de la FAFSA y la Solicitud del California Dream Act, y fecha límite de Cal Grant'},u:'https://www.csac.ca.gov'},
- {d:'2027-04-15',t:{en:'Tax Day: 2026 federal and California returns are due',es:'Día de impuestos: vencen las declaraciones federales y de California de 2026'},u:'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free'}
+ {d:'2027-03-02',t:{en:'FAFSA and California Dream Act priority deadline, and the Cal Grant deadline',es:'Fecha prioritaria de la FAFSA y la Solicitud del California Dream Act, y fecha límite de Cal Grant',ko:'FAFSA·California Dream Act 우선 마감일 및 Cal Grant 마감일',zh:'FAFSA 和 California Dream Act 优先截止日期，以及 Cal Grant 截止日期'},u:'https://www.csac.ca.gov'},
+ {d:'2027-04-15',t:{en:'Tax Day: 2026 federal and California returns are due',es:'Día de impuestos: vencen las declaraciones federales y de California de 2026',ko:'세금 신고일: 2026년 연방 및 캘리포니아 소득세 신고 마감',zh:'报税日：2026 年联邦和加州所得税申报截止'},u:'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free'}
 ];
 
 const HTOOLS=[
- ['StudentAid.gov',{en:'Federal loans, the FAFSA, repayment plans',es:'Préstamos federales, la FAFSA, planes de pago'},'https://studentaid.gov'],
- ['California Student Aid Commission',{en:'Cal Grant and the California Dream Act Application',es:'Cal Grant y la Solicitud del California Dream Act'},'https://www.csac.ca.gov'],
- ['GetCalFresh.org',{en:'Apply for CalFresh online',es:'Solicita CalFresh en línea'},'https://www.getcalfresh.org'],
- ['AnnualCreditReport.com',{en:'Your free credit reports',es:'Tus reportes de crédito gratis'},'https://www.annualcreditreport.com'],
- ['IRS Free File',{en:'File your federal return for free',es:'Declara tus impuestos federales gratis'},'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free'],
- ['Consumer Financial Protection Bureau',{en:'Guides and complaints about banks, cards and collectors',es:'Guías y quejas sobre bancos, tarjetas y cobradores'},'https://www.consumerfinance.gov']
+ ['StudentAid.gov',{en:'Federal loans, the FAFSA, repayment plans',es:'Préstamos federales, la FAFSA, planes de pago',ko:'연방 학자금 대출, FAFSA, 상환 계획',zh:'联邦贷款、FAFSA、还款计划'},'https://studentaid.gov'],
+ ['California Student Aid Commission',{en:'Cal Grant and the California Dream Act Application',es:'Cal Grant y la Solicitud del California Dream Act',ko:'Cal Grant와 California Dream Act 신청',zh:'Cal Grant 和 California Dream Act 申请'},'https://www.csac.ca.gov'],
+ ['GetCalFresh.org',{en:'Apply for CalFresh online',es:'Solicita CalFresh en línea',ko:'온라인으로 CalFresh 신청',zh:'在线申请 CalFresh'},'https://www.getcalfresh.org'],
+ ['AnnualCreditReport.com',{en:'Your free credit reports',es:'Tus reportes de crédito gratis',ko:'무료 신용 보고서',zh:'免费信用报告'},'https://www.annualcreditreport.com'],
+ ['IRS Free File',{en:'File your federal return for free',es:'Declara tus impuestos federales gratis',ko:'연방 세금 무료 신고',zh:'免费申报联邦税'},'https://www.irs.gov/filing/free-file-do-your-federal-taxes-for-free'],
+ ['Consumer Financial Protection Bureau',{en:'Guides and complaints about banks, cards and collectors',es:'Guías y quejas sobre bancos, tarjetas y cobradores',ko:'은행·카드·추심 관련 안내와 민원',zh:'关于银行、信用卡和催收的指南与投诉'},'https://www.consumerfinance.gov']
 ];
 
-const HUI={
- en:{title:'Campus help',lead:'Tell us what\'s going on. We\'ll show you who at UCSC can help, how to reach them, and what to say.',pick:'What\'s going on?',first:'Start here',also:'Also try',bring:'Bring',say:'What to say',copy:'Copy',copied:'Copied',know:'Good to know',site:'Work through it on Slugonomics',call:'Call',email:'Email',where:'Where',when:'When',web:'Website',dates:'Coming up',addcal:'Add to calendar',tools:'Online tools',crisis:'In danger right now? Call 911.',crisis2:'Need to talk? CAPS answers 24/7 at',crisis3:'or call or text 988.',checked:'Every phone number, place and hour on this page was checked against the office\'s official page on',wrong:'Something out of date?',tell:'Tell Sungjun',free:'All of these are free for UCSC students.',choose:'Pick what\'s happening and the steps appear here.',back:'All situations',fmt:{month:'long',day:'numeric',year:'numeric'},loc:'en-US'},
- es:{title:'Ayuda en el campus',lead:'Cuéntanos qué está pasando. Te mostramos quién en UCSC te puede ayudar, cómo contactarlos y qué decir.',pick:'¿Qué está pasando?',first:'Empieza aquí',also:'También puedes',bring:'Lleva',say:'Qué decir',copy:'Copiar',copied:'Copiado',know:'Es bueno saber',site:'Practícalo en Slugonomics',call:'Llamar',email:'Correo',where:'Dónde',when:'Cuándo',web:'Sitio web',dates:'Próximas fechas',addcal:'Agregar al calendario',tools:'Herramientas en línea',crisis:'¿Estás en peligro ahora? Llama al 911.',crisis2:'¿Necesitas hablar? CAPS contesta 24/7 al',crisis3:'o llama o envía un mensaje al 988.',checked:'Cada teléfono, lugar y horario de esta página se comparó con la página oficial de cada oficina el',wrong:'¿Algo está desactualizado?',tell:'Avísale a Sungjun',free:'Todo esto es gratis para estudiantes de UCSC.',choose:'Elige qué está pasando y aquí aparecen los pasos.',back:'Todas las situaciones',fmt:{month:'long',day:'numeric',year:'numeric'},loc:'es-US'}
-};
-const SITE_ES={'Make it through the quarter':'Llegar al final del trimestre','Quarter budget calculator':'Calculadora del presupuesto trimestral','Move off campus':'Mudarte fuera del campus','Off-campus move calculator':'Calculadora de mudanza fuera del campus','Accept my financial aid offer':'Aceptar mi oferta de ayuda financiera','Loan cost calculator':'Calculadora del costo de préstamos','Credit card payoff calculator':'Calculadora para pagar tu tarjeta','Understand my first paycheck':'Entender mi primer cheque','Paycheck calculator':'Calculadora de cheque de pago','Get my first credit card':'Mi primera tarjeta de crédito'};
-const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString(HUI[HL].loc,HUI[HL].fmt);
+Object.assign(STR,{
+ hp_lead:['Tell us what\'s going on. We\'ll show you who at UCSC can help, how to reach them, and what to say.','Cuéntanos qué está pasando. Te mostramos quién en UCSC te puede ayudar, cómo contactarlos y qué decir.','무슨 일이 있는지 알려 주세요. UCSC에서 누가 도와줄 수 있는지, 어떻게 연락하는지, 뭐라고 말하면 되는지 알려 드릴게요.','告诉我们发生了什么。我们会告诉你 UCSC 谁能帮你、怎么联系他们，以及该怎么说。'],
+ hp_free:['All of these are free for UCSC students.','Todo esto es gratis para estudiantes de UCSC.','모두 UCSC 학생에게 무료예요.','对 UCSC 学生全部免费。'],
+ hp_pick:['What\'s going on?','¿Qué está pasando?','무슨 일이 있나요?','发生了什么？'],
+ hp_first:['Start here','Empieza aquí','여기서 시작하세요','从这里开始'],
+ hp_also:['Also try','También puedes','이곳도 도움이 돼요','也可以试试'],
+ hp_bring:['Bring','Lleva','준비물','要带的东西'],
+ hp_say:['What to say','Qué decir','이렇게 말해 보세요','可以这样说'],
+ hp_copy:['Copy','Copiar','복사','复制'],hp_copied:['Copied','Copiado','복사됨','已复制'],
+ hp_know:['Good to know','Es bueno saber','알아 두면 좋아요','需要知道'],
+ hp_site:['Work through it on Slugonomics','Practícalo en Slugonomics','Slugonomics에서 연습해 보기','在 Slugonomics 上演练'],
+ hp_call:['Call','Llamar','전화','拨打'],
+ hp_where:['Where','Dónde','위치','地点'],hp_when:['When','Cuándo','시간','时间'],hp_web:['Website','Sitio web','웹사이트','网站'],
+ hp_dates:['Coming up','Próximas fechas','다가오는 일정','即将到来的日期'],
+ hp_addcal:['Add to calendar','Agregar al calendario','캘린더에 추가','加入日历'],
+ hp_tools:['Online tools','Herramientas en línea','온라인 도구','在线工具'],
+ hp_crisis:['In danger right now? Call 911.','¿Estás en peligro ahora? Llama al 911.','지금 위험한 상황인가요? 911에 전화하세요.','现在有危险吗？请拨打 911。'],
+ hp_crisis2:[(c,n)=>`Need to talk? CAPS answers 24/7 at ${c} (press 3 after hours), or call or text ${n}.`,(c,n)=>`¿Necesitas hablar? CAPS contesta 24/7 al ${c} (marca 3 fuera de horario), o llama o envía un mensaje al ${n}.`,(c,n)=>`이야기할 사람이 필요하다면 CAPS가 24시간 받아요: ${c} (업무 시간 외에는 3번). 또는 ${n}에 전화나 문자를 보내세요.`,(c,n)=>`需要倾诉？CAPS 全天 24 小时接听：${c}（非工作时间请按 3），或拨打、发短信至 ${n}。`],
+ hp_checked:[d=>`Every phone number, place and hour on this page was checked against the office's official page on ${d}.`,d=>`Cada teléfono, lugar y horario de esta página se comparó con la página oficial de cada oficina el ${d}.`,d=>`이 페이지의 모든 전화번호, 장소, 시간은 ${d}에 각 기관의 공식 페이지와 대조해 확인했어요.`,d=>`本页所有电话号码、地点和时间都已于 ${d}与各部门官方网页核对。`],
+ hp_wrong:['Something out of date?','¿Algo está desactualizado?','바뀐 정보가 있나요?','发现信息过时了？'],
+ hp_tell:['Tell Sungjun','Avísale a Sungjun','Sungjun에게 알려 주기','告诉 Sungjun'],
+ hp_choose:['Pick what\'s happening and the steps appear here.','Elige qué está pasando y aquí aparecen los pasos.','상황을 고르면 여기에 단계가 나타나요.','选择你的情况，步骤就会显示在这里。'],
+ hp_back:['All situations','Todas las situaciones','모든 상황','所有情况'],
+ hp_officeen:['','Los nombres de las oficinas aparecen en inglés, como en los letreros y sitios web de UCSC.','기관 이름은 UCSC 안내판과 웹사이트에 나오는 그대로 영어로 표기했어요.','部门名称保留英文，与 UCSC 的指示牌和网站一致。']
+});
+const fmtDate=d=>new Date(d+'T12:00:00').toLocaleDateString(LOCALE[LANG],{month:'long',day:'numeric',year:'numeric'});
+const siteLabel=id=>PATH[id]?pathTitle(id):t('calc_of',TOOLS[id].name);
 
-function contactHTML(k,primary){const c=HC[k],U=HUI[HL];
+function contactHTML(k,primary){const c=HC[k];
  const rows=[];
- if(c.where)rows.push(`<div><dt>${U.where}</dt><dd>${T2(c.where)}</dd></div>`);
- if(c.when)rows.push(`<div><dt>${U.when}</dt><dd>${T2(c.when)}</dd></div>`);
+ if(c.where)rows.push(`<div><dt>${t('hp_where')}</dt><dd>${tx(c.where)}</dd></div>`);
+ if(c.when)rows.push(`<div><dt>${t('hp_when')}</dt><dd>${tx(c.when)}</dd></div>`);
  const acts=[];
- if(c.ph)acts.push(`<a class="btn ${primary?'slug':'line'} sm" href="tel:+1${c.ph[0]}">${U.call} ${c.ph[1]}</a>`);
+ if(c.ph)acts.push(`<a class="btn ${primary?'slug':'line'} sm" href="tel:+1${c.ph[0]}">${t('hp_call')} ${c.ph[1]}</a>`);
  if(c.em)acts.push(`<a class="btn line sm" href="mailto:${c.em}">${c.em}</a>`);
  if(c.em2)acts.push(`<a class="btn line sm" href="mailto:${c.em2}">${c.em2}</a>`);
- acts.push(`<a class="btn line sm" href="${c.u}" target="_blank" rel="noopener">${U.web}</a>`);
- return `<article class="hc"><h4>${c.n}</h4><p>${T2(c.d)}</p>${rows.length?`<dl>${rows.join('')}</dl>`:''}<div class="hcact">${acts.join('')}</div></article>`;}
+ acts.push(`<a class="btn line sm" href="${c.u}" target="_blank" rel="noopener">${t('hp_web')}</a>`);
+ return `<article class="hc"><h4 lang="en">${c.n}</h4><p>${tx(c.d)}</p>${rows.length?`<dl>${rows.join('')}</dl>`:''}<div class="hcact">${acts.join('')}</div></article>`;}
 
-function sitDetail(s){const U=HUI[HL],bring=T2(s.bring),know=T2(s.know);
+function sitDetail(s){const bring=tx(s.bring),know=tx(s.know);
  return `<div class="hdet" id="hdet" tabindex="-1">
-  <button class="hback" data-hback>${icon('left')} ${U.back}</button>
-  <h2>${T2(s.t)}</h2>
-  <h3 class="hsub">${U.first}</h3><div class="hcs">${s.first.map(k=>contactHTML(k,true)).join('')}</div>
-  ${s.extra?`<p class="hextra">${T2(s.extra)}</p>`:''}
-  ${s.also.length?`<h3 class="hsub">${U.also}</h3><div class="hcs">${s.also.map(k=>contactHTML(k,false)).join('')}</div>`:''}
+  <button class="hback" data-hback>${icon('left')} ${t('hp_back')}</button>
+  <h2>${tx(s.t)}</h2>
+  <h3 class="hsub">${t('hp_first')}</h3><div class="hcs">${s.first.map(k=>contactHTML(k,true)).join('')}</div>
+  ${s.extra?`<p class="hextra">${tx(s.extra)}</p>`:''}
+  ${s.also.length?`<h3 class="hsub">${t('hp_also')}</h3><div class="hcs">${s.also.map(k=>contactHTML(k,false)).join('')}</div>`:''}
   <div class="hgrid">
-   ${bring.length?`<section><h3 class="hsub">${U.bring}</h3><ul class="hlist">${bring.map(b=>`<li>${b}</li>`).join('')}</ul></section>`:''}
-   <section><h3 class="hsub">${U.say}</h3><blockquote class="hsay" id="hsay">${esc(T2(s.say))}</blockquote><button class="btn line sm" data-hcopy>${U.copy}</button></section>
+   ${bring.length?`<section><h3 class="hsub">${t('hp_bring')}</h3><ul class="hlist">${bring.map(b=>`<li>${b}</li>`).join('')}</ul></section>`:''}
+   <section><h3 class="hsub">${t('hp_say')}</h3><blockquote class="hsay" id="hsay">${esc(tx(s.say))}</blockquote><button class="btn line sm" data-hcopy>${t('hp_copy')}</button></section>
   </div>
-  ${know.length?`<h3 class="hsub">${U.know}</h3><ul class="hlist">${know.map(b=>`<li>${b}</li>`).join('')}</ul>`:''}
-  ${s.site.length?`<h3 class="hsub">${U.site}</h3><div class="btnrow">${s.site.map(([h,l])=>`<a class="btn line sm" href="${h}">${HL==='es'?(SITE_ES[l]||l):l}</a>`).join('')}</div>`:''}
+  ${know.length?`<h3 class="hsub">${t('hp_know')}</h3><ul class="hlist">${know.map(b=>`<li>${b}</li>`).join('')}</ul>`:''}
+  ${s.site.length?`<h3 class="hsub">${t('hp_site')}</h3><div class="btnrow">${s.site.map(id=>`<a class="btn line sm" href="#${id}">${siteLabel(id)}</a>`).join('')}</div>`:''}
  </div>`;}
 
-V.resources=()=>{const U=HUI[HL],today=new Date().toISOString().slice(0,10),dates=HDATES.filter(x=>x.d>=today),sel=SIT.find(s=>s.id===helpSel);
- return `<div class="wrap page helpp" lang="${HL}">
- <div class="hlang" role="group" aria-label="Language / Idioma"><button data-lang="en" aria-pressed="${HL==='en'}" class="${HL==='en'?'on':''}" lang="en">English</button><button data-lang="es" aria-pressed="${HL==='es'}" class="${HL==='es'?'on':''}" lang="es">Español</button></div>
- <div class="pagehead"><h1>${U.title}</h1><p>${U.lead} ${U.free}</p></div>
- <p class="hcrisis"><b>${U.crisis}</b> ${U.crisis2} ${tel('8314592628','(831) 459-2628')} ${HL==='es'?'(marca 3 fuera de horario)':'(press 3 after hours)'}, ${U.crisis3.replace('988','<a class="tel" href="tel:988">988</a>')}</p>
+V.resources=()=>{const today=new Date().toISOString().slice(0,10),dates=HDATES.filter(x=>x.d>=today),sel=SIT.find(s=>s.id===helpSel);
+ return `<div class="wrap page helpp">
+ <div class="pagehead"><h1>${t('nav_resources')}</h1><p>${t('hp_lead')} ${t('hp_free')}</p></div>
+ <p class="hcrisis"><b>${t('hp_crisis')}</b> ${t('hp_crisis2',tel('8314592628','(831) 459-2628'),'<a class="tel" href="tel:988">988</a>')}</p>
  <div class="hwrap ${sel?'has':''}">
-  <nav class="hsits" aria-label="${U.pick}"><h2 class="hpick">${U.pick}</h2>${SIT.map(s=>`<button class="hsit ${s.id===helpSel?'on':''}" data-sit="${s.id}" aria-pressed="${s.id===helpSel}">${icon(s.ic)}<span>${T2(s.t)}</span>${icon('chev','ic chev')}</button>`).join('')}</nav>
-  <div class="hpane" aria-live="polite">${sel?sitDetail(sel):`<div class="hempty"><p>${U.choose}</p></div>`}</div>
+  <nav class="hsits" aria-label="${t('hp_pick')}"><h2 class="hpick">${t('hp_pick')}</h2>${SIT.map(s=>`<button class="hsit ${s.id===helpSel?'on':''}" data-sit="${s.id}" aria-pressed="${s.id===helpSel}">${icon(s.ic)}<span>${tx(s.t)}</span>${icon('chev','ic chev')}</button>`).join('')}</nav>
+  <div class="hpane" aria-live="polite">${sel?sitDetail(sel):`<div class="hempty"><p>${t('hp_choose')}</p></div>`}</div>
  </div>
- ${dates.length?`<section class="hdates"><h2>${U.dates}</h2>${dates.map((x,i)=>`<div class="hdate"><time datetime="${x.d}">${fmtDate(x.d)}</time><span>${T2(x.t)}</span><button class="btn line sm" data-ics="${i}">${U.addcal}</button></div>`).join('')}</section>`:''}
- <section class="htools"><h2>${U.tools}</h2><ul>${HTOOLS.map(([n,d,u])=>`<li><a href="${u}" target="_blank" rel="noopener">${n}</a><span>${T2(d)}</span></li>`).join('')}</ul></section>
- <p class="hchecked">${U.checked} ${fmtDate(CHECKED)}. ${U.wrong} <a href="https://www.linkedin.com/in/sungjun-lee-572283340" target="_blank" rel="noopener">${U.tell}</a>.</p>
+ ${dates.length?`<section class="hdates"><h2>${t('hp_dates')}</h2>${dates.map((x,i)=>`<div class="hdate"><time datetime="${x.d}">${fmtDate(x.d)}</time><span>${tx(x.t)}</span><button class="btn line sm" data-ics="${i}">${t('hp_addcal')}</button></div>`).join('')}</section>`:''}
+ <section class="htools"><h2>${t('hp_tools')}</h2><ul>${HTOOLS.map(([n,d,u])=>`<li><a href="${u}" target="_blank" rel="noopener" lang="en">${n}</a><span>${tx(d)}</span></li>`).join('')}</ul></section>
+ <p class="hchecked">${t('hp_checked',fmtDate(CHECKED))} ${LANG!=='en'?t('hp_officeen')+' ':''}${t('hp_wrong')} <a href="https://www.linkedin.com/in/sungjun-lee-572283340" target="_blank" rel="noopener">${t('hp_tell')}</a>.</p>
  </div>`;};
 
 function bindHelp(){
- $$('[data-lang]').forEach(b=>b.onclick=()=>{HL=b.dataset.lang;store.set('lang',HL);render();});
  $$('[data-sit]').forEach(b=>b.onclick=()=>{helpSel=b.dataset.sit===helpSel&&innerWidth>900?null:b.dataset.sit;render();const d=$('#hdet');if(d){d.focus({preventScroll:true});if(innerWidth<=900)d.scrollIntoView({block:'start'});}});
- $$('[data-hback]').forEach(b=>b.onclick=()=>{const id=helpSel;helpSel=null;render();const t=$(`[data-sit="${id}"]`);if(t){t.focus();if(innerWidth<=900)t.scrollIntoView({block:'center'});}});
- $$('[data-hcopy]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText($('#hsay').textContent);b.textContent=HUI[HL].copied;}catch(e){const r=document.createRange();r.selectNodeContents($('#hsay'));const s=getSelection();s.removeAllRanges();s.addRange(r);}});
+ $$('[data-hback]').forEach(b=>b.onclick=()=>{const id=helpSel;helpSel=null;render();const x=$(`[data-sit="${id}"]`);if(x){x.focus();if(innerWidth<=900)x.scrollIntoView({block:'center'});}});
+ $$('[data-hcopy]').forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText($('#hsay').textContent);b.textContent=t('hp_copied');}catch(e){const r=document.createRange();r.selectNodeContents($('#hsay'));const s=getSelection();s.removeAllRanges();s.addRange(r);}});
  const today=new Date().toISOString().slice(0,10),dates=HDATES.filter(x=>x.d>=today);
  $$('[data-ics]').forEach(b=>b.onclick=()=>{const x=dates[+b.dataset.ics],d=x.d.replace(/-/g,''),n=new Date(new Date(x.d+'T12:00:00').getTime()+864e5).toISOString().slice(0,10).replace(/-/g,'');
-  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Slugonomics//Campus help//EN','BEGIN:VEVENT',`UID:${d}-${Date.now()}@slugonomics`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,`DTSTART;VALUE=DATE:${d}`,`DTEND;VALUE=DATE:${n}`,`SUMMARY:${T2(x.t).replace(/,/g,'\\,')}`,`URL:${x.u}`,'BEGIN:VALARM','TRIGGER:-P7D','ACTION:DISPLAY','DESCRIPTION:Reminder','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
-  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));a.download=`slugonomics-${x.d}.ics`;document.body.appendChild(a);a.click();a.remove();});
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Slugonomics//Campus help//EN','BEGIN:VEVENT',`UID:${d}-${Date.now()}@slugonomics`,`DTSTAMP:${new Date().toISOString().replace(/[-:]/g,'').slice(0,15)}Z`,`DTSTART;VALUE=DATE:${d}`,`DTEND;VALUE=DATE:${n}`,`SUMMARY:${tx(x.t).replace(/,/g,'\\,')}`,`URL:${x.u}`,'BEGIN:VALARM','TRIGGER:-P7D','ACTION:DISPLAY','DESCRIPTION:Reminder','END:VALARM','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar;charset=utf-8'}));a.download=`slugonomics-${x.d}.ics`;document.body.appendChild(a);a.click();a.remove();});
 }
 
 /* ----- plan ----- */
@@ -1138,45 +1491,37 @@ V.plan=()=>{
  const gains=done.filter(p=>S.paths[p.id].c0&&S.paths[p.id].c1);
  const avg=k=>gains.reduce((s,p)=>s+S.paths[p.id][k],0)/gains.length;
  const tried=PATHS.filter(p=>S.paths[p.id]?.gut!=null);
- if(!items.length&&!done.length)return `<div class="wrap page"><div class="pagehead"><h1>My plan</h1><p>Your next steps show up here once you finish a decision.</p></div>
-  <div class="empty"><h3>Nothing here yet</h3><p class="muted">Finish any decision and choose at least one step. It takes about 7 minutes.</p><div class="btnrow"><a class="btn slug" href="#checkup">Find my first decision</a><a class="btn line" href="#paths">Browse decisions</a></div></div></div>`;
- return `<div class="wrap page"><div class="pagehead"><h1>My plan</h1><p>The steps you chose. Check them off as you go.</p></div>
- <div class="summary"><div><b>${done.length} of ${PATHS.length}</b><span>decisions finished</span></div><div><b>${finished} of ${items.length}</b><span>steps done</span></div>
- <div><b>${gains.length?avg('c0').toFixed(1)+' to '+avg('c1').toFixed(1):'None yet'}</b><span>average confidence, before to after</span></div><div><b>${tried.length?tried.filter(p=>S.paths[p.id].gut===p.gut.a).length+' of '+tried.length:'None yet'}</b><span>first guesses that were right</span></div></div>
- <div class="meter" aria-label="${finished} of ${items.length} steps done"><div style="width:${items.length?finished/items.length*100:0}%"></div></div>
- <div style="margin-top:12px">${PATHS.filter(p=>items.some(x=>x.path===p.id)).map(p=>`<div class="plangroup"><h3>${icon(PICON[p.id])}${p.title}</h3>${items.map((x,i)=>x.path!==p.id?'':`<label class="planitem ${x.done?'done':''}"><input type="checkbox" id="pi-${i}" data-done="${i}" ${x.done?'checked':''}><span><b>${esc(x.t)}</b>${x.w?`<small>${x.href?`<a href="${x.href}" target="_blank" rel="noopener">${esc(x.w)}</a>`:esc(x.w)}</small>`:''}</span></label>`).join('')}</div>`).join('')}</div>
- <div class="btnrow" style="margin-top:28px"><button class="btn" id="copyplan">Copy plan as text</button><a class="btn line" href="#paths">Do another decision</a><button class="btn line" id="resetall">Clear everything</button></div>
+ if(!items.length&&!done.length)return `<div class="wrap page"><div class="pagehead"><h1>${t('nav_plan')}</h1><p>${t('plan_empty_p')}</p></div>
+  <div class="empty"><h3>${t('plan_none')}</h3><p class="muted">${t('plan_none_p')}</p><div class="btnrow"><a class="btn slug" href="#checkup">${t('plan_first')}</a><a class="btn line" href="#paths">${t('plan_browse')}</a></div></div></div>`;
+ return `<div class="wrap page"><div class="pagehead"><h1>${t('nav_plan')}</h1><p>${t('plan_p')}</p></div>
+ <div class="summary"><div><b>${t('of',done.length,PATHS.length)}</b><span>${t('s_dec')}</span></div><div><b>${t('of',finished,items.length)}</b><span>${t('s_steps')}</span></div>
+ <div><b>${gains.length?t('to',avg('c0').toFixed(1),avg('c1').toFixed(1)):t('none_yet')}</b><span>${t('s_conf')}</span></div><div><b>${tried.length?t('of',tried.filter(p=>S.paths[p.id].gut===p.gut.a).length,tried.length):t('none_yet')}</b><span>${t('s_guess')}</span></div></div>
+ <div class="meter" aria-label="${t('of',finished,items.length)} ${t('s_steps')}"><div style="width:${items.length?finished/items.length*100:0}%"></div></div>
+ <div style="margin-top:12px">${PATHS.filter(p=>items.some(x=>x.path===p.id)).map(p=>`<div class="plangroup"><h3>${icon(PICON[p.id])}${pathTitle(p.id)}</h3>${items.map((x,i)=>x.path!==p.id?'':`<label class="planitem ${x.done?'done':''}" lang="en"><input type="checkbox" id="pi-${i}" data-done="${i}" ${x.done?'checked':''}><span><b>${esc(x.t)}</b>${x.w?`<small>${x.href?`<a href="${x.href}" target="_blank" rel="noopener">${esc(x.w)}</a>`:esc(x.w)}</small>`:''}</span></label>`).join('')}</div>`).join('')}</div>
+ <div class="btnrow" style="margin-top:28px"><button class="btn" id="copyplan">${t('plan_copy')}</button><a class="btn line" href="#paths">${t('plan_another')}</a><button class="btn line" id="resetall">${t('plan_clear')}</button></div>
  <div id="resetconfirm"></div>
- <p class="note" style="margin-top:14px">Your plan is saved only in this browser. Copy it into your notes or calendar so you don't lose it.</p></div>`;
+ <p class="note" style="margin-top:14px">${t('plan_note')}</p></div>`;
 };
 function bindPlan(){
  $$('[data-done]').forEach(c=>c.onchange=()=>{S.plan[+c.dataset.done].done=c.checked;save();render();});
  const cp=$('#copyplan');if(cp)cp.onclick=async()=>{
-  const txt='My Slugonomics plan\n\n'+PATHS.filter(p=>S.plan.some(x=>x.path===p.id)).map(p=>p.title+'\n'+S.plan.filter(x=>x.path===p.id).map(x=>`[${x.done?'x':' '}] ${x.t}${x.w?' ('+x.w+')':''}${x.href?' '+x.href:''}`).join('\n')).join('\n\n');
-  try{await navigator.clipboard.writeText(txt);toast('Plan copied');}catch(e){$('#resetconfirm').innerHTML=`<textarea class="copybox" id="copybox" readonly>${esc(txt)}</textarea><p class="note">Copying isn't available here. Select the text above and copy it.</p>`;}};
- const r=$('#resetall');if(r)r.onclick=()=>{$('#resetconfirm').innerHTML=`<div class="fb bad" style="margin-top:16px"><h4>Clear all progress and your plan?</h4><p style="margin-bottom:12px">This can't be undone.</p><button class="btn" id="resetyes">Clear everything</button></div>`;$('#resetyes').onclick=()=>{S={paths:{},plan:[],checkup:null};save();ck={i:0,a:[]};render();toast('Everything cleared');};};
+  const txt=t('plan_title')+'\n\n'+PATHS.filter(p=>S.plan.some(x=>x.path===p.id)).map(p=>pathTitle(p.id)+'\n'+S.plan.filter(x=>x.path===p.id).map(x=>`[${x.done?'x':' '}] ${x.t}${x.w?' ('+x.w+')':''}${x.href?' '+x.href:''}`).join('\n')).join('\n\n');
+  try{await navigator.clipboard.writeText(txt);toast(t('plan_copied'));}catch(e){$('#resetconfirm').innerHTML=`<textarea class="copybox" id="copybox" readonly>${esc(txt)}</textarea><p class="note">${t('plan_nocopy')}</p>`;}};
+ const r=$('#resetall');if(r)r.onclick=()=>{$('#resetconfirm').innerHTML=`<div class="fb bad" style="margin-top:16px"><h4>${t('plan_sure')}</h4><p style="margin-bottom:12px">${t('plan_undo')}</p><button class="btn" id="resetyes">${t('plan_clear')}</button></div>`;$('#resetyes').onclick=()=>{S={paths:{},plan:[],checkup:null};save();ck={i:0,a:[]};render();toast(t('plan_cleared'));};};
 }
 
 /* ----- about / comparison ----- */
-V.why=()=>`<div class="wrap page"><div class="pagehead"><h1>About Slugonomics</h1><p>Most college financial wellness platforms are large libraries. iGrad, which hundreds of universities license, offers articles, videos, courses, calculators and games, personalized by a sign-up checkup. That breadth is useful. Students usually arrive at one specific moment, though: an aid offer, a lease, a card offer. Slugonomics is built for that moment.</p></div>
- <div class="scroll"><table class="cmp"><thead><tr><th></th><th>Typical platform (e.g. iGrad)</th><th>Slugonomics</th></tr></thead><tbody>
- <tr><td>Where you start</td><td>A wellness checkup, then recommended content</td><td>The decision you're facing right now</td></tr>
- <tr><td>Main format</td><td>Articles, videos and mini-courses</td><td>Five-step decision walkthroughs</td></tr>
- <tr><td>Practice</td><td>Calculators and short games</td><td>A calculator inside every decision, plus three full simulators</td></tr>
- <tr><td>Local detail</td><td>National content with school branding</td><td>Santa Cruz rent, UCSC quarters and aid timing, named campus offices</td></tr>
- <tr><td>What you leave with</td><td>Points, badges and completed modules</td><td>A personal list of next steps</td></tr>
- <tr><td>Measuring learning</td><td>Usage reports for administrators</td><td>A guess before and after, plus confidence ratings</td></tr>
- <tr><td>Access</td><td>School-paid license with campus sign-in</td><td>Free, open link, no account</td></tr>
- <tr><td>Who makes it</td><td>A fintech company</td><td>Sungjun Lee, a UCSC student who just made these decisions</td></tr>
+V.why=()=>`<div class="wrap page"><div class="pagehead"><h1>${t('why_h')}</h1><p>${t('why_p')}</p></div>
+ <div class="scroll"><table class="cmp"><thead><tr><th></th><th>${t('cmp_typ')}</th><th>Slugonomics</th></tr></thead><tbody>
+ ${STR.cmp.map(r=>`<tr><td>${row4(r[0])}</td><td>${row4(r[1])}</td><td>${row4(r[2])}</td></tr>`).join('')}
  </tbody></table></div>
- <section style="margin-top:72px"><h2>What's next</h2>
- <div class="gaps"><div><h3>More decisions</h3><p>Six decisions today. New ones get chosen from what students ask for in interviews.</p></div>
- <div><h3>Campus dashboard</h3><p>A privacy-reviewed view for campus staff to see learning results across students, without tracking individuals.</p></div>
- <div><h3>Official review</h3><p>Our numbers follow 2026 federal and California rules. The next step is a review by UCSC Financial Aid.</p></div></div></section>
- <section style="margin-top:64px;padding-top:32px;border-top:1px solid var(--line)"><h2>About us</h2><p class="muted" style="margin-top:10px">Slugonomics is created by Sungjun Lee, UC Santa Cruz.</p></section></div>`;
+ <section style="margin-top:72px"><h2>${t('next_h')}</h2>
+ <div class="gaps">${STR.nx.map(r=>`<div><h3>${row4(r[0])}</h3><p>${row4(r[1])}</p></div>`).join('')}</div></section>
+ <section style="margin-top:64px;padding-top:32px;border-top:1px solid var(--line)"><h2>${t('us_h')}</h2><p class="muted" style="margin-top:10px">${t('us_p')}</p></section></div>`;
 
 /* ==================== router ==================== */
 function render(){
+ applyChrome();
  const h=(location.hash||'#home').slice(1)||'home';
  const app=$('#app');let html,after=null,nav=h;
  if(PATH[h]){html=pathView(PATH[h]);after=()=>bindPath(PATH[h]);nav='paths';}
