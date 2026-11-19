@@ -256,7 +256,7 @@ main{min-height:60vh}
 .numbox::-webkit-inner-spin-button,.numbox::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 .numbox:focus{outline:none;border-color:var(--ink);background:var(--surface)}
 .field .hint{font-size:.82rem;color:var(--muted);margin-top:2px;line-height:1.4}
-.out{padding:24px;background:var(--paper)}
+.out{padding:24px;background:var(--paper);scroll-margin-top:84px}
 .out .eyebrow{font-weight:600;font-size:.92rem;color:var(--muted)}
 .out .big{font-size:2.7rem;font-weight:800;line-height:1.05;color:var(--ink);letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin-top:2px}
 .out .big .small{font-size:1rem;font-weight:600;letter-spacing:0}
@@ -427,6 +427,47 @@ footer .brand{font-size:1rem;margin-bottom:10px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:8px;font-weight:700;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s;z-index:50}
 .toast.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* calculators v2 */
+.sr{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.out .sub{color:var(--muted);margin-top:6px;font-size:.95rem}
+.out .big.warn{color:var(--bad)}
+.field .lab{font-weight:600;font-size:.93rem;color:var(--ink);margin-bottom:8px}
+.seg{display:flex;gap:4px;padding:4px;background:var(--sunk);border-radius:10px}
+.seg button{flex:1;font:inherit;font-weight:700;font-size:.92rem;padding:8px 10px;min-height:42px;border:0;border-radius:7px;background:transparent;color:var(--muted);cursor:pointer}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-checked="true"]{background:var(--surface);color:var(--ink);box-shadow:0 0 0 1.5px var(--ink)}
+.seg button:focus-visible,.numbox:focus-visible{outline:2px solid var(--sea);outline-offset:2px}
+.seg button{line-height:1.2}
+.numbox{width:9ch}
+.toolfoot{margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}
+.toolfoot .hint{font-size:.84rem;color:var(--muted);margin:0}
+.toolacts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.toolacts .btn.sm{padding:9px 13px;font-size:.88rem}
+.wkchart{margin:18px 0 6px}
+.wkchart .cap{font-size:.85rem;font-weight:600;color:var(--muted);margin-bottom:8px}
+.wkchart .plot{position:relative;display:grid;grid-template-columns:repeat(11,1fr);gap:4px;height:104px;margin:0 0 24px 22px}
+.wkchart .zero{position:absolute;left:0;right:0;border-top:1.5px solid var(--ink);z-index:1;pointer-events:none}
+.wkchart .zero span{position:absolute;right:100%;top:-.62em;padding-right:4px;font-size:.66rem;font-weight:700;color:var(--muted)}
+.wkchart .wk{position:relative;display:flex;flex-direction:column}
+.wkchart .col{position:relative;flex:1}
+.wkchart .col i{position:absolute;left:0;right:0;background:var(--good);border-radius:2px}
+.wkchart .wk.neg .col i{background:repeating-linear-gradient(135deg,var(--bad) 0 4px,var(--bad-bg) 4px 7px);box-shadow:inset 0 0 0 1.5px var(--bad)}
+.wkchart .wk>span{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:.68rem;font-weight:700;color:var(--muted);font-variant-numeric:tabular-nums}
+.wkchart .wk.neg>span{color:var(--bad)}
+.goalbar{height:10px;border-radius:5px;background:var(--sunk);overflow:hidden;margin:16px 0 6px}
+.goalbar div{height:100%;background:var(--good);border-radius:5px}
+.dock{position:fixed;left:12px;right:12px;bottom:max(12px,env(safe-area-inset-bottom));z-index:40;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 12px 12px 16px;background:var(--ink);color:var(--paper);border-radius:12px;box-shadow:0 8px 28px rgba(16,37,31,.28);font-weight:650;font-size:.92rem;line-height:1.3}
+.dock[hidden]{display:none}
+.dock button{flex:none;background:var(--slug);color:var(--slug-ink);border:0;border-radius:8px;font:inherit;font-weight:700;padding:9px 12px;cursor:pointer}
+@media (min-width:761px){.dock{display:none!important}}
+@media (max-width:520px){.out .big{font-size:2.25rem}}
+.savedcalc{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+.savedcalc>.ic{flex:none}
+.savedcalc>span{flex:1;min-width:0;display:flex;flex-direction:column}
+.savedcalc small{color:var(--muted);font-size:.88rem}
+.savedcalc .btn.sm{padding:8px 12px;font-size:.86rem}
+@media (max-width:520px){.savedcalc{flex-wrap:wrap}.savedcalc>span{flex-basis:calc(100% - 40px)}}
 </style>
 </head>
 <body>
@@ -476,7 +517,7 @@ const store={get(k,d){try{const v=localStorage.getItem('slugo:'+k);return v==nul
 let S=store.get('state',{paths:{},plan:[],checkup:null});
 const save=()=>{store.set('state',S);updCount();};
 function updCount(){const n=S.plan.filter(x=>!x.done).length,el=$('#planct');if(!el)return;el.hidden=!n;el.textContent=n;}
-function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2200);}
+function toast(t){const el=$('#toast');const d=document.querySelector('.dock:not([hidden])');el.style.bottom=d&&d.offsetParent!==null?(window.innerHeight-d.getBoundingClientRect().top+10)+'px':'';el.textContent=t;el.classList.add('show');clearTimeout(toast._t);toast._t=setTimeout(()=>el.classList.remove('show'),2200);}
 /* ==================== languages ====================
    Hand-written translations. Each entry is [English, Spanish, Korean, Simplified Chinese].
    Office and program names stay in English, because that's what students see on campus signs and websites. */
@@ -616,12 +657,82 @@ const STR={
  tools_p:['Each one answers a question students actually ask. All of them use 2026 federal and California rules.','Cada una responde una pregunta que los estudiantes de verdad hacen. Todas usan las reglas federales y de California de 2026.','학생들이 실제로 궁금해하는 질문에 하나씩 답해 줘요. 모두 2026년 연방 및 캘리포니아 기준을 사용해요.','每个计算器都回答一个学生真正关心的问题，全部采用 2026 年联邦和加州规定。'],
  tools_next:[(x,tm)=>`<b>Turn these numbers into a decision.</b> ${x} takes about ${tm} and ends with a plan.`,(x,tm)=>`<b>Convierte estos números en una decisión.</b> ${x} toma unos ${tm} y termina con un plan.`,(x,tm)=>`<b>이 숫자를 결정으로 바꿔 보세요.</b> ${x}는 약 ${tm} 정도 걸리고 계획으로 마무리돼요.`,(x,tm)=>`<b>把这些数字变成决定。</b>${x} 大约需要 ${tm}，最后会得到一份计划。`],
  start_dec:['Start the decision','Empezar la decisión','가이드 시작하기','开始这个决定'],
- slide_hint:['Slide, or type any amount in the box. Typing a bigger number stretches the slider.','Desliza o escribe cualquier cantidad en la casilla. Si escribes un número mayor, el control se amplía.','슬라이더를 움직이거나 칸에 금액을 직접 입력하세요. 더 큰 숫자를 입력하면 슬라이더 범위가 늘어나요.','拖动滑块，或在框中直接输入任意金额。输入更大的数字时，滑块范围会自动扩大。'],
  type_any:['type any amount','escribe cualquier cantidad','금액 직접 입력','输入任意金额'],
  yes:['Yes','Sí','예','是'],no:['No','No','아니요','否'],
  u_y:['y','años','년','年'],u_h:['h','h','시간','小时'],u_w:['w','sem.','주','周'],u_mo:['mo','meses','개월','个月'],'u_×':['×','×','회','次'],
  calc_of:[n=>`${n} calculator`,n=>`Calculadora: ${n}`,n=>`${n} 계산기`,n=>`${n}计算器`],
  per_week:['/week','/semana','/주','/周'],per_mo:['/mo','/mes','/월','/月'],per_year:['/year','/año','/년','/年'],
+ slide_hint:['Slide, or tap a number to type any amount.','Desliza o toca un número para escribir cualquier cantidad.','슬라이더를 움직이거나 숫자를 눌러 원하는 금액을 입력하세요.','拖动滑块，或点数字直接输入任意金额。'],
+ reset:['Reset','Restablecer','초기화','重置'],
+ reset_done:['Back to the starting numbers','De vuelta a los números iniciales','처음 숫자로 돌아갔어요','已恢复初始数字'],
+ share:['Copy link','Copiar enlace','링크 복사','复制链接'],
+ shared:['Link copied. It opens with these numbers.','Enlace copiado. Se abre con estos números.','링크를 복사했어요. 이 숫자 그대로 열려요.','链接已复制，打开后会显示这些数字。'],
+ nolink:['Copy the address bar to share these numbers.','Copia la barra de direcciones para compartir estos números.','주소창을 복사하면 이 숫자를 공유할 수 있어요.','复制地址栏即可分享这些数字。'],
+ savecalc:['Save to My plan','Guardar en Mi plan','내 계획에 저장','保存到我的计划'],
+ savedcalc:['Saved to My plan','Guardado en Mi plan','내 계획에 저장했어요','已保存到我的计划'],
+ seeres:['See result','Ver resultado','결과 보기','查看结果'],
+ j_campus:['On campus','En el campus','교내','校内'],
+ j_off:['Off campus','Fuera del campus','교외','校外'],
+ j_gig:['Gig app','App de encargos','긱 앱','零工平台'],
+ plan_saved:['Saved numbers','Números guardados','저장한 숫자','保存的数字'],
+ plan_open:['Open','Abrir','열기','打开'],
+ plan_remove:['Remove','Quitar','삭제','移除'],
+ b_eyebrow:['Will it last until finals?','¿Te alcanza hasta los finales?','기말까지 버틸 수 있을까요?','能撑到期末吗？'],
+ b_all:['Lasts all 11 weeks','Alcanza las 11 semanas','11주 내내 버텨요','能撑满 11 周'],
+ b_runs:[w=>`Runs out in week ${w}`,w=>`Se acaba en la semana ${w}`,w=>`${w}주차에 바닥나요`,w=>`第 ${w} 周用完`],
+ b_spend:[x=>`You spend about ${x} a week.`,x=>`Gastas unos ${x} por semana.`,x=>`일주일에 약 ${x}를 써요.`,x=>`你每周大约花 ${x}。`],
+ b_chart:['Money left at the end of each week','Dinero que te queda al final de cada semana','매주 말에 남는 돈','每周结束时剩下的钱'],
+ b_legend:['A bar below the $0 line means you\'re out of money that week.','Una barra debajo de la línea de $0 significa que esa semana ya no tienes dinero.','$0 선 아래 막대는 그 주에 돈이 바닥났다는 뜻이에요.','柱子低于 $0 线，表示那一周钱已经用完。'],
+ f_loancost_amt:['Amount you borrow each year','Cantidad que pides cada año','매년 빌리는 금액','每年借款金额'],
+ f_loancost_nyr:['Years you borrow','Años que pides préstamo','대출받는 햇수','借款年数'],
+ h_loancost_nyr:['Most students take a new loan each school year. Federal limits for dependent undergrads: $5,500 in year 1, $6,500 in year 2, $7,500 after that.','La mayoría pide un préstamo nuevo cada año escolar. Límites federales para estudiantes dependientes: $5,500 el año 1, $6,500 el año 2 y $7,500 después.','대부분 학년마다 새로 대출을 받아요. 부양 학부생 연방 한도: 1학년 $5,500, 2학년 $6,500, 그 이후 $7,500.','大多数学生每个学年都会借一笔新贷款。受抚养本科生的联邦上限：第一年 $5,500，第二年 $6,500，之后每年 $7,500。'],
+ f_loancost_school:['Years from first loan to first payment (school + 6-month grace)','Años desde el primer préstamo hasta el primer pago (escuela + 6 meses de gracia)','첫 대출부터 첫 상환까지 (재학 + 6개월 유예)','从第一笔贷款到第一次还款的年数（在校 + 6 个月宽限期）'],
+ f_loancost_sub:['Subsidized loan?','¿Préstamo subsidiado?','보조금 대출(subsidized)인가요?','是补贴贷款吗？'],
+ l_tier:[(n,b)=>`Repayment term: ${n} years. For loans made after July 1, 2026, the federal Tiered Standard plan sets it from what you borrowed (${b}).`,(n,b)=>`Plazo de pago: ${n} años. Para préstamos desde el 1 de julio de 2026, el plan federal Tiered Standard lo fija según lo que pediste (${b}).`,(n,b)=>`상환 기간: ${n}년. 2026년 7월 1일 이후 대출은 연방 Tiered Standard 플랜이 빌린 금액(${b})에 따라 기간을 정해요.`,(n,b)=>`还款期：${n} 年。2026 年 7 月 1 日之后的贷款，由联邦 Tiered Standard 计划根据借款总额（${b}）决定期限。`],
+ l_borrowN:[n=>`You borrow (${n} loans)`,n=>`Pides prestado (${n} préstamos)`,n=>`빌리는 금액 (대출 ${n}건)`,n=>`借款总额（${n} 笔）`],
+ l_each:[x=>`Each extra $1,000 you borrow adds about <b>${x}</b> to what you repay.`,x=>`Cada $1,000 adicionales que pides suman unos <b>${x}</b> a lo que pagas.`,x=>`$1,000을 더 빌릴 때마다 갚을 돈이 약 <b>${x}</b> 늘어나요.`,x=>`每多借 $1,000，最终要还的钱就增加约 <b>${x}</b>。`],
+ l_int:[x=>` Paying just the interest while in school (about ${x}/mo for each year's loan) stops it from piling up.`,x=>` Pagar solo los intereses mientras estudias (unos ${x}/mes por cada préstamo anual) evita que se acumulen.`,x=>` 재학 중 이자만이라도 내면(연간 대출 1건당 월 약 ${x}) 이자가 쌓이지 않아요.`,x=>` 在校期间只付利息（每笔年度贷款每月约 ${x}），就能避免利息越积越多。`],
+ l_rap:[' If the payment is too high, the Repayment Assistance Plan (RAP) sets it from your income instead.',' Si el pago es demasiado alto, el Repayment Assistance Plan (RAP) lo calcula según tus ingresos.',' 상환액이 너무 크면 Repayment Assistance Plan(RAP)으로 소득에 맞춰 낼 수 있어요.',' 如果月供太高，可以改用 Repayment Assistance Plan（RAP），按收入计算还款额。'],
+ f_cardpayoff_goal:['Debt-free goal','Meta para quedar sin deuda','빚 청산 목표','还清目标'],
+ h_cardpayoff_goal:['How many months from now you want the card paid off.','En cuántos meses quieres terminar de pagar la tarjeta.','몇 개월 안에 카드 빚을 다 갚고 싶은지 정하세요.','你希望几个月内还清这张卡。'],
+ c_goal:[(n,x)=>`To be debt-free in ${n} months, pay ${x}/mo.`,(n,x)=>`Para quedar sin deuda en ${n} meses, paga ${x}/mes.`,(n,x)=>`${n}개월 안에 다 갚으려면 매달 ${x}를 내세요.`,(n,x)=>`想在 ${n} 个月内还清，每月需还 ${x}。`],
+ c_goalint:[x=>` Interest along the way: ${x}.`,x=>` Intereses en el camino: ${x}.`,x=>` 그동안 내는 이자: ${x}.`,x=>` 期间利息共 ${x}。`],
+ f_paycalc_job:['Type of job','Tipo de trabajo','일의 종류','工作类型'],
+ h_paycalc_job:['Campus jobs while you\'re enrolled at least half-time usually skip Social Security and Medicare. Gig apps (DoorDash, Uber, Instacart) withhold nothing, so you set taxes aside yourself.','Los trabajos en el campus mientras estudias al menos medio tiempo normalmente no pagan Social Security ni Medicare. Las apps de encargos (DoorDash, Uber, Instacart) no retienen nada, así que tú apartas los impuestos.','하프타임 이상 재학 중 교내 근무는 보통 Social Security와 Medicare가 면제돼요. 긱 앱(DoorDash, Uber, Instacart)은 아무것도 떼지 않으니 세금을 직접 떼어 둬야 해요.','至少半日制在读期间的校内工作通常免缴 Social Security 和 Medicare。零工平台（DoorDash、Uber、Instacart）不预扣任何税，要自己留出税款。'],
+ g_take:['Paid every two weeks (nothing withheld)','Pago cada dos semanas (sin retenciones)','2주마다 받는 돈 (원천징수 없음)','每两周到账（不预扣税）'],
+ g_set:['Set aside for taxes','Aparta para impuestos','세금용으로 떼어둘 돈','留出缴税'],
+ g_se:['Self-employment tax (15.3%)','Impuesto de autoempleo (15.3%)','자영업세 (15.3%)','自雇税（15.3%）'],
+ g_fed:['Federal income tax','Impuesto federal sobre la renta','연방 소득세','联邦所得税'],
+ g_ca:['California income tax','Impuesto estatal de California','캘리포니아 소득세','加州所得税'],
+ g_from:[(h,w)=>`${h} hrs × 2 weeks × ${w}. Set aside your share of these taxes:`,(h,w)=>`${h} h × 2 semanas × ${w}. Aparta tu parte de estos impuestos:`,(h,w)=>`${h}시간 × 2주 × ${w}. 이 세금만큼 떼어 두세요:`,(h,w)=>`${h} 小时 × 2 周 × ${w}。请为以下税款留出相应金额：`],
+ g_keep:['What you can actually spend','Lo que realmente puedes gastar','실제로 쓸 수 있는 돈','真正能花的钱'],
+ g_verdict:[(x,y)=>`Move ${x} from every two-week payout into savings for taxes. You'll owe about ${y} for the year.`,(x,y)=>`Pasa ${x} de cada pago quincenal a ahorros para impuestos. Deberás unos ${y} en el año.`,(x,y)=>`2주마다 받는 돈에서 ${x}를 세금용 저축으로 옮기세요. 1년 동안 약 ${y}를 내야 해요.`,(x,y)=>`每两周的收入里转 ${x} 到储蓄账户留作税款。全年大约要缴 ${y}。`],
+ g_quarterly:[' If you\'ll owe $1,000 or more, the IRS expects quarterly estimated payments.',' Si vas a deber $1,000 o más, el IRS espera pagos estimados trimestrales.',' $1,000 이상 낼 것 같으면 IRS에 분기별 예정세를 내야 해요.',' 如果全年要缴 $1,000 或以上，IRS 要求按季度预缴税款。'],
+ g_why:['Apps send you a 1099 instead of a W-2, so no one withholds tax for you. Track your miles: business driving is deductible and can cut what you owe. Estimate assumes no expenses and single-filer 2026 rules.','Las apps te mandan un 1099 en vez de un W-2, así que nadie te retiene impuestos. Anota tus millas: manejar por trabajo es deducible y puede bajar lo que debes. La estimación supone cero gastos y las reglas de 2026 para declarantes solteros.','앱은 W-2 대신 1099를 보내서 아무도 세금을 떼 주지 않아요. 운행 거리를 기록하세요. 업무용 운전은 공제돼서 낼 세금이 줄어요. 비용 없음, 2026년 단독 신고 기준으로 추정했어요.','平台给你的是 1099 而不是 W-2，所以没人替你预扣税。记录里程：工作用车可以抵扣，能少缴不少税。估算假设没有业务支出，按 2026 年单身报税规则计算。'],
+ tn_savegoal:['Savings Goal','Meta de ahorro','저축 목표','储蓄目标'],
+ tb_savegoal:['Pick a goal and a deadline. See what to set aside each week.','Elige una meta y una fecha. Mira cuánto apartar cada semana.','목표 금액과 기한을 정하면 매주 얼마를 모아야 하는지 보여 드려요.','定一个目标和期限，看看每周该存多少。'],
+ f_savegoal_goal:['Amount you need','Cantidad que necesitas','필요한 금액','需要的金额'],
+ h_savegoal_goal:['Common goals: a $1,000 emergency fund, fall move-in costs, a laptop.','Metas comunes: un fondo de emergencia de $1,000, la mudanza de otoño, una laptop.','흔한 목표: $1,000 비상금, 가을 입주 비용, 노트북.','常见目标：$1,000 应急金、秋季入住费用、一台笔记本电脑。'],
+ f_savegoal_have:['Already saved','Ya ahorrado','이미 모은 돈','已经存了'],
+ f_savegoal_weeks:['Weeks until you need it','Semanas hasta que lo necesitas','필요할 때까지 남은 주','距离需要还有几周'],
+ h_savegoal_weeks:['A quarter is about 11 weeks. A school year is about 40.','Un trimestre son unas 11 semanas. Un año escolar, unas 40.','쿼터 하나는 약 11주, 1년은 약 40주예요.','一个学季约 11 周，一个学年约 40 周。'],
+ f_savegoal_apy:['Interest your savings account pays (APY)','Interés de tu cuenta de ahorros (APY)','저축 계좌 이자율 (APY)','储蓄账户利率（APY）'],
+ h_savegoal_apy:['Most checking accounts pay close to 0%. High-yield savings accounts at banks and credit unions pay more. Check today\'s rate before you open one.','La mayoría de las cuentas de cheques pagan casi 0%. Las cuentas de ahorro de alto rendimiento en bancos y cooperativas pagan más. Revisa la tasa actual antes de abrir una.','대부분의 입출금 계좌 이자는 0%에 가까워요. 은행과 신용조합의 고금리 저축 계좌가 더 많이 줘요. 개설 전에 현재 금리를 확인하세요.','大多数支票账户利率接近 0%。银行和信用合作社的高收益储蓄账户利率更高，开户前先查当前利率。'],
+ sg_need:['Set aside each week','Aparta cada semana','매주 모을 돈','每周存入'],
+ sg_for:[(x,n)=>`to reach ${x} in ${n} weeks.`,(x,n)=>`para llegar a ${x} en ${n} semanas.`,(x,n)=>`${n}주 안에 ${x}를 모으려면요.`,(x,n)=>`才能在 ${n} 周内存够 ${x}。`],
+ sg_have:[(x,p)=>`You already have ${x} (${p}% of the way).`,(x,p)=>`Ya tienes ${x} (${p}% del camino).`,(x,p)=>`이미 ${x}가 있어요 (${p}% 달성).`,(x,p)=>`你已经有 ${x}（完成 ${p}%）。`],
+ sg_mo:['Per month (about)','Por mes (aprox.)','한 달 기준 (약)','每月（约）'],
+ sg_in:['You put in','Tú aportas','내가 넣는 돈','你存入'],
+ sg_int:['Interest earned','Intereses ganados','받는 이자','赚到的利息'],
+ sg_reach:['Goal','Meta','목표','目标'],
+ sg_done:['You already have enough. Goal reached.','Ya tienes suficiente. Meta cumplida.','이미 충분해요. 목표 달성!','钱已经够了，目标达成。'],
+ sg_round:[(x,n)=>`Round up to ${x} a week and you get there in ${n} weeks.`,(x,n)=>`Redondea a ${x} por semana y llegas en ${n} semanas.`,(x,n)=>`매주 ${x}로 올려 잡으면 ${n}주 만에 도착해요.`,(x,n)=>`每周凑整存 ${x}，${n} 周就能达成。`],
+ sg_auto:['Set up an automatic transfer on payday. Money that moves before you see it is money you don\'t spend.','Programa una transferencia automática el día de pago. El dinero que se mueve antes de que lo veas es dinero que no gastas.','월급날 자동 이체를 걸어 두세요. 보기 전에 옮겨진 돈은 쓰지 않게 돼요.','在发薪日设置自动转账。还没看到就被转走的钱，你就不会花掉。'],
+ sg_long:[' For goals 5+ years away, low-cost index funds have historically grown faster than savings, but they can drop in any year. Keep money you need soon in savings.',' Para metas a 5 años o más, los fondos indexados de bajo costo históricamente han crecido más que los ahorros, pero pueden bajar cualquier año. El dinero que necesitas pronto, mantenlo en ahorros.',' 5년 이상 남은 목표라면 저비용 인덱스 펀드가 역사적으로 저축보다 많이 올랐지만, 어느 해든 떨어질 수 있어요. 곧 쓸 돈은 저축에 두세요.',' 对于 5 年以上的目标，低成本指数基金历史上比储蓄增长更快，但任何一年都可能下跌。近期要用的钱，放在储蓄里。'],
+ f_rent_deposit:['Security deposit (your share)','Depósito de garantía (tu parte)','보증금 (내 몫)','押金（你的份额）'],
+ h_rent_deposit:['California caps most security deposits at one month\'s rent.','California limita la mayoría de los depósitos a un mes de renta.','캘리포니아는 대부분의 보증금을 월세 1개월분으로 제한해요.','加州规定大多数押金不得超过一个月房租。'],
+ r_dep_hi:[x=>`That deposit is more than one month's rent. Since July 2024, California caps most deposits at one month (${x}). Only small landlords can ask for up to two. Not sure which yours is? Ask <a href="#resources">Tenant Sanctuary</a>, free.`,x=>`Ese depósito es más de un mes de renta. Desde julio de 2024, California limita la mayoría a un mes (${x}). Solo los propietarios pequeños pueden pedir hasta dos. ¿No sabes cuál es el tuyo? Pregunta gratis en <a href="#resources">Tenant Sanctuary</a>.`,x=>`보증금이 월세 1개월분보다 많아요. 2024년 7월부터 캘리포니아는 대부분의 보증금을 1개월분(${x})으로 제한해요. 소규모 집주인만 2개월분까지 받을 수 있어요. 잘 모르겠다면 <a href="#resources">Tenant Sanctuary</a>에 무료로 물어보세요.`,x=>`押金超过了一个月房租。自 2024 年 7 月起，加州规定大多数押金最多一个月（${x}），只有小房东可以收到两个月。不确定你的房东属于哪种？可以免费咨询 <a href="#resources">Tenant Sanctuary</a>。`],
+ r_dep_over:[x=>`That's over California's limit for any landlord (two months' rent, ${x}). Don't pay it. Talk to <a href="#resources">Tenant Sanctuary</a> first, free.`,x=>`Eso supera el límite de California para cualquier propietario (dos meses de renta, ${x}). No lo pagues. Habla primero con <a href="#resources">Tenant Sanctuary</a>, gratis.`,x=>`어떤 집주인이든 캘리포니아 한도(월세 2개월분, ${x})를 넘어요. 내지 말고 먼저 <a href="#resources">Tenant Sanctuary</a>에 무료로 상담하세요.`,x=>`这超过了加州对任何房东的上限（两个月房租，${x}）。先别付，先免费咨询 <a href="#resources">Tenant Sanctuary</a>。`],
 
  /* plan */
  plan_empty_p:['Your next steps show up here once you finish a decision.','Tus próximos pasos aparecen aquí cuando terminas una decisión.','결정 가이드를 마치면 다음 할 일이 여기에 나타나요.','完成一个决定后，你的下一步行动会显示在这里。'],
@@ -692,12 +803,13 @@ const IC={
  house:'<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/><path d="M10 20v-5h4v5"/>',
  cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/><path d="M7.5 14h2M11 14h2M14.5 14h2M7.5 17h2"/>',
  cup:'<path d="M4 9h13v4.5A5.5 5.5 0 0 1 11.5 19h-2A5.5 5.5 0 0 1 4 13.5z"/><path d="M17 10.5h1.5a2.5 2.5 0 0 1 0 5H17"/><path d="M8 3.5v2.5M12 3.5v2.5"/>',
+ jar:'<path d="M8 3.5h8"/><path d="M9 3.5v3C6.6 7.4 5.5 9 5.5 11.5V18a2.5 2.5 0 0 0 2.5 2.5h8a2.5 2.5 0 0 0 2.5-2.5v-6.5c0-2.5-1.1-4.1-3.5-5V3.5"/><path d="M9.5 13.5h5"/>',
  chev:'<path d="m9 6 6 6-6 6"/>',
  left:'<path d="m15 6-6 6 6 6"/>'
 };
 const icon=(k,c='ic')=>`<svg class="${c}" viewBox="0 0 24 24" aria-hidden="true">${IC[k]}</svg>`;
 const PICON={aid:'cap',credit:'card',paycheck:'cash',lease:'house',quarter:'cal',habit:'cup'};
-const TICON={budget:'cal',loancost:'cap',cardpayoff:'card',paycalc:'cash',habitcost:'cup',rent:'house'};
+const TICON={budget:'cal',loancost:'cap',cardpayoff:'card',paycalc:'cash',savegoal:'jar',rent:'house'};
 /* ==================== 2026 constants ==================== */
 const LOAN_RATE=6.52, ORIG_FEE=0.01057, FED_STD=16100, CA_STD=5706, CA_CREDIT=153, SDI_R=0.013, MIN_WAGE=16.90;
 const FED_BR=[[12400,.10],[50400,.12],[105700,.22],[201775,.24],[256225,.32],[640600,.35],[1e12,.37]];
@@ -720,10 +832,8 @@ Object.assign(STR,{
  f_budget_phone:['Phone, subscriptions per month','Teléfono y suscripciones por mes','휴대폰·구독료 (월)','每月手机和订阅费'],
  f_budget_transport:['Transport per week','Transporte por semana','주당 교통비','每周交通费'],
  f_budget_fun:['Going out & fun per week','Salidas y diversión por semana','주당 외출·여가비','每周外出娱乐'],
- b_weekly:['Weekly spending','Gasto semanal','주당 지출','每周花费'],
  b_q11:['Quarter = 11 weeks (10 of classes + finals).','Trimestre = 11 semanas (10 de clases + finales).','쿼터 = 11주 (수업 10주 + 기말고사 주).','一个学季 = 11 周（10 周上课 + 期末周）。'],
  b_week:[i=>`Week ${i}`,i=>`Semana ${i}`,i=>`${i}주차`,i=>`第 ${i} 周`],
- b_legend:['Green weeks you\'re in the positive. Red weeks you\'re out of money.','En las semanas verdes tienes saldo positivo. En las rojas te quedaste sin dinero.','초록색 주는 잔고가 남아 있고, 빨간색 주는 돈이 바닥난 주예요.','绿色表示这一周还有余额，红色表示钱已经用完。'],
  b_in:['Money coming in this quarter','Dinero que entra este trimestre','이번 쿼터 들어오는 돈','本学季收入'],
  b_out:['Money going out this quarter','Dinero que sale este trimestre','이번 쿼터 나가는 돈','本学季支出'],
  b_left:['Left at finals week','Lo que queda en la semana de finales','기말고사 주에 남는 돈','期末周剩余'],
@@ -734,13 +844,8 @@ Object.assign(STR,{
 
  tn_loancost:['Loan Cost','Costo del préstamo','대출 비용','贷款成本'],
  tb_loancost:['What a student loan really costs, and what borrowing less saves you.','Lo que de verdad cuesta un préstamo estudiantil y cuánto te ahorras si pides menos.','학자금 대출의 진짜 비용, 그리고 덜 빌리면 얼마나 아낄 수 있는지 알아보세요.','学生贷款的真实成本，以及少借一点能省多少。'],
- f_loancost_amt:['Amount you borrow','Cantidad que pides prestada','빌리는 금액','借款金额'],
  f_loancost_rate:['Interest rate','Tasa de interés','금리','利率'],
  h_loancost_rate:['2026–27 federal undergraduate rate: 6.52% fixed. Private loans vary.','Tasa federal de pregrado 2026–27: 6.52% fija. Los préstamos privados varían.','2026–27 연방 학부 대출 금리: 6.52% 고정. 사설 대출은 다를 수 있어요.','2026–27 学年联邦本科贷款利率：6.52% 固定。私人贷款利率各不相同。'],
- f_loancost_years:['Repayment term (years)','Plazo de pago (años)','상환 기간 (년)','还款期限（年）'],
- f_loancost_school:['Years until repayment starts (school + 6-mo grace)','Años hasta que empiezas a pagar (escuela + 6 meses de gracia)','상환 시작까지 남은 기간 (재학 + 6개월 유예)','距开始还款的年数（在校期间 + 6 个月宽限期）'],
- f_loancost_sub:['Subsidized? (1 = yes, 0 = no)','¿Subsidiado? (1 = sí, 0 = no)','보조금 대출인가요? (1 = 예, 0 = 아니요)','是否为补贴贷款？（1 = 是，0 = 否）'],
- h_loancost_sub:['Government pays the interest on subsidized loans while you\'re in school.','El gobierno paga los intereses de los préstamos subsidiados mientras estudias.','보조금 대출(subsidized)은 재학 중 이자를 정부가 내 줘요.','补贴贷款在你在校期间的利息由政府支付。'],
  l_monthly:['Monthly payment after school','Pago mensual después de la escuela','졸업 후 월 상환액','毕业后每月还款'],
  l_for:[n=>`/mo for ${n} yrs`,n=>`/mes durante ${n} años`,n=>`/월, ${n}년간`,n=>`/月，共 ${n} 年`],
  l_borrow:['You borrow','Pides prestado','빌린 금액','借款金额'],
@@ -752,8 +857,6 @@ Object.assign(STR,{
  l_got:['You received','Recibiste','받은 돈','你拿到的'],
  l_repay:['You repay','Devuelves','갚는 돈','你要还的'],
  l_ratio:[x=>`Every $1 that reached you costs ${x} to repay.`,x=>`Cada $1 que recibiste te cuesta ${x} devolverlo.`,x=>`받은 $1마다 ${x}를 갚아야 해요.`,x=>`你拿到的每 $1，都要还 ${x}。`],
- l_less:[(a,b,c)=>`Borrow 30% less (${a}) and your payment drops to <b>${b}</b>/mo, saving ${c} overall.`,(a,b,c)=>`Pide 30% menos (${a}) y tu pago baja a <b>${b}</b>/mes, con un ahorro total de ${c}.`,(a,b,c)=>`30% 덜 빌리면(${a}) 월 상환액이 <b>${b}</b>로 줄고, 총 ${c}를 아껴요.`,(a,b,c)=>`少借 30%（${a}），每月还款降到 <b>${b}</b>，总共可省 ${c}。`],
- l_int:[x=>` Paying just the interest while in school (about ${x}/mo) stops it from piling up.`,x=>` Pagar solo los intereses mientras estudias (unos ${x}/mes) evita que se acumulen.`,x=>` 재학 중 이자만 내도(월 약 ${x}) 이자가 쌓이지 않아요.`,x=>` 在校期间只还利息（每月约 ${x}），就能避免利息越滚越多。`],
 
  tn_cardpayoff:['Credit Card Payoff','Pagar tu tarjeta','신용카드 상환','信用卡还款'],
  tb_cardpayoff:['The minimum-payment trap, in numbers.','La trampa del pago mínimo, en números.','최소 결제의 함정을 숫자로 보여 드려요.','用数字看清"最低还款"陷阱。'],
@@ -779,8 +882,6 @@ Object.assign(STR,{
  h_paycalc_wage:['California minimum wage in 2026: $16.90/hr.','Salario mínimo de California en 2026: $16.90/hora.','2026년 캘리포니아 최저임금: 시간당 $16.90.','2026 年加州最低工资：每小时 $16.90。'],
  f_paycalc_hours:['Hours per week','Horas por semana','주당 근무 시간','每周工时'],
  f_paycalc_weeks:['Weeks worked this year','Semanas trabajadas este año','올해 일한 주 수','今年工作周数'],
- f_paycalc_campus:['Campus job while enrolled? (1 = yes)','¿Trabajo en el campus mientras estudias? (1 = sí)','재학 중 교내 근무인가요? (1 = 예)','在校期间的校内工作？（1 = 是）'],
- h_paycalc_campus:['Students working for their own school while enrolled at least half-time are usually exempt from Social Security & Medicare (FICA).','Los estudiantes que trabajan para su propia escuela mientras estudian al menos medio tiempo normalmente están exentos de Social Security y Medicare (FICA).','최소 하프타임 이상 재학하며 자기 학교에서 일하는 학생은 보통 Social Security와 Medicare(FICA)가 면제돼요.','至少半日制在读、并在本校工作的学生，通常免缴 Social Security 和 Medicare（FICA）。'],
  p_take:['Take-home every two weeks','Pago neto cada dos semanas','2주마다 실수령액','每两周到手'],
  p_from:[(g,h,w)=>`from ${g} gross (${h} hrs × 2 weeks × ${w})`,(g,h,w)=>`de ${g} brutos (${h} h × 2 semanas × ${w})`,(g,h,w)=>`세전 ${g} (${h}시간 × 2주 × ${w})`,(g,h,w)=>`税前 ${g}（${h} 小时 × 2 周 × ${w}）`],
  p_gross:['Gross pay','Pago bruto','세전 급여','税前工资'],
@@ -794,24 +895,11 @@ Object.assign(STR,{
  p_close:['Withholding is close to what you owe. Filing still builds a record and may unlock credits.','Lo retenido es parecido a lo que debes. Declarar igual crea un historial y puede darte acceso a créditos.','원천징수액이 내야 할 세금과 비슷해요. 그래도 신고하면 기록이 남고 세액공제를 받을 수도 있어요.','预扣金额与应缴税额接近。即便如此，报税也能留下记录，还可能获得抵税额。'],
  p_why:['Payroll withholds as if every paycheck lasts all year. If you only work part of the year, you\'re often over-withheld. Estimates use single-filer 2026 brackets and no other income.','La nómina retiene como si cada cheque durara todo el año. Si solo trabajas parte del año, a menudo te retienen de más. Las estimaciones usan los tramos de 2026 para declarantes solteros y sin otros ingresos.','급여 원천징수는 모든 월급이 1년 내내 이어진다고 가정해요. 1년 중 일부만 일하면 보통 더 많이 떼여요. 추정치는 2026년 단독 신고자 세율 구간과 다른 소득이 없다는 가정을 사용해요.','工资预扣是按每份工资持续一整年来计算的。如果你只工作了一年中的一部分，通常会被多扣。估算采用 2026 年单身报税人税率，且假设没有其他收入。'],
 
- tn_habitcost:['Habit Cost','Costo de un hábito','습관 비용','习惯成本'],
- tb_habitcost:['What a small daily spend becomes if you invest it instead.','En qué se convierte un pequeño gasto diario si lo inviertes.','작은 일상 지출을 투자했다면 얼마가 됐을지 보여 줘요.','每天的小花费如果拿去投资，会变成多少。'],
- f_habitcost_amt:['Amount per purchase','Monto por compra','1회 지출액','每次花费'],
- f_habitcost_days:['Times per week','Veces por semana','주당 횟수','每周次数'],
- f_habitcost_years:['Years','Años','기간 (년)','年数'],
- f_habitcost_ret:['Yearly return if invested','Rendimiento anual si lo inviertes','투자 시 연 수익률','投资年回报率'],
- h_habitcost_ret:['Long-run stock index average is often cited near 7% after inflation, but it\'s never guaranteed.','El promedio a largo plazo de los índices bursátiles suele citarse cerca de 7% después de la inflación, pero nunca está garantizado.','주가지수의 장기 평균 수익률은 물가 상승을 뺀 뒤 약 7%로 자주 언급되지만, 절대 보장되지는 않아요.','股票指数的长期平均回报（扣除通胀后）常被引用为约 7%，但从无保证。'],
- hb_costs:['That habit costs','Ese hábito cuesta','이 습관의 비용','这个习惯花费'],
- hb_spent:[n=>`Spent over ${n} yrs`,n=>`Gastado en ${n} años`,n=>`${n}년간 지출`,n=>`${n} 年花掉`],
- hb_inv:['If invested','Si lo inviertes','투자했다면','如果拿去投资'],
- hb_40:[x=>`Invested from age 18 to 40 instead, it could grow to about <b>${x}</b>.`,x=>`Si lo inviertes de los 18 a los 40 años, podría crecer a unos <b>${x}</b>.`,x=>`18살부터 40살까지 대신 투자하면 약 <b>${x}</b>까지 불어날 수 있어요.`,x=>`如果从 18 岁投资到 40 岁，可能增长到约 <b>${x}</b>。`],
- hb_half:[x=>`You don't have to quit. Cut it in half and you'd still keep about ${x}.`,x=>`No tienes que dejarlo. Redúcelo a la mitad y aun así te quedarías con unos ${x}.`,x=>`끊을 필요는 없어요. 절반만 줄여도 약 ${x}를 지킬 수 있어요.`,x=>`不必完全戒掉。减半的话，你仍能留下约 ${x}。`],
 
  tn_rent:['Off-Campus Move','Mudanza fuera del campus','캠퍼스 밖 이사','搬出校园'],
  tb_rent:['The real monthly cost of an apartment, including what the listing leaves out.','El costo mensual real de un departamento, incluido lo que el anuncio no dice.','매물 광고에 안 나오는 비용까지 포함한 아파트의 실제 월 비용.','公寓真实的每月成本，包括房源广告没写的部分。'],
  f_rent_rent:['Your share of rent per month','Tu parte de la renta por mes','내 몫의 월세','你每月分摊的房租'],
  f_rent_util:['Utilities & internet (your share)','Servicios e internet (tu parte)','공과금·인터넷 (내 몫)','水电和网费（你的份额）'],
- f_rent_deposit:['Security deposit (your share)','Depósito de garantía (tu parte)','보증금 (내 몫)','押金（你的份额）'],
  f_rent_lease:['Months on the lease','Meses del contrato','임대 계약 기간 (개월)','租约月数'],
  f_rent_school:['Months you\'re actually in Santa Cruz','Meses que de verdad estás en Santa Cruz','실제로 산타크루즈에 있는 개월 수','你实际在圣克鲁兹的月数'],
  f_rent_commute:['Extra transport per month','Transporte extra por mes','추가 교통비 (월)','每月额外交通费'],
@@ -836,28 +924,34 @@ const TOOLS={
    const income=v.aid+v.savings+v.job*W+v.family*months;
    const wk=v.food+v.transport+v.fun+(v.rent+v.phone)/4.33;
    const spend=wk*W, left=income-spend;
-   let bal=v.aid+v.savings, cells='', shortWeek=null;
-   for(let i=1;i<=W;i++){bal+=v.job+v.family/4.33-wk;const s=bal<0;if(s&&shortWeek==null)shortWeek=i;cells+=`<div class="${s?'short':''}" title="${t('b_week',i)}: ${money(bal)}">${i}</div>`;}
+   let bal=v.aid+v.savings, shortWeek=null;const bals=[];
+   for(let i=1;i<=W;i++){bal+=v.job+v.family/4.33-wk;bals.push(bal);if(bal<0&&shortWeek==null)shortWeek=i;}
+   const hi=Math.max(1,...bals),lo=Math.max(0,...bals.map(b=>-b)),R=hi+lo,base=hi/R*100;
+   const bars=bals.map((b,i)=>{const h=Math.max(1.5,Math.abs(b)/R*100);const st=b>=0?`bottom:${100-base}%;height:${h}%`:`top:${base}%;height:${h}%`;
+    return `<div class="wk${b<0?' neg':''}"><div class="col"><i style="${st}"></i></div><span>${i+1}</span><em class="sr">${t('b_week',i+1)}: ${money(b)}</em></div>`;}).join('');
    const safe=(income-(v.rent+v.phone)*months)/W - v.transport;
+   const head=shortWeek==null?t('b_all'):t('b_runs',shortWeek);
    const verdict=left>=0?`<div class="verdict good">${t('b_good',money(left))}</div>`:`<div class="verdict bad">${t('b_bad',shortWeek,money(-left))}</div>`;
-   return `<div class="eyebrow">${t('b_weekly')}</div><div class="big num">${money(wk)}<span class="small muted"> ${t('per_week')}</span></div>
-   <p class="small muted" style="margin-top:6px">${t('b_q11')}</p>
-   <div class="weeks" aria-label="${t('b_legend')}">${cells}</div><p class="small muted">${t('b_legend')}</p>
+   return {html:`<div class="eyebrow">${t('b_eyebrow')}</div><div class="big ${shortWeek==null?'':'warn'}">${head}</div>
+   <p class="sub">${t('b_spend',money(wk))} ${t('b_q11')}</p>
+   <div class="wkchart" role="img" aria-label="${t('b_chart')}"><p class="cap">${t('b_chart')}</p><div class="plot"><div class="zero" style="top:${base}%"><span>$0</span></div>${bars}</div></div>
+   <p class="small muted">${t('b_legend')}</p>
    <table class="rows"><tr><td>${t('b_in')}</td><td class="n">${money(income)}</td></tr>
    <tr><td>${t('b_out')}</td><td class="n">${money(spend)}</td></tr>
    <tr class="tot"><td>${t('b_left')}</td><td class="n">${money(left)}</td></tr></table>${verdict}
-   <p class="why" style="margin-top:12px">${t('b_even',money(Math.max(0,safe)))}${left<0?t('b_help'):''}</p>`;
+   <p class="why" style="margin-top:12px">${t('b_even',money(Math.max(0,safe)))}${left<0?t('b_help'):''}</p>`,
+   sum:`${head} · ${t('b_left')}: ${money(left)}`};
   }}),
  loancost:TOOL('loancost',{ico:'🎓',
-  fields:[{k:'amt',min:500,max:150000,step:250,v:5500,fmt:'$'},{k:'rate',min:0,max:20,step:.01,v:LOAN_RATE,fmt:'%'},{k:'years',min:5,max:30,step:1,v:10,fmt:'y'},{k:'school',min:0,max:10,step:.5,v:4,fmt:'y'},{k:'sub',min:0,max:1,step:1,v:0,fmt:''}],
+  fields:[{k:'amt',min:500,max:150000,step:250,v:5500,fmt:'$'},{k:'nyr',min:1,max:6,step:1,v:1,fmt:'y'},{k:'rate',min:0,max:20,step:.01,v:LOAN_RATE,fmt:'%'},{k:'school',min:0,max:10,step:.5,v:4,fmt:'y'},{k:'sub',min:0,max:1,step:1,v:0,fmt:''}],
   calc(v){
-   const fee=v.amt*ORIG_FEE, got=v.amt-fee;
-   const accrued=v.sub?0:v.amt*v.rate/100*v.school;
-   const P=v.amt+accrued, n=v.years*12, m=pmt(P,v.rate,n), total=m*n;
-   const less=v.amt*0.7, Pl=less+(v.sub?0:less*v.rate/100*v.school), ml=pmt(Pl,v.rate,n);
-   const ratio=total/got;
-   return `<div class="eyebrow">${t('l_monthly')}</div><div class="big num">${money(m)}<span class="small muted"> ${t('l_for',v.years)}</span></div>
-   <table class="rows"><tr><td>${t('l_borrow')}</td><td class="n">${money(v.amt)}</td></tr>
+   const N=Math.max(1,Math.round(v.nyr)),borrowed=v.amt*N,fee=borrowed*ORIG_FEE,got=borrowed-fee;
+   let accrued=0;if(!v.sub)for(let k=0;k<N;k++)accrued+=v.amt*v.rate/100*Math.max(0,v.school-k);
+   const P=borrowed+accrued,term=tierTerm(borrowed),n=term*12;
+   const m=loanPay(borrowed,accrued,v.rate,n),total=m*n,ratio=total/got;
+   return {html:`<div class="eyebrow">${t('l_monthly')}</div><div class="big">${money(m)}<span class="small muted"> ${t('l_for',term)}</span></div>
+   <p class="sub">${t('l_tier',term,money(borrowed))}</p>
+   <table class="rows"><tr><td>${N>1?t('l_borrowN',N):t('l_borrow')}</td><td class="n">${money(borrowed)}</td></tr>
    <tr><td>${t('l_fee')}</td><td class="n">−${money(fee)}</td></tr>
    <tr><td>${t('l_cash')}</td><td class="n">${money(got)}</td></tr>
    <tr><td>${t('l_accr')}</td><td class="n">${money(accrued)}</td></tr>
@@ -866,59 +960,83 @@ const TOOLS={
    <div class="bars"><div class="bar"><span>${t('l_got')}</span><div class="track"><div class="fill good" style="width:${Math.min(100,got/total*100)}%"></div></div><b>${money(got)}</b></div>
    <div class="bar"><span>${t('l_repay')}</span><div class="track"><div class="fill bad" style="width:100%"></div></div><b>${money(total)}</b></div></div>
    <div class="verdict ${ratio>1.6?'bad':'meh'}">${t('l_ratio',money(ratio,2))}</div>
-   <p class="why" style="margin-top:12px">${t('l_less',money(less),money(ml),money((m-ml)*n))}${v.sub?'':t('l_int',money(v.amt*v.rate/100/12))}</p>`;
+   <p class="why" style="margin-top:12px">${t('l_each',money(total/borrowed*1000))}${v.sub?'':t('l_int',money(v.amt*v.rate/100/12))}${t('l_rap')}</p>`,
+   sum:`${money(m)}${t('per_mo')} · ${t('l_total')}: ${money(total)}`};
   }}),
  cardpayoff:TOOL('cardpayoff',{ico:'💳',
-  fields:[{k:'bal',min:100,max:50000,step:50,v:1200,fmt:'$'},{k:'apr',min:0,max:36,step:.25,v:22.5,fmt:'%'},{k:'pay',min:25,max:5000,step:5,v:40,fmt:'$'}],
+  fields:[{k:'bal',min:100,max:50000,step:50,v:1200,fmt:'$'},{k:'apr',min:0,max:36,step:.25,v:22.5,fmt:'%'},{k:'pay',min:25,max:5000,step:5,v:40,fmt:'$'},{k:'goal',min:1,max:60,step:1,v:12,fmt:'mo'}],
   calc(v){
    const r=v.apr/100/12;
    function run(payFn){let b=v.bal,i=0,m=0;while(b>0.005&&m<600){const int=b*r;i+=int;b+=int;const p=Math.min(b,payFn(b));if(p<=int&&m>0){return{m:Infinity,i};}b-=p;m++;}return{m,i};}
    const mine=run(()=>v.pay);
    const minimum=run(b=>Math.max(25,b*.01+b*r));
-   const fastPay=Math.max(v.pay*2,v.pay+50),fast=run(()=>fastPay);
+   const G=Math.max(1,Math.round(v.goal)),goalPay=Math.ceil(pmt(v.bal,v.apr,G)*100)/100,goal=run(()=>goalPay);
    const fmtM=m=>m===Infinity?t('c_never'):m>=24?t('c_yrs',(m/12).toFixed(1)):t('c_mo',m);
-   const maxI=Math.max(mine.i,minimum.i,fast.i,1);
+   const maxI=Math.max(mine.i,minimum.i,goal.i,1);
    const row=(label,o,cls)=>`<div class="bar"><span>${label}</span><div class="track"><div class="fill ${cls}" style="width:${o.m===Infinity?100:Math.max(3,o.i/maxI*100)}%"></div></div><b>${o.m===Infinity?'∞':money(o.i)}</b></div>`;
-   return `<div class="eyebrow">${t('c_free',money(v.pay))}</div><div class="big num">${fmtM(mine.m)}</div>
-   ${mine.m===Infinity?`<div class="verdict bad">${t('c_neverv')}</div>`:`<p class="muted" style="margin-top:6px">${t('c_andpay',money(mine.i),money(v.bal))}</p>`}
-   <div class="eyebrow" style="margin-top:16px">${t('c_by')}</div>
-   <div class="bars">${row(t('c_min'),minimum,'bad')}${row(t('c_plan'),mine,'')}${row(money(fastPay)+t('per_mo'),fast,'good')}</div>
-   <table class="rows"><tr><td>${t('c_min')}</td><td class="n">${fmtM(minimum.m)}</td></tr><tr><td>${t('c_plan')}</td><td class="n">${fmtM(mine.m)}</td></tr><tr><td>${t('c_paying',money(fastPay))}</td><td class="n">${fmtM(fast.m)}</td></tr></table>
-   <p class="why">${t('c_why')}</p>`;
+   return {html:`<div class="eyebrow">${t('c_free',money(v.pay))}</div><div class="big ${mine.m===Infinity?'warn':''}">${fmtM(mine.m)}</div>
+   ${mine.m===Infinity?`<div class="verdict bad">${t('c_neverv')}</div>`:`<p class="sub">${t('c_andpay',money(mine.i),money(v.bal))}</p>`}
+   <div class="verdict good">${t('c_goal',G,money(goalPay,2))}${t('c_goalint',money(goal.i))}</div>
+   <div class="eyebrow" style="margin-top:18px">${t('c_by')}</div>
+   <div class="bars">${row(t('c_min'),minimum,'bad')}${row(t('c_plan'),mine,'')}${row(t('c_paying',money(goalPay)),goal,'good')}</div>
+   <table class="rows"><tr><td>${t('c_min')}</td><td class="n">${fmtM(minimum.m)}</td></tr><tr><td>${t('c_plan')}</td><td class="n">${fmtM(mine.m)}</td></tr><tr><td>${t('c_paying',money(goalPay))}</td><td class="n">${fmtM(goal.m)}</td></tr></table>
+   <p class="why">${t('c_why')}</p>`,
+   sum:`${fmtM(mine.m)} · ${t('c_paying',money(goalPay))} → ${t('c_mo',G)}`};
   }}),
  paycalc:TOOL('paycalc',{ico:'💵',
-  fields:[{k:'wage',min:MIN_WAGE,max:150,step:.1,v:18,fmt:'$'},{k:'hours',min:1,max:80,step:1,v:12,fmt:'h'},{k:'weeks',min:1,max:52,step:1,v:40,fmt:'w'},{k:'campus',min:0,max:1,step:1,v:1,fmt:''}],
+  fields:[{k:'job',fmt:'choice',v:'campus',opts:['campus','off','gig']},{k:'wage',min:MIN_WAGE,max:150,step:.1,v:18,fmt:'$'},{k:'hours',min:1,max:80,step:1,v:12,fmt:'h'},{k:'weeks',min:1,max:52,step:1,v:40,fmt:'w'}],
   calc(v){
    const gw=v.wage*v.hours*2, annual=v.wage*v.hours*v.weeks;
-   const ann=gw*26;
-   const wFed=fedTax(ann)/26, wSt=caTax(ann)/26, sdi=gw*SDI_R, ss=v.campus?0:gw*.062, med=v.campus?0:gw*.0145;
+   if(v.job==='gig'){
+    const se=annual*.9235>=400?annual*.9235*.153:0, adj=annual-se/2;
+    const ti=Math.max(0,adj-FED_STD), fed=brTax(ti-.2*Math.min(adj,ti),FED_BR), ca=caTax(adj);
+    const tax=se+fed+ca, rate=annual?tax/annual:0, aside=gw*rate, keep=gw-aside;
+    return {html:`<div class="eyebrow">${t('g_take')}</div><div class="big">${money(gw,2)}</div><p class="sub">${t('g_from',v.hours,money(v.wage,2))}</p>
+    <table class="rows"><tr><td>${t('g_se')}</td><td class="n">−${money(se*gw/Math.max(annual,1),2)}</td></tr>
+    <tr><td>${t('g_fed')}</td><td class="n">−${money(fed*gw/Math.max(annual,1),2)}</td></tr>
+    <tr><td>${t('g_ca')}</td><td class="n">−${money(ca*gw/Math.max(annual,1),2)}</td></tr>
+    <tr class="tot"><td>${t('g_keep')}</td><td class="n">${money(keep,2)}</td></tr></table>
+    <div class="verdict meh">${t('g_verdict',money(aside,2),money(tax))}${tax>=1000?t('g_quarterly'):''}</div>
+    <p class="why" style="margin-top:12px">${t('g_why')}</p>`,
+    sum:`${t('g_set')}: ${money(aside,2)} / ${money(gw,2)}`};
+   }
+   const campus=v.job==='campus', ann=gw*26;
+   const wFed=fedTax(ann)/26, wSt=caTax(ann)/26, sdi=gw*SDI_R, ss=campus?0:gw*.062, med=campus?0:gw*.0145;
    const net=gw-wFed-wSt-sdi-ss-med;
    const periods=v.weeks/2;
    const refund=(wFed*periods-fedTax(annual))+(wSt*periods-caTax(annual));
-   return `<div class="eyebrow">${t('p_take')}</div><div class="big num">${money(net,2)}</div><p class="small muted" style="margin-top:6px">${t('p_from',money(gw,2),v.hours,money(v.wage,2))}</p>
+   return {html:`<div class="eyebrow">${t('p_take')}</div><div class="big">${money(net,2)}</div><p class="sub">${t('p_from',money(gw,2),v.hours,money(v.wage,2))}</p>
    <table class="rows"><tr><td>${t('p_gross')}</td><td class="n">${money(gw,2)}</td></tr>
    <tr><td>${t('p_fed')}</td><td class="n">−${money(wFed,2)}</td></tr>
    <tr><td>${t('p_ca')}</td><td class="n">−${money(wSt,2)}</td></tr>
    <tr><td>CA SDI (1.3%)</td><td class="n">−${money(sdi,2)}</td></tr>
-   <tr><td>Social Security (6.2%)</td><td class="n">${v.campus?t('p_exempt'):'−'+money(ss,2)}</td></tr>
-   <tr><td>Medicare (1.45%)</td><td class="n">${v.campus?t('p_exempt'):'−'+money(med,2)}</td></tr>
+   <tr><td>Social Security (6.2%)</td><td class="n">${campus?t('p_exempt'):'−'+money(ss,2)}</td></tr>
+   <tr><td>Medicare (1.45%)</td><td class="n">${campus?t('p_exempt'):'−'+money(med,2)}</td></tr>
    <tr class="tot"><td>${t('p_net')}</td><td class="n">${money(net,2)}</td></tr></table>
    <p>${annual<FED_STD?t('p_year_low',money(annual)):t('p_year',money(annual))}</p>
    <div class="verdict ${refund>1?'good':'meh'}">${refund>1?t('p_refund',money(refund)):t('p_close')}</div>
-   <p class="why" style="margin-top:12px">${t('p_why')}</p>`;
+   <p class="why" style="margin-top:12px">${t('p_why')}</p>`,
+   sum:`${t('p_take')}: ${money(net,2)}`};
   }}),
- habitcost:TOOL('habitcost',{ico:'☕',
-  fields:[{k:'amt',min:1,max:200,step:.5,v:7,fmt:'$'},{k:'days',min:1,max:7,step:1,v:5,fmt:'×'},{k:'years',min:1,max:50,step:1,v:10,fmt:'y'},{k:'ret',min:0,max:15,step:.5,v:7,fmt:'%'}],
+ savegoal:TOOL('savegoal',{ico:'🫙',
+  fields:[{k:'goal',min:50,max:50000,step:50,v:1000,fmt:'$'},{k:'have',min:0,max:50000,step:25,v:0,fmt:'$'},{k:'weeks',min:1,max:260,step:1,v:25,fmt:'w'},{k:'apy',min:0,max:10,step:.05,v:0,fmt:'%'}],
   calc(v){
-   const yr=v.amt*v.days*52, mo=yr/12, r=v.ret/100/12, n=v.years*12;
-   const fv=r===0?mo*n:mo*((Math.pow(1+r,n)-1)/r);
-   const spent=yr*v.years;
-   const at40=r===0?mo*12*22:mo*((Math.pow(1+r,264)-1)/r);
-   return `<div class="eyebrow">${t('hb_costs')}</div><div class="big num">${money(yr)}<span class="small muted"> ${t('per_year')}</span></div>
-   <div class="bars" style="margin-top:16px"><div class="bar"><span>${t('hb_spent',v.years)}</span><div class="track"><div class="fill bad" style="width:${spent/fv*100}%"></div></div><b>${money(spent)}</b></div>
-   <div class="bar"><span>${t('hb_inv')}</span><div class="track"><div class="fill good" style="width:100%"></div></div><b>${money(fv)}</b></div></div>
-   <p>${t('hb_40',money(at40))}</p>
-   <div class="verdict meh">${t('hb_half',money(fv/2))}</div>`;
+   const n=Math.max(1,Math.round(v.weeks)), rw=Math.pow(1+v.apy/100,1/52)-1, g=Math.pow(1+rw,n);
+   const gap=v.goal-v.have*g;
+   if(gap<=0)return {html:`<div class="eyebrow">${t('sg_need')}</div><div class="big">$0</div><div class="verdict good">${t('sg_done')}</div>`,sum:t('sg_done')};
+   const w=rw?gap*rw/(g-1):gap/n, put=w*n, earned=Math.max(0,v.goal-v.have-put);
+   const R=Math.ceil((w+.01)/5)*5;let b=v.have,k=0;while(b<v.goal&&k<2000){b=b*(1+rw)+R;k++;}
+   const pct=Math.min(100,v.have/v.goal*100);
+   return {html:`<div class="eyebrow">${t('sg_need')}</div><div class="big">${money(w,2)}<span class="small muted"> ${t('per_week')}</span></div>
+   <p class="sub">${t('sg_for',money(v.goal),n)}</p>
+   <div class="goalbar" aria-hidden="true"><div style="width:${pct}%"></div></div><p class="small muted">${t('sg_have',money(v.have),Math.round(pct))}</p>
+   <table class="rows"><tr><td>${t('sg_mo')}</td><td class="n">${money(w*52/12)}</td></tr>
+   <tr><td>${t('sg_in')}</td><td class="n">${money(put)}</td></tr>
+   ${v.apy>0?`<tr><td>${t('sg_int')}</td><td class="n">+${money(earned)}</td></tr>`:''}
+   <tr class="tot"><td>${t('sg_reach')}</td><td class="n">${money(v.goal)}</td></tr></table>
+   ${k<n?`<div class="verdict good">${t('sg_round',money(R),k)}</div>`:''}
+   <p class="why" style="margin-top:12px">${t('sg_auto')}${n>=260?t('sg_long'):''}</p>`,
+   sum:`${money(w,2)}${t('per_week')} · ${money(v.goal)} / ${n} ${t('u_w')}`};
   }}),
  rent:TOOL('rent',{ico:'🏠',
   fields:[{k:'rent',min:400,max:6000,step:25,v:1150,fmt:'$'},{k:'util',min:0,max:800,step:5,v:90,fmt:'$'},{k:'deposit',min:0,max:12000,step:50,v:1150,fmt:'$'},{k:'lease',min:6,max:12,step:1,v:12,fmt:'mo'},{k:'school',min:6,max:12,step:1,v:9,fmt:'mo'},{k:'commute',min:0,max:1000,step:5,v:30,fmt:'$'},{k:'ins',min:0,max:100,step:1,v:15,fmt:'$'}],
@@ -928,36 +1046,65 @@ const TOOLS={
    const perSchoolMonth=year/v.school;
    const moveIn=v.deposit+v.rent+(v.util>0?50:0);
    const empty=v.rent*Math.max(0,v.lease-v.school);
-   return `<div class="eyebrow">${t('r_true')}</div><div class="big num">${money(perSchoolMonth)}</div><p class="small muted" style="margin-top:6px">${t('r_vs',money(v.rent))}</p>
+   const dep=v.deposit>v.rent*2+.5?`<div class="verdict bad">${t('r_dep_over',money(v.rent*2))}</div>`:v.deposit>v.rent+.5?`<div class="verdict meh">${t('r_dep_hi',money(v.rent))}</div>`:'';
+   return {html:`<div class="eyebrow">${t('r_true')}</div><div class="big">${money(perSchoolMonth)}</div><p class="sub">${t('r_vs',money(v.rent))}</p>
    <table class="rows"><tr><td>${t('r_all')}</td><td class="n">${money(monthly)}${t('per_mo')}</td></tr>
    <tr><td>${t('r_year')}</td><td class="n">${money(year)}</td></tr>
    <tr><td>${t('r_empty')}</td><td class="n">${money(empty)}</td></tr>
    <tr class="tot"><td>${t('r_movein')}</td><td class="n">${money(moveIn)}</td></tr></table>
-   ${empty>0?`<div class="verdict meh">${t('r_meh',v.lease,v.school,money(empty))}</div>`:`<div class="verdict good">${t('r_good')}</div>`}
-   <p class="why" style="margin-top:12px">${t('r_why')}</p>`;
+   ${dep}${empty>0?`<div class="verdict meh">${t('r_meh',v.lease,v.school,money(empty))}</div>`:`<div class="verdict good">${t('r_good')}</div>`}
+   <p class="why" style="margin-top:12px">${t('r_why')}</p>`,
+   sum:`${t('r_true')}: ${money(perSchoolMonth)}${t('per_mo')}`};
   }})
 };
+/* Tiered Standard plan (loans made on or after July 1, 2026): term set by principal balance */
+function tierTerm(b){return b<25000?10:b<50000?15:b<100000?20:25;}
+/* Unpaid in-school interest isn't capitalized when repayment starts (federal rule since July 2023): it sits beside the principal, gets paid first, and doesn't earn interest itself. */
+function loanPay(B,U,ratePct,n){const r=ratePct/100/12;if(B+U<=0)return 0;if(r===0)return (B+U)/n;
+ const ok=m=>{let b=B,u=U;for(let i=0;i<n;i++){u+=b*r;let p=m;const pu=Math.min(u,p);u-=pu;p-=pu;b-=Math.min(b,p);}return b+u<=.005;};
+ let lo=pmt(B,ratePct,n),hi=pmt(B,ratePct,n)+U/n+1;for(let i=0;i<50;i++){const mid=(lo+hi)/2;ok(mid)?hi=mid:lo=mid;}return hi;}
 
-function fieldHTML(t_,f,val){
- const v=val??f.v,bool=f.fmt==='';
- const pre=f.fmt==='$'?'$':'',suf=f.fmt==='%'?'%':f.fmt==='$'||bool?'':t('u_'+f.fmt);
- const box=bool?`<output id="${t_}-${f.k}-o">${v?t('yes'):t('no')}</output>`
-  :`<span class="numwrap">${pre?`<span aria-hidden="true">${pre}</span>`:''}<input type="number" inputmode="decimal" class="numbox" id="${t_}-${f.k}-n" data-n="${f.k}" min="${f.min}" step="any" value="${+(+v).toFixed(2)}" aria-label="${esc(f.l)}, ${t('type_any')}">${suf?`<span aria-hidden="true">${suf}</span>`:''}</span>`;
- return `<div class="field"><label for="${t_}-${f.k}"><span>${f.l}</span>${box}</label>
- <input type="range" id="${t_}-${f.k}" data-k="${f.k}" min="${f.min}" max="${Math.max(f.max,v)}" step="${f.step}" value="${v}">${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;
+const numFmt=x=>(+(+x).toFixed(2)).toLocaleString('en-US',{maximumFractionDigits:2});
+const numParse=s=>parseFloat(String(s).replace(/[,\s$%]/g,''));
+function fieldHTML(t_,f,v){
+ if(f.fmt===''||f.fmt==='choice'){
+  const opts=f.fmt===''?[[1,t('yes')],[0,t('no')]]:f.opts.map(o=>[o,t('j_'+o)]);
+  return `<div class="field"><div class="lab" id="${t_}-${f.k}-l">${f.l}</div><div class="seg${opts.length>2?' three':''}" role="radiogroup" aria-labelledby="${t_}-${f.k}-l">${opts.map(([k,n])=>`<button type="button" role="radio" data-s="${f.k}" data-v="${k}" aria-checked="${String(k)===String(v)}" tabindex="${String(k)===String(v)?0:-1}">${n}</button>`).join('')}</div>${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;}
+ const pre=f.fmt==='$'?'$':'',suf=f.fmt==='%'?'%':f.fmt==='$'?'':t('u_'+f.fmt);
+ return `<div class="field"><label for="${t_}-${f.k}-n"><span>${f.l}</span><span class="numwrap">${pre?`<span aria-hidden="true">${pre}</span>`:''}<input type="text" inputmode="decimal" autocomplete="off" class="numbox" id="${t_}-${f.k}-n" data-n="${f.k}" value="${numFmt(v)}">${suf?`<span aria-hidden="true">${suf}</span>`:''}</span></label>
+ <input type="range" id="${t_}-${f.k}" data-k="${f.k}" min="${f.min}" max="${Math.max(f.max,v)}" step="${f.step}" value="${v}" aria-label="${esc(f.l)}">${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;
 }
-function mountTool(el,id,preset={}){
- const T=TOOLS[id];
- el.innerHTML=`<div class="tool"><div class="card">${T.fields.map(f=>fieldHTML(id,f,preset[f.k])).join('')}<p class="hint" style="margin-top:14px">${t('slide_hint')}</p></div><div class="out" aria-live="polite"></div></div>`;
- const out=$('.out',el);
- const read=()=>{const v={};T.fields.forEach(f=>{const n=$('#'+id+'-'+f.k+'-n',el),r=$('#'+id+'-'+f.k,el);let x=parseFloat(n?n.value:r.value);if(!isFinite(x))x=parseFloat(r.value);v[f.k]=Math.max(f.min,x);});return v;};
- const upd=()=>{out.innerHTML=T.calc(read());T.fields.forEach(f=>{if(f.fmt==='')$('#'+id+'-'+f.k+'-o',el).textContent=+$('#'+id+'-'+f.k,el).value?t('yes'):t('no');});};
- T.fields.forEach(f=>{const r=$('#'+id+'-'+f.k,el),n=$('#'+id+'-'+f.k+'-n',el);
-  r.addEventListener('input',()=>{if(n)n.value=+(+r.value).toFixed(2);upd();});
-  if(n)n.addEventListener('input',()=>{const x=parseFloat(n.value);if(!isFinite(x))return;if(x>+r.max)r.max=x;r.value=Math.max(f.min,x);upd();});
-  if(n)n.addEventListener('blur',()=>{const x=parseFloat(n.value);if(!isFinite(x)||x<f.min){n.value=f.min;r.value=f.min;upd();}});
+function toolDefaults(T){const d={};T.fields.forEach(f=>d[f.k]=f.v);return d;}
+function toolQuery(T,val){const p=new URLSearchParams();T.fields.forEach(f=>{if(String(val[f.k])!==String(f.v))p.set(f.k,f.fmt==='choice'?val[f.k]:+(+val[f.k]).toFixed(2));});return p.toString();}
+function mountTool(el,id,preset={},opt={}){
+ const T=TOOLS[id],val={};
+ T.fields.forEach(f=>{const x=preset[f.k];if(f.fmt==='choice')val[f.k]=f.opts.includes(x)?x:f.v;else{const n=parseFloat(x);val[f.k]=isFinite(n)?Math.max(f.min,f.fmt===''?(n?1:0):n):f.v;}});
+ el.innerHTML=`<div class="tool"><div class="card">${T.fields.map(f=>fieldHTML(id,f,val[f.k])).join('')}
+ <div class="toolfoot"><p class="hint">${t('slide_hint')}</p><div class="toolacts"><button type="button" class="btn line sm" data-act="reset">${t('reset')}</button>${opt.url?`<button type="button" class="btn line sm" data-act="share">${t('share')}</button><button type="button" class="btn sm" data-act="save">${t('savecalc')}</button>`:''}</div></div></div>
+ <div class="out"></div></div><p class="sr" aria-live="polite" data-live></p>
+ <div class="dock" hidden><span data-dock></span><button type="button" data-act="see">${t('seeres')}</button></div>`;
+ const out=$('.out',el),live=$('[data-live]',el),dock=$('.dock',el);let res={sum:''},liveT;
+ const sync=()=>{if(opt.url){const q=toolQuery(T,val);history.replaceState(null,'','#'+id+(q?'?'+q:''));}};
+ const upd=(quiet)=>{res=T.calc({...val});out.innerHTML=res.html;$('[data-dock]',el).textContent=res.sum;
+  clearTimeout(liveT);if(!quiet)liveT=setTimeout(()=>live.textContent=res.sum,700);sync();};
+ T.fields.forEach(f=>{
+  if(f.fmt===''||f.fmt==='choice'){const bs=$$(`[data-s="${f.k}"]`,el);
+   const pick=b=>{bs.forEach(x=>{const on=x===b;x.setAttribute('aria-checked',on);x.tabIndex=on?0:-1;});val[f.k]=f.fmt===''?+b.dataset.v:b.dataset.v;upd();};
+   bs.forEach((b,i)=>{b.onclick=()=>pick(b);b.onkeydown=e=>{const d={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1}[e.key];if(!d)return;e.preventDefault();const nb=bs[(i+d+bs.length)%bs.length];nb.focus();pick(nb);};});
+   return;}
+  const r=$('#'+id+'-'+f.k,el),n=$('#'+id+'-'+f.k+'-n',el);
+  r.addEventListener('input',()=>{val[f.k]=+r.value;n.value=numFmt(r.value);upd();});
+  n.addEventListener('input',()=>{const x=numParse(n.value);if(!isFinite(x))return;if(x>+r.max)r.max=x;r.value=Math.max(f.min,x);val[f.k]=Math.max(f.min,x);upd();});
+  n.addEventListener('focus',()=>{n.value=String(numParse(n.value));n.select();});
+  n.addEventListener('blur',()=>{let x=numParse(n.value);if(!isFinite(x)||x<f.min){x=f.min;r.value=x;val[f.k]=x;upd();}n.value=numFmt(x);});
+  n.addEventListener('keydown',e=>{if(e.key==='Enter')n.blur();});
  });
- upd();
+ el.querySelector('[data-act="reset"]').onclick=()=>{mountTool(el,id,{},opt);toast(t('reset_done'));};
+ const sh=el.querySelector('[data-act="share"]');if(sh)sh.onclick=async()=>{sync();try{await navigator.clipboard.writeText(location.href);toast(t('shared'));}catch(e){toast(t('nolink'));}};
+ const sv=el.querySelector('[data-act="save"]');if(sv)sv.onclick=()=>{S.calcs=S.calcs||[];const q=toolQuery(T,val);S.calcs=S.calcs.filter(c=>!(c.id===id&&c.q===q));S.calcs.unshift({id,q,sum:res.sum,at:Date.now()});S.calcs=S.calcs.slice(0,20);save();toast(t('savedcalc'));};
+ el.querySelector('[data-act="see"]').onclick=()=>out.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+ if('IntersectionObserver' in window){const io=new IntersectionObserver(es=>{es.forEach(e=>{dock.hidden=e.isIntersecting||e.boundingClientRect.top<0;});},{threshold:0,rootMargin:'0px 0px -45% 0px'});io.observe(out);}
+ upd(true);
 }
 
 /* ==================== decision paths ==================== */
@@ -1057,7 +1204,7 @@ const PATHS=[
    {t:'Check if I qualify for CalFresh',w:'UCSC CalFresh outreach',href:'https://basicneeds.ucsc.edu'},
    {t:'Know where the campus food pantries are',w:'UCSC Basic Needs',href:'https://basicneeds.ucsc.edu'},
    {t:'Bookmark Slug Support for real emergencies',w:'Dean of Students',href:'https://deanofstudents.ucsc.edu'}]},
- {id:'habit',ico:'☕',title:'Small spending, big numbers',q:'Do my daily habits actually matter?',time:'5 min',tool:'habitcost',preset:{},
+ {id:'habit',ico:'☕',title:'Small spending, big numbers',q:'Do my daily habits actually matter?',time:'5 min',tool:'savegoal',preset:{goal:1000,weeks:25},
   gut:{q:'You spend $7 on coffee or delivery 5 days a week. Roughly how much is that per year?',opts:['About $350','About $900','About $1,800','About $3,600'],a:2,ex:'$7 × 5 × 52 = $1,820. Small, frequent purchases are the easiest money to lose track of.'},
   learn:[
    ['Frequency beats price','A $7 habit five times a week costs more per year than most students\' textbooks.'],
@@ -1510,25 +1657,27 @@ function bindHelp(){
 
 /* ----- plan ----- */
 V.plan=()=>{
- const done=PATHS.filter(p=>S.paths[p.id]?.done),items=S.plan,finished=items.filter(x=>x.done).length;
+ const done=PATHS.filter(p=>S.paths[p.id]?.done),items=S.plan,finished=items.filter(x=>x.done).length,calcs=(S.calcs||[]).filter(c=>TOOLS[c.id]);
  const gains=done.filter(p=>S.paths[p.id].c0&&S.paths[p.id].c1);
  const avg=k=>gains.reduce((s,p)=>s+S.paths[p.id][k],0)/gains.length;
  const tried=PATHS.filter(p=>S.paths[p.id]?.gut!=null);
- if(!items.length&&!done.length)return `<div class="wrap page"><div class="pagehead"><h1>${t('nav_plan')}</h1><p>${t('plan_empty_p')}</p></div>
+ if(!items.length&&!done.length&&!calcs.length)return `<div class="wrap page"><div class="pagehead"><h1>${t('nav_plan')}</h1><p>${t('plan_empty_p')}</p></div>
   <div class="empty"><h3>${t('plan_none')}</h3><p class="muted">${t('plan_none_p')}</p><div class="btnrow"><a class="btn slug" href="#checkup">${t('plan_first')}</a><a class="btn line" href="#paths">${t('plan_browse')}</a></div></div></div>`;
  return `<div class="wrap page"><div class="pagehead"><h1>${t('nav_plan')}</h1><p>${t('plan_p')}</p></div>
  <div class="summary"><div><b>${t('of',done.length,PATHS.length)}</b><span>${t('s_dec')}</span></div><div><b>${t('of',finished,items.length)}</b><span>${t('s_steps')}</span></div>
  <div><b>${gains.length?t('to',avg('c0').toFixed(1),avg('c1').toFixed(1)):t('none_yet')}</b><span>${t('s_conf')}</span></div><div><b>${tried.length?t('of',tried.filter(p=>S.paths[p.id].gut===p.gut.a).length,tried.length):t('none_yet')}</b><span>${t('s_guess')}</span></div></div>
  <div class="meter" aria-label="${t('of',finished,items.length)} ${t('s_steps')}"><div style="width:${items.length?finished/items.length*100:0}%"></div></div>
  <div style="margin-top:12px">${PATHS.filter(p=>items.some(x=>x.path===p.id)).map(p=>`<div class="plangroup"><h3>${icon(PICON[p.id])}${pathTitle(p.id)}</h3>${items.map((x,i)=>x.path!==p.id?'':`<label class="planitem ${x.done?'done':''}" lang="en"><input type="checkbox" id="pi-${i}" data-done="${i}" ${x.done?'checked':''}><span><b>${esc(x.t)}</b>${x.w?`<small>${x.href?`<a href="${x.href}" target="_blank" rel="noopener">${esc(x.w)}</a>`:esc(x.w)}</small>`:''}</span></label>`).join('')}</div>`).join('')}</div>
+ ${calcs.length?`<div class="plangroup"><h3>${icon('cal')}${t('plan_saved')}</h3>${calcs.map((c,i)=>`<div class="savedcalc">${icon(TICON[c.id])}<span><b>${TOOLS[c.id].name}</b><small>${esc(c.sum)}</small></span><a class="btn line sm" href="#${c.id}${c.q?'?'+c.q:''}">${t('plan_open')}</a><button type="button" class="btn line sm" data-rmcalc="${i}">${t('plan_remove')}</button></div>`).join('')}</div>`:''}
  <div class="btnrow" style="margin-top:28px"><button class="btn" id="copyplan">${t('plan_copy')}</button><a class="btn line" href="#paths">${t('plan_another')}</a><button class="btn line" id="resetall">${t('plan_clear')}</button></div>
  <div id="resetconfirm"></div>
  <p class="note" style="margin-top:14px">${t('plan_note')}</p></div>`;
 };
 function bindPlan(){
+ $$('[data-rmcalc]').forEach(b=>b.onclick=()=>{const live=(S.calcs||[]).filter(c=>TOOLS[c.id]);const x=live[+b.dataset.rmcalc];S.calcs=S.calcs.filter(c=>c!==x);save();render();});
  $$('[data-done]').forEach(c=>c.onchange=()=>{S.plan[+c.dataset.done].done=c.checked;save();render();});
  const cp=$('#copyplan');if(cp)cp.onclick=async()=>{
-  const txt=t('plan_title')+'\n\n'+PATHS.filter(p=>S.plan.some(x=>x.path===p.id)).map(p=>pathTitle(p.id)+'\n'+S.plan.filter(x=>x.path===p.id).map(x=>`[${x.done?'x':' '}] ${x.t}${x.w?' ('+x.w+')':''}${x.href?' '+x.href:''}`).join('\n')).join('\n\n');
+  const txt=t('plan_title')+'\n\n'+PATHS.filter(p=>S.plan.some(x=>x.path===p.id)).map(p=>pathTitle(p.id)+'\n'+S.plan.filter(x=>x.path===p.id).map(x=>`[${x.done?'x':' '}] ${x.t}${x.w?' ('+x.w+')':''}${x.href?' '+x.href:''}`).join('\n')).join('\n\n')+((S.calcs||[]).filter(c=>TOOLS[c.id]).length?'\n\n'+t('plan_saved')+'\n'+(S.calcs||[]).filter(c=>TOOLS[c.id]).map(c=>`${TOOLS[c.id].name}: ${c.sum}\n${location.origin+location.pathname}#${c.id}${c.q?'?'+c.q:''}`).join('\n'):'');
   try{await navigator.clipboard.writeText(txt);toast(t('plan_copied'));}catch(e){$('#resetconfirm').innerHTML=`<textarea class="copybox" id="copybox" readonly>${esc(txt)}</textarea><p class="note">${t('plan_nocopy')}</p>`;}};
  const r=$('#resetall');if(r)r.onclick=()=>{$('#resetconfirm').innerHTML=`<div class="fb bad" style="margin-top:16px"><h4>${t('plan_sure')}</h4><p style="margin-bottom:12px">${t('plan_undo')}</p><button class="btn" id="resetyes">${t('plan_clear')}</button></div>`;$('#resetyes').onclick=()=>{S={paths:{},plan:[],checkup:null};save();ck={i:0,a:[]};render();toast(t('plan_cleared'));};};
 }
@@ -1567,11 +1716,11 @@ V.videos=()=>`<div class="wrap page"><div class="pagehead"><h1>${t('vid_h')}</h1
 /* ==================== router ==================== */
 function render(){
  applyChrome();
- const h=(location.hash||'#home').slice(1)||'home';
+ const hfull=(location.hash||'#home').slice(1)||'home',[h,hq]=hfull.split('?');
  const app=$('#app');let html,after=null,nav=h;
  if(PATH[h]){html=pathView(PATH[h]);after=()=>bindPath(PATH[h]);nav='paths';}
- else if(TOOLS[h]){html=toolsView(h);after=()=>mountTool($('#toolmount'),h);nav='tools';}
- else if(h==='tools'){html=toolsView();after=()=>mountTool($('#toolmount'),'budget');}
+ else if(TOOLS[h]){html=toolsView(h);after=()=>mountTool($('#toolmount'),h,Object.fromEntries(new URLSearchParams(hq||'')),{url:true});nav='tools';}
+ else if(h==='tools'){html=toolsView();after=()=>mountTool($('#toolmount'),'budget',{},{url:true});nav='tools';}
  else if(h==='checkup'){html=V.checkup();after=bindCheckup;nav='paths';}
  else if(V[h]&&h!=='home'){html=V[h]();}
  else{html=V.home();nav='home';after=bindHome;}
@@ -1584,7 +1733,7 @@ function render(){
  updCount();
 }
 let lastHash=null;
-window.addEventListener('hashchange',()=>{const h=location.hash.slice(1);
+window.addEventListener('hashchange',()=>{const h=location.hash.slice(1).split('?')[0];
  if(PATH[h]&&S.paths[h])S.paths[h].view=S.paths[h].done?4:S.paths[h].step||0;
  if(h==='checkup'&&lastHash!=='checkup'&&ck.i>=CHECK.length)ck={i:0,a:[]};
  lastHash=h;render();window.scrollTo({top:0});});
