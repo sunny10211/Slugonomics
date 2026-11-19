@@ -439,6 +439,30 @@ footer .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:40px}
 .vid.flash{animation:vflash 1.6s ease-out}
 @keyframes vflash{0%{box-shadow:0 0 0 4px #F4C21B}100%{box-shadow:0 0 0 0 transparent}}
 @media (prefers-reduced-motion:reduce){.vid.flash{animation:none}}
+
+/* proof points: open list on desktop, tap-to-open on phones */
+.pts{border-top:2px solid var(--ink)}
+.pt{border-bottom:1px solid var(--line);padding:20px 0}
+.pt summary{list-style:none;cursor:pointer;font-family:var(--display);font-weight:700;font-size:1.15rem;color:var(--ink);letter-spacing:-.01em;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.pt summary::-webkit-details-marker{display:none}
+.pt summary::after{content:'+';font-family:var(--sans);font-weight:500;font-size:1.4rem;color:var(--muted);line-height:1}
+.pt[open] summary::after{content:'–'}
+.pt p{color:var(--muted);margin-top:8px}
+@media (min-width:601px){.pts{display:grid}.pt{display:grid;grid-template-columns:minmax(150px,.7fr) minmax(0,1.3fr);gap:8px 28px;align-items:start}.pt summary{pointer-events:none}.pt summary::after{display:none}.pt p{margin-top:0}}
+/* phones: compact homepage */
+@media (max-width:600px){
+ .pt{padding:16px 0}
+ .homeband .games{gap:28px;margin-top:28px}
+ .homeband .game{grid-template-columns:96px minmax(0,1fr);gap:4px 18px;align-items:start}
+ .homeband .game .phones{min-height:0;display:block;order:0}
+ .homeband .game .phone{width:96px;border-radius:18px;padding:4px}
+ .homeband .game .phone img{border-radius:14px}
+ .homeband .game .phone+.phone,.homeband .game dl{display:none}
+ .homeband .game h3{font-size:1.5rem}
+ .homeband .game .what{font-size:.98rem;margin:6px 0 14px}
+ .homeband .workshop{margin-top:28px;padding-top:22px}
+ .row{padding:16px 4px}
+}
 footer p{font-family:var(--sans);font-size:.88rem;max-width:none;margin-bottom:8px}
 footer .brand{font-size:1rem;margin-bottom:10px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:8px;font-weight:700;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s;z-index:50}
@@ -1292,14 +1316,14 @@ V.home=()=>{
   <div class="index">${PATHS.map(rowHTML).join('')}</div>
  </div></section>
 
- <section class="band"><div class="wrap">
+ <section class="band homeband"><div class="wrap">
   <div class="sechead"><div><h2>${t('band_h')}</h2><p>${t('band_p')}</p></div></div>
   ${gamesHTML()}
  </div></section>
 
  <section class="sec"><div class="wrap proof">
   <aside><h2>${t('proof_h')}</h2><p>${t('proof_p')}</p></aside>
-  <dl>${[1,2,3,4,5].map(i=>`<div><dt>${t('p'+i+'t')}</dt><dd>${t('p'+i+'d')}</dd></div>`).join('')}</dl>
+  <div class="pts">${[1,2,3,4,5].map(i=>`<details class="pt" ${innerWidth>600?'open':''}><summary>${t('p'+i+'t')}</summary><p>${t('p'+i+'d')}</p></details>`).join('')}</div>
  </div></section>
 
  <section class="sec" style="padding-top:0;border-top:0"><div class="wrap">
