@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Slugonomics · Learning results</title>
+<style>
+@font-face{font-family:'Bricolage Grotesque';src:url(assets/fonts/bricolage-grotesque.woff2) format('woff2');font-weight:200 800;font-display:swap}
+@font-face{font-family:'Instrument Sans';src:url(assets/fonts/instrument-sans.woff2) format('woff2');font-weight:400 700;font-display:swap}
+:root{color-scheme:light;--paper:#EDF1EE;--surface:#FCFCFB;--sunk:#E1E8E3;--ink:#10251F;--text:#22352F;--muted:#56665F;--line:#CFD9D3;--grid:#E4EAE6;
+ --before:#B8870A;--after:#13875C;--bar:#13875C;--bad:#B4412E;
+ --display:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;--sans:'Instrument Sans',ui-sans-serif,system-ui,sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--text);font:16px/1.5 var(--sans);-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);color:var(--ink);margin:0;letter-spacing:-.02em}
+h1{font-size:clamp(2rem,4vw,2.8rem);line-height:1.05}
+h2{font-size:1.35rem}
+.wrap{max-width:1120px;margin:0 auto;padding:32px 24px 80px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}
+.brand{display:flex;gap:10px;align-items:center;font-family:var(--display);font-weight:800;font-size:1.2rem;color:var(--ink);text-decoration:none}
+.muted{color:var(--muted)}
+.small{font-size:.88rem}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:12px 18px;background:var(--ink);color:#fff;cursor:pointer}
+.btn.line{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--line)}
+.btn:focus-visible,input:focus-visible,.tab:focus-visible{outline:3px solid var(--ink);outline-offset:2px}
+label{display:grid;gap:6px;font-weight:600;font-size:.92rem;color:var(--ink)}
+input{font:inherit;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;background:#fff}
+.signin{max-width:420px;display:grid;gap:16px;margin-top:24px}
+.err{color:var(--bad);font-weight:600}
+.banner{background:#FFF4CF;border:1px solid #EBD58A;color:#5C4600;border-radius:12px;padding:12px 16px;font-weight:600;margin-bottom:20px}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0 24px}
+.tab{font:inherit;font-weight:700;font-size:.92rem;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:8px 14px;cursor:pointer}
+.tab[aria-pressed="true"]{background:var(--ink);color:#fff;border-color:var(--ink)}
+.filters .sp{flex:1}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
+@media(max-width:860px){.tiles{grid-template-columns:repeat(2,1fr)}}
+.tile .k{font-size:.8rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tile .v{font-family:var(--display);font-weight:800;font-size:2.4rem;color:var(--ink);line-height:1.1;margin-top:6px;font-variant-numeric:tabular-nums}
+.tile .s{font-size:.88rem;color:var(--muted);margin-top:2px}
+.grid2{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:860px){.grid2{grid-template-columns:1fr}}
+.legend{display:flex;gap:18px;font-size:.88rem;color:var(--text);margin:6px 0 14px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+.qrow{display:grid;grid-template-columns:minmax(140px,1fr) 2fr;gap:14px;align-items:center;padding:10px 0;border-top:1px solid var(--grid)}
+.qrow:first-of-type{border-top:0}
+.qlab{font-size:.92rem;color:var(--ink);font-weight:600;line-height:1.3}
+.bars{display:grid;gap:4px}
+.br{position:relative;height:14px;display:flex;align-items:center;gap:8px}
+.br .f{height:12px;border-radius:0 4px 4px 0;min-width:2px}
+.br .n{font-size:.8rem;font-variant-numeric:tabular-nums;color:var(--text);white-space:nowrap}
+.hit{cursor:default}
+.tip{position:fixed;z-index:10;pointer-events:none;background:var(--ink);color:#fff;font-size:.85rem;padding:8px 10px;border-radius:8px;box-shadow:0 8px 24px -8px rgba(0,0,0,.4);opacity:0;transition:opacity .1s;max-width:260px}
+.tip b{font-weight:700}
+.days{display:flex;align-items:flex-end;gap:2px;height:160px;border-bottom:1px solid var(--line);margin-top:12px}
+.days .d{flex:1;display:flex;align-items:flex-end;height:100%;}
+.days .d i{display:block;width:100%;background:var(--bar);border-radius:4px 4px 0 0;min-height:2px}
+.axis{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted);margin-top:6px}
+.dist{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+.dist div{text-align:center;font-size:.8rem;color:var(--muted)}
+.dist .col{height:70px;display:flex;align-items:flex-end;justify-content:center}
+.dist .col i{display:block;width:70%;background:var(--bar);border-radius:4px 4px 0 0;min-height:2px}
+.quote{border-left:3px solid var(--line);padding:4px 0 4px 14px;margin:12px 0;color:var(--text)}
+table{width:100%;border-collapse:collapse;font-size:.9rem;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--grid)}
+th{font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+td.r,th.r{text-align:right}
+details summary{cursor:pointer;font-weight:700;color:var(--ink);margin-top:14px}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.setup ol{padding-left:20px}.setup li{margin:6px 0}
+code{background:var(--sunk);padding:2px 6px;border-radius:6px;font-size:.88em}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="brand" href="index.html">
+      <svg width="32" height="32" viewBox="0 0 64 64" aria-hidden="true"><rect width="64" height="64" rx="16" fill="#10251F"/><g transform="translate(5 14) scale(.45)"><path d="M4 62C4 56 14 54 28 52C44 50 52 36 68 31C86 26 102 32 107 45C111 55 106 62 96 62Z" fill="#F4C21B"/><path d="M90 31 93 9M98 33 110 14" stroke="#F4C21B" stroke-width="6" stroke-linecap="round"/><circle cx="93" cy="8" r="6" fill="#F4C21B"/><circle cx="110.5" cy="13" r="6" fill="#F4C21B"/></g></svg>
+      Slugonomics</a>
+    <div id="acct" class="small muted"></div>
+  </div>
+  <h1>Learning results</h1>
+  <p class="muted" style="margin-top:8px;max-width:62ch">Anonymous before-and-after quiz scores and survey answers from students who chose to share them. Private: only the owner account can read this data.</p>
+  <div id="app" style="margin-top:24px"></div>
+</div>
+<div class="tip" id="tip" role="status" aria-live="polite"></div>
+<script src="assets/config.js"></script>
+<script>
+const CFG=window.SLUGO_CONFIG||{};
+const DEMO=/[?&]demo\b/.test(location.search);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const GAMES={
+ 'slug-life':{name:'Slug Life',q:['Credit card minimum payments','Rent: share of take-home pay','Starting to invest early','Subsidized loan interest','What builds credit','What an emergency fund is for']},
+ 'slug-college':{name:'Slug College',q:['Credit card minimum payments','Rent: share of income','Treating a quarterly aid refund','Subsidized loan interest','Gross vs. net pay','What an emergency fund is for']},
+ 'college-sim':{name:'Workshop sim',q:null}
+};
+const WEEKQ=['Which loan charges interest in school','Gross vs. net on a paystub','Avoiding card interest','Tax refund on low income','Tuition form (1098-T)'];
+const FOURQ=['Which loan charges interest in school','Budget from net pay','Avoiding card interest','Tax refund on low income','Filing FAFSA late','Employer 401(k) match','Gig income taxes','12 vs 15 units'];
+let ROWS=[],GAME='all';
+
+/* ---------- auth + data ---------- */
+async function signIn(email,password){
+ const r=await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${encodeURIComponent(CFG.firebaseApiKey)}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password,returnSecureToken:true})});
+ const j=await r.json(); if(!r.ok)throw new Error(j.error&&j.error.message||'Sign-in failed');
+ sessionStorage.setItem('slugRes',JSON.stringify({tok:j.idToken,email:j.email,exp:Date.now()+(+j.expiresIn-60)*1000}));
+ return j;
+}
+function session(){try{const s=JSON.parse(sessionStorage.getItem('slugRes'));return s&&s.exp>Date.now()?s:null;}catch(e){return null;}}
+function dec(v){
+ if(!v)return null;
+ if('stringValue'in v)return v.stringValue;if('integerValue'in v)return +v.integerValue;if('doubleValue'in v)return v.doubleValue;
+ if('booleanValue'in v)return v.booleanValue;if('nullValue'in v)return null;
+ if('arrayValue'in v)return (v.arrayValue.values||[]).map(dec);return null;
+}
+async function load(tok){
+ const out=[];let page='';
+ do{
+  const u=`https://firestore.googleapis.com/v1/projects/${encodeURIComponent(CFG.firebaseProjectId)}/databases/(default)/documents/results?pageSize=300${page?'&pageToken='+encodeURIComponent(page):''}`;
+  const r=await fetch(u,{headers:{Authorization:'Bearer '+tok}});
+  if(r.status===403)throw new Error('This account cannot read results. Check the owner email in firestore.rules.');
+  if(!r.ok)throw new Error('Could not load results ('+r.status+')');
+  const j=await r.json();(j.documents||[]).forEach(d=>{const o={};Object.entries(d.fields||{}).forEach(([k,v])=>o[k]=dec(v));out.push(o);});
+  page=j.nextPageToken||'';
+ }while(page);
+ return out;
+}
+function demoRows(){
+ let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+ const rows=[],today=new Date();
+ const games=['slug-life','slug-life','slug-college','slug-college','slug-college','college-sim'];
+ for(let i=0;i<64;i++){
+  const g=games[i%games.length],n=g==='college-sim'?5:6,anon='demo'+i,dd=new Date(today-Math.floor(rnd()*40)*864e5).toISOString().slice(0,10);
+  const pre=Array.from({length:n},(_,k)=>rnd()<.38+k*.04?1:0),post=pre.map(x=>x||rnd()<.55?1:0);
+  rows.push({game:g,anon,phase:'pre',score:pre.reduce((a,b)=>a+b),of:n,ans:pre.map(x=>x?0:1),right:pre,day:dd});
+  if(rnd()<.72){rows.push({game:g,anon,phase:'post',score:post.reduce((a,b)=>a+b),of:n,ans:post.map(x=>x?0:1),right:post,day:dd});
+   if(rnd()<.7)rows.push({game:g,anon,phase:'survey',learn:3+Math.round(rnd()*2),rec:2+Math.round(rnd()*3),change:rnd()<.3?['More about taxes please','Add a roommate budget split','The rent part was really useful','More about internships'][Math.floor(rnd()*4)]:'',day:dd});}
+ }
+ return rows;
+}
+
+/* ---------- analysis ---------- */
+function analyze(rows){
+ const by={};rows.forEach(r=>{const k=r.game+'|'+r.anon;(by[k]=by[k]||{game:r.game}) ;if(r.phase==='pre'&&!by[k].pre)by[k].pre=r;if(r.phase==='post')by[k].post=r;if(r.phase==='survey')by[k].survey=r;});
+ const people=Object.values(by);
+ const started=people.filter(p=>p.pre),pairs=people.filter(p=>p.pre&&p.post&&p.pre.of===p.post.of);
+ const avg=(a,f)=>a.length?a.reduce((s,x)=>s+f(x),0)/a.length:null;
+ const preA=avg(pairs,p=>p.pre.score/p.pre.of),postA=avg(pairs,p=>p.post.score/p.post.of);
+ const improved=pairs.filter(p=>p.post.score>p.pre.score).length;
+ const surveys=people.map(p=>p.survey).filter(Boolean);
+ return {people,started,pairs,preA,postA,improved,surveys,avg};
+}
+const pct=v=>v==null?'—':Math.round(v*100)+'%';
+
+/* ---------- render ---------- */
+function render(){
+ const rows=GAME==='all'?ROWS:ROWS.filter(r=>r.game===GAME);
+ const A=analyze(rows);
+ const app=$('#app');
+ const tabs=['all','slug-life','slug-college','college-sim'].map(g=>`<button class="tab" aria-pressed="${GAME===g}" data-g="${g}">${g==='all'?'All games':GAMES[g].name}</button>`).join('');
+ let html=(DEMO?'<div class="banner">Sample data: this is what the page will look like once students start sharing.</div>':'')+
+ `<div class="filters" role="group" aria-label="Filter by game">${tabs}<span class="sp"></span><button class="btn line" id="csv">Download CSV</button></div>`;
+ if(!A.started.length){app.innerHTML=html+`<div class="card empty">No shared results yet${GAME==='all'?'':' for this game'}. They appear here as soon as a student who opted in finishes a quiz.</div>`;bind();return;}
+ const gain=A.preA!=null?A.postA-A.preA:null;
+ html+=`<div class="tiles">
+  <div class="card tile"><div class="k">Students who shared</div><div class="v">${A.started.length}</div><div class="s">took the first quiz</div></div>
+  <div class="card tile"><div class="k">Finished before + after</div><div class="v">${A.pairs.length}</div><div class="s">${A.started.length?Math.round(A.pairs.length/A.started.length*100):0}% of those who started</div></div>
+  <div class="card tile"><div class="k">Average score</div><div class="v" style="font-size:2rem;white-space:nowrap">${pct(A.preA)} → ${pct(A.postA)}</div><div class="s">${gain==null?'needs finished pairs':(gain>=0?'+':'')+Math.round(gain*100)+' points, same students'}</div></div>
+  <div class="card tile"><div class="k">Improved</div><div class="v">${A.pairs.length?Math.round(A.improved/A.pairs.length*100)+'%':'—'}</div><div class="s">${A.improved} of ${A.pairs.length} scored higher after</div></div>
+ </div>`;
+ // per-question
+ const qsets=questionSets(A.pairs);
+ html+=`<div class="grid2"><div class="card"><h2>Right answers by question</h2><p class="muted small" style="margin-top:4px">Students who finished both quizzes. Each pair of bars is the share who got it right.</p>
+  <div class="legend"><span><i style="background:var(--before)"></i>Before</span><span><i style="background:var(--after)"></i>After</span></div>
+  ${qsets.length?qsets.map(s=>`${qsets.length>1?`<h3 style="font-size:1rem;margin:18px 0 4px">${esc(s.title)} <span class="muted small">(${s.n} students)</span></h3>`:''}${s.q.map(q=>`<div class="qrow"><div class="qlab">${esc(q.label)}</div><div class="bars">
+     <div class="br hit" data-tip="<b>${esc(q.label)}</b><br>Before: ${pct(q.b)} right">${bar(q.b,'var(--before)')}</div>
+     <div class="br hit" data-tip="<b>${esc(q.label)}</b><br>After: ${pct(q.a)} right (${fmtDelta(q.a-q.b)})">${bar(q.a,'var(--after)')}</div></div></div>`).join('')}`).join(''):'<p class="muted">Appears once students finish both quizzes.</p>'}
+  <details><summary>Table view</summary><table><thead><tr><th>Question</th><th class="r">Before</th><th class="r">After</th><th class="r">Change</th></tr></thead><tbody>
+  ${qsets.flatMap(s=>s.q.map(q=>`<tr><td>${esc((qsets.length>1?s.title+': ':'')+q.label)}</td><td class="r">${pct(q.b)}</td><td class="r">${pct(q.a)}</td><td class="r">${fmtDelta(q.a-q.b)}</td></tr>`)).join('')}</tbody></table></details>
+ </div>
+ <div style="display:grid;gap:16px;align-content:start">${activity(rows)}${survey(A)}</div></div>`;
+ html+=comments(A)+pageCounts();
+ app.innerHTML=html;bind();
+}
+function bar(v,c){const w=Math.max(0,Math.min(1,v||0))*100;return `<span class="f" style="width:calc(${w}% - 44px);background:${c}"></span><span class="n">${pct(v)}</span>`;}
+function fmtDelta(d){return (d>=0?'+':'−')+Math.abs(Math.round(d*100))+' pts';}
+function questionSets(pairs){
+ const groups={};
+ pairs.forEach(p=>{const n=p.pre.of,k=p.game+'|'+n;(groups[k]=groups[k]||{game:p.game,n,list:[]}).list.push(p);});
+ return Object.values(groups).map(g=>{
+  const labels=g.game==='college-sim'?(g.n===5?WEEKQ:g.n===8?FOURQ:null):GAMES[g.game].q;
+  const title=g.game==='college-sim'?(g.n===5?'Workshop sim · one week':g.n===8?'Workshop sim · four years':'Workshop sim'):GAMES[g.game].name;
+  return {title,n:g.list.length,q:Array.from({length:g.n},(_,i)=>{
+   const ok=(p,ph)=>((p[ph].right||[])[i]===1);
+   return {label:(labels&&labels[i])||'Question '+(i+1),b:g.list.filter(p=>ok(p,'pre')).length/g.list.length,a:g.list.filter(p=>ok(p,'post')).length/g.list.length};})};
+ });
+}
+function activity(rows){
+ const days={};rows.forEach(r=>{if(r.phase==='pre'&&r.day)days[r.day]=(days[r.day]||0)+1;});
+ const keys=Object.keys(days).sort();if(!keys.length)return '';
+ const start=new Date(keys[0]),end=new Date(keys[keys.length-1]),list=[];
+ for(let d=new Date(start);d<=end;d=new Date(+d+864e5)){const k=d.toISOString().slice(0,10);list.push([k,days[k]||0]);}
+ const show=list.slice(-60),mx=Math.max(...show.map(x=>x[1]),1);
+ const f=k=>new Date(k+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'});
+ return `<div class="card"><h2>New students per day</h2><p class="muted small" style="margin-top:4px">First quiz shared, last ${show.length} days</p>
+  <div class="days" role="img" aria-label="Bar chart of new students per day">${show.map(([k,v])=>`<div class="d hit" data-tip="<b>${f(k)}</b><br>${v} new student${v===1?'':'s'}"><i style="height:${v/mx*100}%"></i></div>`).join('')}</div>
+  <div class="axis"><span>${f(show[0][0])}</span><span>peak ${mx}/day</span><span>${f(show[show.length-1][0])}</span></div></div>`;
+}
+function survey(A){
+ const s=A.surveys;if(!s.length)return '';
+ const dist=k=>[1,2,3,4,5].map(v=>s.filter(x=>x[k]===v).length);
+ const block=(k,lab,lo,hi)=>{const d=dist(k),mx=Math.max(...d,1),n=d.reduce((a,b)=>a+b,0),av=n?d.reduce((a,c,i)=>a+c*(i+1),0)/n:0;
+  return `<div style="margin-top:16px"><div style="display:flex;justify-content:space-between;align-items:baseline"><b style="color:var(--ink)">${lab}</b><span style="font-family:var(--display);font-weight:800;font-size:1.4rem;color:var(--ink)">${av.toFixed(1)}<span class="muted small"> / 5</span></span></div>
+  <div class="dist">${d.map((c,i)=>`<div><div class="col hit" data-tip="<b>${i+1}</b>: ${c} student${c===1?'':'s'}"><i style="height:${c/mx*100}%"></i></div>${i+1}</div>`).join('')}</div>
+  <div class="axis"><span>${lo}</span><span>${hi}</span></div></div>`;};
+ return `<div class="card"><h2>Survey</h2><p class="muted small" style="margin-top:4px">${s.length} responses after finishing</p>
+  ${block('learn','Learned about money','Nothing new','A lot')}${block('rec','Would recommend','Not likely','Very likely')}</div>`;
+}
+function comments(A){
+ const c=A.surveys.filter(x=>x.change).slice(-12).reverse();if(!c.length)return '';
+ return `<div class="card" style="margin-top:16px"><h2>What students would add or change</h2>${c.map(x=>`<p class="quote">“${esc(x.change)}” <span class="muted small">· ${esc(GAMES[x.game]?GAMES[x.game].name:x.game)}</span></p>`).join('')}</div>`;
+}
+function pageCounts(){
+ return CFG.goatcounterCode?`<p class="muted small" style="margin-top:20px">Page visits: <a href="https://${esc(CFG.goatcounterCode)}.goatcounter.com" target="_blank" rel="noopener">open the GoatCounter dashboard</a></p>`:'';
+}
+function bind(){
+ document.querySelectorAll('[data-g]').forEach(b=>b.onclick=()=>{GAME=b.dataset.g;render();});
+ const c=$('#csv');if(c)c.onclick=()=>{
+  const cols=['day','game','phase','anon','score','of','ans','right','learn','rec','change','college','year'];
+  const q=v=>v==null?'':'"'+String(Array.isArray(v)?v.join(' '):v).replace(/"/g,'""')+'"';
+  const txt=cols.join(',')+'\n'+ROWS.map(r=>cols.map(k=>q(r[k])).join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'text/csv'}));a.download='slugonomics-results.csv';a.click();
+ };
+ const tip=$('#tip');
+ document.querySelectorAll('.hit').forEach(h=>{
+  h.onmousemove=e=>{tip.innerHTML=h.dataset.tip;tip.style.opacity=1;const x=Math.min(e.clientX+14,innerWidth-tip.offsetWidth-8);tip.style.left=x+'px';tip.style.top=(e.clientY+14)+'px';};
+  h.onmouseleave=()=>{tip.style.opacity=0;};
+ });
+}
+
+/* ---------- boot ---------- */
+async function boot(){
+ const app=$('#app');
+ if(DEMO){ROWS=demoRows();render();return;}
+ if(!CFG.firebaseApiKey||!CFG.firebaseProjectId){
+  app.innerHTML=`<div class="card setup"><h2>Not set up yet</h2><p style="margin-top:8px">Result sharing is switched off until Firebase is connected. Follow <code>SETUP-RESULTS.md</code> in the repository (about 10 minutes), then reload this page.</p>
+  <p style="margin-top:12px"><a href="?demo">Preview this page with sample data →</a></p></div>`;return;}
+ const s=session();
+ if(!s){
+  app.innerHTML=`<form class="card signin" id="si"><h2>Owner sign-in</h2><label>Email<input type="email" id="em" autocomplete="username" required></label><label>Password<input type="password" id="pw" autocomplete="current-password" required></label><p class="err" id="er" role="alert"></p><button class="btn" type="submit">Sign in</button></form>`;
+  $('#si').onsubmit=async e=>{e.preventDefault();$('#er').textContent='';try{await signIn($('#em').value,$('#pw').value);boot();}catch(err){$('#er').textContent=err.message.replace(/_/g,' ').toLowerCase().replace(/^./,c=>c.toUpperCase());}};
+  return;}
+ $('#acct').innerHTML=`${esc(s.email)} · <a href="#" id="so">Sign out</a>`;$('#so').onclick=e=>{e.preventDefault();sessionStorage.removeItem('slugRes');location.reload();};
+ app.innerHTML='<div class="card empty">Loading results…</div>';
+ try{ROWS=await load(s.tok);render();}catch(e){app.innerHTML=`<div class="card"><p class="err">${esc(e.message)}</p></div>`;}
+}
+boot();
+</script>
+</body>
+</html>

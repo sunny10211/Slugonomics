@@ -1464,7 +1464,7 @@ async function lbInit(){
 let ST={db:null,uid:null,canWrite:false,isOwner:false,all:null};
 const stKey=pid=>"scStudy_"+pid;
 function stGet(pid){const v=lsGet(stKey(pid||(PROF&&PROF.id)||"guest"),{});return v&&typeof v==="object"?v:{};}
-function stPut(v){const pid=PROF?PROF.id:"guest";lsSet(stKey(pid),v);stSync(pid,v);}
+function stPut(v){const pid=PROF?PROF.id:"guest";lsSet(stKey(pid),v);stSync(pid,v);if(window.SlugShare)SlugShare.sync("slug-college",pid,v,{college:PROF&&PROF.college,year:PROF&&PROF.year,key:STUDY_Q.map(q=>q.a)});}
 let stChain=Promise.resolve();
 function stSync(pid,v){
  if(!ST.db||!ST.uid||!ST.canWrite)return;
@@ -2276,4 +2276,5 @@ window.claude?.hot?.snapshot?.(()=>({C,UI}));
 window.claude?.hot?.ready?window.claude.hot.ready(boot):boot(window.claude?.hot?.data??{});
 
 </script>
+<script src="assets/config.js"></script><script src="assets/share.js" defer></script>
 </body></html>

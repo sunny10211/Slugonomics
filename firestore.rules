@@ -1,0 +1,40 @@
+rules_version = '2';
+// Slugonomics: anonymous learning results.
+// Anyone can ADD a well-formed result row; nobody can change or delete one;
+// only the owner account can READ them (used by results.html).
+// Replace OWNER_EMAIL below with the email of the owner account you create in
+// Firebase Authentication, then publish these rules in the Firebase console.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /results/{id} {
+      allow read: if request.auth != null
+                  && request.auth.token.email == 'OWNER_EMAIL';
+
+      allow create: if isValidResult(request.resource.data);
+      allow update, delete: if false;
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+function isValidResult(d) {
+  return d.keys().hasOnly(['v', 'game', 'anon', 'day', 'college', 'year', 'phase',
+                           'score', 'of', 'ans', 'right', 'learn', 'rec', 'change'])
+    && d.keys().hasAll(['v', 'game', 'anon', 'day', 'phase'])
+    && d.v == 1
+    && d.game in ['slug-life', 'slug-college', 'college-sim']
+    && d.phase in ['pre', 'post', 'survey']
+    && d.anon is string && d.anon.size() <= 40
+    && d.day is string && d.day.size() == 10
+    && (!('college' in d) || (d.college is string && d.college.size() <= 20))
+    && (!('year' in d) || (d.year is string && d.year.size() <= 10))
+    && (!('score' in d) || (d.score is int && d.score >= 0 && d.score <= 20))
+    && (!('of' in d) || (d.of is int && d.of >= 0 && d.of <= 20))
+    && (!('ans' in d) || (d.ans is list && d.ans.size() <= 20))
+    && (!('right' in d) || (d.right is list && d.right.size() <= 20))
+    && (!('learn' in d) || (d.learn is int && d.learn >= 0 && d.learn <= 5))
+    && (!('rec' in d) || (d.rec is int && d.rec >= 0 && d.rec <= 5))
+    && (!('change' in d) || (d.change is string && d.change.size() <= 300));
+}

@@ -422,6 +422,7 @@ footer .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:40px}
 .vid ul{margin:4px 0 0;padding-left:18px;color:var(--text);font-size:.96rem;line-height:1.55}
 .vid ul li{margin:2px 0}
 .vidseries{margin-top:8px;padding-top:28px;border-top:1px solid var(--line)}
+.sharetoggle .linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 footer p{font-family:var(--sans);font-size:.88rem;max-width:none;margin-bottom:8px}
 footer .brand{font-size:1rem;margin-bottom:10px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,16px);background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:8px;font-weight:700;opacity:0;visibility:hidden;transition:opacity .2s,transform .2s;z-index:50}
@@ -503,11 +504,14 @@ footer .brand{font-size:1rem;margin-bottom:10px}
     <div>
       <p id="foot2"></p>
       <p id="foot3"></p>
+      <p id="sharetoggle" class="sharetoggle" hidden></p>
     </div>
   </div>
 </footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<script src="assets/config.js"></script>
+<script src="assets/share.js"></script>
 <script>
 const $=(s,el=document)=>el.querySelector(s);
 const $$=(s,el=document)=>[...el.querySelectorAll(s)];
@@ -557,7 +561,7 @@ const STR={
   'Las cifras siguen las reglas de 2026: una tasa fija de 6.52% para los préstamos Direct Loans de pregrado 2026–27 con una comisión de originación de 1.057%, una deducción estándar federal de $16,100 y el salario mínimo de California de $16.90.',
   '모든 수치는 2026년 기준입니다: 2026–27학년도 학부 Direct Loan 고정금리 6.52%(대출 수수료 1.057%), 연방 표준공제 $16,100, 캘리포니아 최저임금 시간당 $16.90.',
   '数字依据 2026 年规定：2026–27 学年本科 Direct Loan 固定利率 6.52%，贷款手续费 1.057%；联邦标准扣除额 $16,100；加州最低工资每小时 $16.90。'],
- foot3:['Your progress and plan stay in this browser. Nothing you enter is sent anywhere.','Tu progreso y tu plan se quedan en este navegador. Nada de lo que escribes se envía a ningún lado.','진행 상황과 계획은 이 브라우저에만 저장돼요. 입력한 내용은 어디에도 전송되지 않습니다.','你的进度和计划只保存在这个浏览器里，你输入的任何内容都不会被发送出去。'],
+ foot3:['Your progress, plan and real budget stay in this browser. If you opt in, the games share anonymous quiz scores and ratings, never your name or your numbers.','Tu progreso, tu plan y tu presupuesto real se quedan en este navegador. Si aceptas, los juegos comparten puntajes y calificaciones anónimos, nunca tu nombre ni tus cifras.','진행 상황, 계획, 실제 예산은 이 브라우저에만 저장돼요. 동의하면 게임이 익명의 퀴즈 점수와 평가만 공유하며, 이름이나 금액은 절대 공유하지 않아요.','你的进度、计划和真实预算只保存在这个浏览器中。若你同意，游戏只会匿名分享测验分数和评分，绝不包含你的姓名或金额。'],
  en_only:['','Por ahora, esta guía está en inglés. Pronto estará en español.','이 가이드는 현재 영어로만 제공돼요. 한국어 버전도 곧 준비됩니다.','这份指南目前仅提供英文版，中文版即将推出。'],
  games_en:['','Por ahora, los juegos están en inglés.','게임은 현재 영어로만 제공돼요.','游戏目前仅提供英文版。'],
 
@@ -586,7 +590,7 @@ const STR={
  proof_h:['Built so a campus can see it working','Hecho para que un campus vea que funciona','캠퍼스가 효과를 직접 확인할 수 있도록','让学校看得见成效'],
  proof_p:['Slugonomics is free and needs no account, so anyone can open it and check every claim on this page.','Slugonomics es gratis y no requiere cuenta, así que cualquiera puede abrirlo y comprobar cada afirmación de esta página.','Slugonomics는 무료이고 가입이 필요 없어서, 누구나 열어 보고 이 페이지의 모든 내용을 직접 확인할 수 있어요.','Slugonomics 免费且无需注册，任何人都可以打开它，亲自核实本页的每一项说法。'],
  p1t:['Learning you can measure','Aprendizaje que se puede medir','측정 가능한 학습 효과','可衡量的学习效果'],
- p1d:['Players answer the same six questions before their first run and after they finish. Results show what changed for each question, plus a short survey.','Los jugadores responden las mismas seis preguntas antes de su primera partida y al terminar. Los resultados muestran qué cambió en cada pregunta, además de una breve encuesta.','플레이어는 첫 플레이 전과 끝난 뒤에 같은 6개 질문에 답해요. 결과는 질문별로 무엇이 달라졌는지와 짧은 설문 결과를 보여 줍니다.','玩家在第一次游戏前和结束后回答同样的六道题。结果会逐题显示变化，并附上一份简短问卷。'],
+ p1d:['Players answer the same six questions before their first run and after they finish. Students who opt in share their scores anonymously, so the change for each question can be shown across everyone who played.','Los jugadores responden las mismas seis preguntas antes de su primera partida y al terminar. Quienes aceptan comparten sus puntajes de forma anónima, así se puede mostrar el cambio en cada pregunta entre todos los que jugaron.','플레이어는 첫 플레이 전과 끝난 뒤에 같은 6문항에 답해요. 동의한 학생의 점수는 익명으로 공유되어, 플레이한 모든 학생의 문항별 변화를 보여 줄 수 있어요.','玩家在第一次游戏前和结束后回答同样的六个问题。同意分享的学生会匿名提交分数，从而可以展示所有玩家在每道题上的变化。'],
  p2t:['Real 2026 numbers','Cifras reales de 2026','2026년 실제 숫자','真实的 2026 年数据'],
  p2d:['The 6.52% federal loan rate, California\'s $16.90 minimum wage, current UCSC tuition, housing and UC SHIP costs, and CalFresh income limits.','La tasa federal de préstamos de 6.52%, el salario mínimo de California de $16.90, la colegiatura actual de UCSC, los costos de vivienda y de UC SHIP, y los límites de ingreso de CalFresh.','연방 학자금 대출 금리 6.52%, 캘리포니아 최저임금 $16.90, 현재 UCSC 등록금·주거비·UC SHIP 보험료, CalFresh 소득 기준까지 반영했어요.','联邦学生贷款利率 6.52%、加州最低工资 $16.90、UCSC 当前的学费、住宿和 UC SHIP 保险费用，以及 CalFresh 收入上限。'],
  p3t:['Local by design','Local desde el diseño','지역 맞춤 설계','为本地量身打造'],
@@ -594,7 +598,7 @@ const STR={
  p4t:['Decisions, not a library','Decisiones, no una biblioteca','자료실이 아닌 결정 가이드','是决定，而不是资料库'],
  p4d:['Students start from the moment they\'re in, like an aid offer, a lease or a card offer, and leave with steps for this week.','Los estudiantes empiezan desde el momento que están viviendo, como una oferta de ayuda, un contrato de renta o una oferta de tarjeta, y salen con pasos para esta semana.','학생들은 학자금 제안, 임대 계약, 카드 권유처럼 지금 마주한 순간에서 시작해, 이번 주에 할 일을 들고 나가요.','学生从自己正面对的时刻出发，比如助学金通知、租约或信用卡推销，离开时带走本周就能做的事。'],
  p5t:['Private by default','Privado desde el inicio','기본은 개인정보 보호','默认保护隐私'],
- p5d:['No sign-up. Progress, plans and real budgets stay in the student\'s own browser.','Sin registro. El progreso, los planes y los presupuestos reales se quedan en el navegador de cada estudiante.','가입이 필요 없어요. 진행 상황, 계획, 실제 예산은 모두 학생 본인의 브라우저에만 저장돼요.','无需注册。进度、计划和真实预算都只保存在学生自己的浏览器里。'],
+ p5d:['No sign-up. Progress, plans and real budgets stay in the student\'s own browser. Sharing quiz results is opt-in and anonymous.','Sin registro. El progreso, los planes y los presupuestos reales se quedan en el navegador de cada estudiante. Compartir resultados es opcional y anónimo.','가입이 필요 없어요. 진행 상황, 계획, 실제 예산은 학생 본인의 브라우저에만 저장돼요. 퀴즈 결과 공유는 선택이며 익명이에요.','无需注册。进度、计划和真实预算都只保存在学生自己的浏览器中。分享测验结果完全自愿且匿名。'],
  founder_h:['Made by Sungjun Lee','Creado por Sungjun Lee','Sungjun Lee가 만들었어요','由 Sungjun Lee 创建'],
  founder_p:['A UC Santa Cruz Business Economics student who has worked as a financial accounting analyst since 2023. Slugonomics is shaped by interviews with UCSC students about the money decisions they actually face.','Estudiante de Business Economics en UC Santa Cruz que trabaja como analista de contabilidad financiera desde 2023. Slugonomics se basa en entrevistas con estudiantes de UCSC sobre las decisiones de dinero que realmente enfrentan.','UC Santa Cruz에서 경영경제학(Business Economics)을 전공하며 2023년부터 재무회계 분석가로 일하고 있어요. Slugonomics는 UCSC 학생들이 실제로 겪는 돈 문제에 대한 인터뷰를 바탕으로 만들어졌어요.','UC Santa Cruz 商业经济学（Business Economics）专业学生，自 2023 年起担任财务会计分析师。Slugonomics 的内容来自对 UCSC 学生的访谈，聚焦他们真正面对的理财决定。'],
  contact:['Contact Sungjun','Contactar a Sungjun','Sungjun에게 연락하기','联系 Sungjun'],
@@ -795,6 +799,7 @@ function applyChrome(){
  const lp=$('#langslot');if(lp&&!$('#langsel')){lp.innerHTML=langPicker();$('#langsel').onchange=e=>{LANG=e.target.value;store.set('lang',LANG);render();};}
  const ll=$('.langlbl');if(ll)ll.textContent=t('lang');const ls=$('#langsel');if(ls){ls.value=LANG;ls.setAttribute('aria-label',t('lang')+' / Language');}
  const f=k=>{const el=$('#'+k);if(el)el.innerHTML=t(k);};['foot1','foot_copy','foot2','foot3'].forEach(f);
+ if(window.SlugShare)SlugShare.mountToggle($('#sharetoggle'));
 }
 const IC={
  cap:'<path d="M2 9.5 12 4.5l10 5-10 5z"/><path d="M6 11.5V16c3.3 2.2 8.7 2.2 12 0v-4.5"/><path d="M22 9.5V15"/>',

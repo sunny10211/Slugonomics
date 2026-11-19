@@ -1418,10 +1418,11 @@ function bind(){
    if(i===les.q.a&&!PROG.done.includes(les.id)){PROG.done.push(les.id);lsSet("slugLearn",PROG);learn(les.terms);toast("Lesson complete");}render();});
  document.querySelectorAll("[data-arch]").forEach(b=>b.onclick=()=>{S.arch=b.dataset.arch;S.name=(document.getElementById("nm")||{}).value||S.name;render();});
  on("nm","input",e=>S.name=e.target.value);
- on("tosetup2","click",()=>{S.screen="pre";S.qi=0;S.pre=[];render();});
+ on("tosetup2","click",()=>{S.screen="pre";S.qi=0;S.pre=[];S.runT=Date.now();render();});
  document.querySelectorAll("[data-qa]").forEach(b=>b.onclick=()=>{const arr=S.screen==="post"?S.post:S.pre;arr[S.qi]=+b.dataset.qa;render();});
  on("qnext","click",()=>{
   if(S.qi<QUIZ.length-1){S.qi++;render();return;}
+  csShare("week",S.screen,S.screen==="post"?S.post:S.pre,QUIZ,S.runT);
   if(S.screen==="pre")beginGame();else{S.screen="report";render();window.scrollTo({top:0,behavior:"smooth"});}
  });
  document.querySelectorAll("[data-ch]").forEach(b=>b.onclick=()=>{if(b.getAttribute("aria-disabled")==="true")return;doChoice(+b.dataset.ch);});
@@ -1484,6 +1485,7 @@ function softRender(){
  else if(ds){const k=Object.keys(ds);if(k.length){const sel=k.map(x=>`[data-${x.replace(/[A-Z]/g,c=>"-"+c.toLowerCase())}="${ds[x]}"]`).join("");const e=document.querySelector(sel);if(e)e.focus({preventScroll:true});}}
 }
 function goTab(t){UI.tab=t;UI.drawer=null;render();window.scrollTo({top:0});}
+function csShare(mode,phase,arr,Q,t){if(!window.SlugShare||!arr)return;const score=arr.filter((a,i)=>a===Q[i].a).length;SlugShare.sync("college-sim",mode,{[phase]:{score,of:Q.length,ans:arr.slice(),t:t||0}},{key:Q.map(q=>q.a)});}
 function beginGame(){
  const A=ARCH[S.arch];S.screen="game";S.money=A.money;S.prior=A.prior;S.startNet=A.money;S.day=0;S.slot=0;S.cur=null;S.pending=null;S.mg=null;
  S.lastNet=null;
@@ -2828,9 +2830,10 @@ function bindFour(){
  document.querySelectorAll("[data-fchar]").forEach(b=>b.onclick=()=>{F.arch=b.dataset.fchar;render();});
  document.querySelectorAll("[data-fmaj]").forEach(b=>b.onclick=()=>{F.major=b.dataset.fmaj;render();});
  on("f-name","input",e=>F.name=e.target.value);
- on("f-begin","click",()=>{F.step=1;F.qi=0;F.pre=[];render();window.scrollTo({top:0});});
+ on("f-begin","click",()=>{F.step=1;F.qi=0;F.pre=[];F.runT=Date.now();render();window.scrollTo({top:0});});
  document.querySelectorAll("[data-fq]").forEach(b=>b.onclick=()=>{if(F.phase==="postq"){F.post_q[F.qi]=+b.dataset.fq;}else F.pre[F.qi]=+b.dataset.fq;render();});
  on("f-qnext","click",()=>{if(F.qi<QUIZ4.length-1){F.qi++;render();return;}
+  csShare("four-year",F.phase==="postq"?"post":"pre",F.phase==="postq"?F.post_q:F.pre,QUIZ4,F.runT);
   if(F.phase==="postq"){F.proj=project();F.phase="final";render();window.scrollTo({top:0});}else{startF();render();window.scrollTo({top:0});}});
  const rs=document.getElementById("f-sub"),ru=document.getElementById("f-uns");
  if(rs){const u=()=>{F.mg.sub=+rs.value;F.mg.unsub=+ru.value;syncRender();};rs.oninput=u;ru.oninput=u;}
@@ -3136,4 +3139,5 @@ window.claude?.hot?.ready?window.claude.hot.ready(start):start(window.claude?.ho
 </script>
 
 <a href="index.html#play" id="slugo-back" style="position:fixed;left:12px;bottom:12px;z-index:9999;background:#003C6C;color:#fff;font:700 13px/1 system-ui,sans-serif;padding:9px 13px;border-radius:999px;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.25)">← Slugonomics</a>
+<script src="assets/config.js"></script><script src="assets/share.js" defer></script>
 </body></html>
