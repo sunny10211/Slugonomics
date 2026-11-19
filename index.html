@@ -251,6 +251,10 @@ main{min-height:60vh}
 .field label{display:flex;justify-content:space-between;gap:12px;font-weight:600;font-size:.93rem;color:var(--ink);margin-bottom:6px}
 .field label output{font-weight:800;font-variant-numeric:tabular-nums;color:var(--sea);white-space:nowrap}
 .field input[type=range]{width:100%;accent-color:var(--ink)}
+.numwrap{display:inline-flex;align-items:center;gap:2px;font-weight:700;color:var(--sea);white-space:nowrap}
+.numbox{width:7.5ch;font:inherit;font-weight:700;color:var(--sea);text-align:right;font-variant-numeric:tabular-nums;background:var(--paper);border:1.5px solid var(--line);border-radius:7px;padding:3px 6px;-moz-appearance:textfield}
+.numbox::-webkit-inner-spin-button,.numbox::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+.numbox:focus{outline:none;border-color:var(--ink);background:var(--surface)}
 .field .hint{font-size:.82rem;color:var(--muted);margin-top:2px;line-height:1.4}
 .out{padding:24px;background:var(--paper)}
 .out .eyebrow{font-weight:600;font-size:.92rem;color:var(--muted)}
@@ -410,15 +414,15 @@ function pmt(P,ratePct,months){const r=ratePct/100/12;if(P<=0)return 0;if(r===0)
 const TOOLS={
  budget:{name:'Quarter Budget',ico:'🗓️',blurb:'Your aid arrives in one lump each quarter. See how many weeks it actually lasts.',
   fields:[
-   {k:'aid',l:'Aid refund this quarter (after tuition & housing)',min:0,max:8000,step:50,v:1800,fmt:'$'},
-   {k:'savings',l:'Money already in checking',min:0,max:5000,step:50,v:400,fmt:'$'},
-   {k:'job',l:'Take-home pay per week',min:0,max:800,step:10,v:150,fmt:'$'},
-   {k:'family',l:'Help from family per month',min:0,max:1500,step:25,v:0,fmt:'$'},
-   {k:'rent',l:'Rent per month (0 if it’s in your aid)',min:0,max:2500,step:25,v:0,fmt:'$'},
-   {k:'food',l:'Groceries & food per week',min:0,max:300,step:5,v:85,fmt:'$'},
-   {k:'phone',l:'Phone, subscriptions per month',min:0,max:300,step:5,v:60,fmt:'$'},
-   {k:'transport',l:'Transport per week',min:0,max:150,step:5,v:15,fmt:'$'},
-   {k:'fun',l:'Going out & fun per week',min:0,max:300,step:5,v:60,fmt:'$'},
+   {k:'aid',l:'Aid refund this quarter (after tuition & housing)',min:0,max:25000,step:50,v:1800,fmt:'$'},
+   {k:'savings',l:'Money already in checking',min:0,max:50000,step:50,v:400,fmt:'$'},
+   {k:'job',l:'Take-home pay per week',min:0,max:3000,step:10,v:150,fmt:'$'},
+   {k:'family',l:'Help from family per month',min:0,max:5000,step:25,v:0,fmt:'$'},
+   {k:'rent',l:'Rent per month (0 if it’s in your aid)',min:0,max:6000,step:25,v:0,fmt:'$'},
+   {k:'food',l:'Groceries & food per week',min:0,max:800,step:5,v:85,fmt:'$'},
+   {k:'phone',l:'Phone, subscriptions per month',min:0,max:800,step:5,v:60,fmt:'$'},
+   {k:'transport',l:'Transport per week',min:0,max:500,step:5,v:15,fmt:'$'},
+   {k:'fun',l:'Going out & fun per week',min:0,max:1000,step:5,v:60,fmt:'$'},
   ],
   calc(v){
    const W=11, months=W/4.33;
@@ -440,10 +444,10 @@ const TOOLS={
   }},
  loancost:{name:'Loan Cost',ico:'🎓',blurb:'What a student loan really costs, and what borrowing less saves you.',
   fields:[
-   {k:'amt',l:'Amount you borrow',min:500,max:31000,step:250,v:5500,fmt:'$'},
-   {k:'rate',l:'Interest rate',min:0,max:15,step:.01,v:LOAN_RATE,fmt:'%',hint:'2026–27 federal undergraduate rate: 6.52% fixed. Private loans vary.'},
-   {k:'years',l:'Repayment term (years)',min:5,max:25,step:1,v:10,fmt:'y'},
-   {k:'school',l:'Years until repayment starts (school + 6-mo grace)',min:0,max:5,step:.5,v:4,fmt:'y'},
+   {k:'amt',l:'Amount you borrow',min:500,max:150000,step:250,v:5500,fmt:'$'},
+   {k:'rate',l:'Interest rate',min:0,max:20,step:.01,v:LOAN_RATE,fmt:'%',hint:'2026–27 federal undergraduate rate: 6.52% fixed. Private loans vary.'},
+   {k:'years',l:'Repayment term (years)',min:5,max:30,step:1,v:10,fmt:'y'},
+   {k:'school',l:'Years until repayment starts (school + 6-mo grace)',min:0,max:10,step:.5,v:4,fmt:'y'},
    {k:'sub',l:'Subsidized? (1 = yes, 0 = no)',min:0,max:1,step:1,v:0,fmt:'',hint:'Government pays the interest on subsidized loans while you\'re in school.'},
   ],
   calc(v){
@@ -466,9 +470,9 @@ const TOOLS={
   }},
  cardpayoff:{name:'Credit Card Payoff',ico:'💳',blurb:'The minimum-payment trap, in numbers.',
   fields:[
-   {k:'bal',l:'Card balance',min:100,max:10000,step:50,v:1200,fmt:'$'},
+   {k:'bal',l:'Card balance',min:100,max:50000,step:50,v:1200,fmt:'$'},
    {k:'apr',l:'APR',min:0,max:35,step:.25,v:22.5,fmt:'%',hint:'New card offers averaged about 24% APR in late 2026. Student cards are often lower.'},
-   {k:'pay',l:'Your monthly payment',min:25,max:1000,step:5,v:40,fmt:'$'},
+   {k:'pay',l:'Your monthly payment',min:25,max:5000,step:5,v:40,fmt:'$'},
   ],
   calc(v){
    const r=v.apr/100/12;
@@ -488,8 +492,8 @@ const TOOLS={
   }},
  paycalc:{name:'Paycheck',ico:'💵',blurb:'Gross vs. net: where your paycheck goes, and why filing taxes can pay you back.',
   fields:[
-   {k:'wage',l:'Hourly wage',min:MIN_WAGE,max:40,step:.1,v:18,fmt:'$',hint:'California minimum wage in 2026: $16.90/hr.'},
-   {k:'hours',l:'Hours per week',min:1,max:40,step:1,v:12,fmt:'h'},
+   {k:'wage',l:'Hourly wage',min:MIN_WAGE,max:150,step:.1,v:18,fmt:'$',hint:'California minimum wage in 2026: $16.90/hr.'},
+   {k:'hours',l:'Hours per week',min:1,max:80,step:1,v:12,fmt:'h'},
    {k:'weeks',l:'Weeks worked this year',min:1,max:52,step:1,v:40,fmt:'w'},
    {k:'campus',l:'Campus job while enrolled? (1 = yes)',min:0,max:1,step:1,v:1,fmt:'',hint:'Students working for their own school while enrolled at least half-time are usually exempt from Social Security & Medicare (FICA).'},
   ],
@@ -517,10 +521,10 @@ const TOOLS={
   }},
  habitcost:{name:'Habit Cost',ico:'☕',blurb:'What a small daily spend becomes if you invest it instead.',
   fields:[
-   {k:'amt',l:'Amount per purchase',min:1,max:40,step:.5,v:7,fmt:'$'},
+   {k:'amt',l:'Amount per purchase',min:1,max:200,step:.5,v:7,fmt:'$'},
    {k:'days',l:'Times per week',min:1,max:7,step:1,v:5,fmt:'×'},
-   {k:'years',l:'Years',min:1,max:40,step:1,v:10,fmt:'y'},
-   {k:'ret',l:'Yearly return if invested',min:0,max:10,step:.5,v:7,fmt:'%',hint:'Long-run stock index average is often cited near 7% after inflation, but it\'s never guaranteed.'},
+   {k:'years',l:'Years',min:1,max:50,step:1,v:10,fmt:'y'},
+   {k:'ret',l:'Yearly return if invested',min:0,max:15,step:.5,v:7,fmt:'%',hint:'Long-run stock index average is often cited near 7% after inflation, but it\'s never guaranteed.'},
   ],
   calc(v){
    const yr=v.amt*v.days*52, mo=yr/12, r=v.ret/100/12, n=v.years*12;
@@ -535,13 +539,13 @@ const TOOLS={
   }},
  rent:{name:'Off-Campus Move',ico:'🏠',blurb:'The real monthly cost of an apartment, including what the listing leaves out.',
   fields:[
-   {k:'rent',l:'Your share of rent per month',min:400,max:2500,step:25,v:1150,fmt:'$'},
-   {k:'util',l:'Utilities & internet (your share)',min:0,max:300,step:5,v:90,fmt:'$'},
-   {k:'deposit',l:'Security deposit (your share)',min:0,max:4000,step:50,v:1150,fmt:'$'},
+   {k:'rent',l:'Your share of rent per month',min:400,max:6000,step:25,v:1150,fmt:'$'},
+   {k:'util',l:'Utilities & internet (your share)',min:0,max:800,step:5,v:90,fmt:'$'},
+   {k:'deposit',l:'Security deposit (your share)',min:0,max:12000,step:50,v:1150,fmt:'$'},
    {k:'lease',l:'Months on the lease',min:6,max:12,step:1,v:12,fmt:'mo'},
    {k:'school',l:'Months you\'re actually in Santa Cruz',min:6,max:12,step:1,v:9,fmt:'mo'},
-   {k:'commute',l:'Extra transport per month',min:0,max:300,step:5,v:30,fmt:'$'},
-   {k:'ins',l:'Renters insurance per month',min:0,max:40,step:1,v:15,fmt:'$'},
+   {k:'commute',l:'Extra transport per month',min:0,max:1000,step:5,v:30,fmt:'$'},
+   {k:'ins',l:'Renters insurance per month',min:0,max:100,step:1,v:15,fmt:'$'},
   ],
   calc(v){
    const monthly=v.rent+v.util+v.commute+v.ins;
@@ -560,18 +564,24 @@ const TOOLS={
 };
 
 function fieldHTML(t,f,val){
- const v=val??f.v;
- const disp=f.fmt==='$'?money(v,f.step<1?2:0):f.fmt==='%'?v+'%':f.fmt===''?(v?'Yes':'No'):v+' '+f.fmt;
- return `<div class="field"><label for="${t}-${f.k}"><span>${f.l}</span><output id="${t}-${f.k}-o">${disp}</output></label>
- <input type="range" id="${t}-${f.k}" data-k="${f.k}" min="${f.min}" max="${f.max}" step="${f.step}" value="${v}">${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;
+ const v=val??f.v,bool=f.fmt==='';
+ const pre=f.fmt==='$'?'$':'',suf=f.fmt==='%'?'%':f.fmt==='$'||bool?'':f.fmt;
+ const box=bool?`<output id="${t}-${f.k}-o">${v?'Yes':'No'}</output>`
+  :`<span class="numwrap">${pre?`<span aria-hidden="true">${pre}</span>`:''}<input type="number" inputmode="decimal" class="numbox" id="${t}-${f.k}-n" data-n="${f.k}" min="${f.min}" step="any" value="${+(+v).toFixed(2)}" aria-label="${esc(f.l)}, type any amount">${suf?`<span aria-hidden="true">${suf}</span>`:''}</span>`;
+ return `<div class="field"><label for="${t}-${f.k}"><span>${f.l}</span>${box}</label>
+ <input type="range" id="${t}-${f.k}" data-k="${f.k}" min="${f.min}" max="${Math.max(f.max,v)}" step="${f.step}" value="${v}">${f.hint?`<div class="hint">${f.hint}</div>`:''}</div>`;
 }
 function mountTool(el,id,preset={}){
  const T=TOOLS[id];
- el.innerHTML=`<div class="tool"><div class="card">${T.fields.map(f=>fieldHTML(id,f,preset[f.k])).join('')}</div><div class="out" aria-live="polite"></div></div>`;
+ el.innerHTML=`<div class="tool"><div class="card">${T.fields.map(f=>fieldHTML(id,f,preset[f.k])).join('')}<p class="hint" style="margin-top:14px">Slide, or type any amount in the box. Typing a bigger number stretches the slider.</p></div><div class="out" aria-live="polite"></div></div>`;
  const out=$('.out',el);
- const read=()=>{const v={};T.fields.forEach(f=>{v[f.k]=parseFloat($('#'+id+'-'+f.k,el).value);});return v;};
- const upd=()=>{const v=read();T.fields.forEach(f=>{const x=v[f.k];$('#'+id+'-'+f.k+'-o',el).textContent=f.fmt==='$'?money(x,f.step<1?2:0):f.fmt==='%'?x+'%':f.fmt===''?(x?'Yes':'No'):x+' '+f.fmt;});out.innerHTML=T.calc(v);};
- $$('input[type=range]',el).forEach(i=>i.addEventListener('input',upd));
+ const read=()=>{const v={};T.fields.forEach(f=>{const n=$('#'+id+'-'+f.k+'-n',el),r=$('#'+id+'-'+f.k,el);let x=parseFloat(n?n.value:r.value);if(!isFinite(x))x=parseFloat(r.value);v[f.k]=Math.max(f.min,x);});return v;};
+ const upd=()=>{out.innerHTML=T.calc(read());T.fields.forEach(f=>{if(f.fmt==='')$('#'+id+'-'+f.k+'-o',el).textContent=+$('#'+id+'-'+f.k,el).value?'Yes':'No';});};
+ T.fields.forEach(f=>{const r=$('#'+id+'-'+f.k,el),n=$('#'+id+'-'+f.k+'-n',el);
+  r.addEventListener('input',()=>{if(n)n.value=+(+r.value).toFixed(2);upd();});
+  if(n)n.addEventListener('input',()=>{const x=parseFloat(n.value);if(!isFinite(x))return;if(x>+r.max)r.max=x;r.value=Math.max(f.min,x);upd();});
+  if(n)n.addEventListener('blur',()=>{const x=parseFloat(n.value);if(!isFinite(x)||x<f.min){n.value=f.min;r.value=f.min;upd();}});
+ });
  upd();
 }
 

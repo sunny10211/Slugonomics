@@ -974,6 +974,289 @@ Object.assign(EV,{
 
 </script>
 <script>
+/* ======================= SLUG COLLEGE: MORE EVENTS (replay variety) =======================
+   Two kinds of variety, both picked at random each run:
+   1. ALTS: some months swap their usual event for a different one that fits the same time of year.
+   2. WILD: on many months a second, smaller Santa Cruz situation shows up. Each one happens at most once a run.
+   Money figures are rounded estimates for Santa Cruz in 2026. */
+
+LESSONS.scams={ic:"🎣",t:"Spotting scams",c:"Scams aimed at students copy real things: aid refunds, campus jobs, apartment listings. The tells are urgency, a link or payment app instead of the official site, and anyone sending you money and asking for some back.",tip:"Go to the official site or office yourself. Never pay a deposit for a place you haven't seen, and never send back part of a check."};
+
+const ALTS={
+ RUSH:["BIKETHEFT"],WINTERBREAK:["GIFTS"],CLUBFAIR:["TEXTBOOKS"],SCHOLARSHIPS:["GIGWORK"],CARDTABLE:["STORECARD"],
+ SICK:["STORM"],SPRINGBREAK:["AQUARIUM"],BREAKDOWN:["RENTALSCAM"],ROOMMATE:["RENTHIKE"],ACCIDENT:["LAPTOPSTOLEN"],
+ CONCERT:["CATALYST"],DATING:["FRIENDLOAN","COSIGN"],JULY:["REDWOODS"],MAJORCLUB:["SLUGCENTS"]
+};
+const ALT_P=0.5,WILD_P=0.3;
+function pickMain(m){
+ C.alts=C.alts||{};
+ if(C.alts[m]==null){const k=MAP[m],a=ALTS[k];C.alts[m]=a&&pr(ALT_P)?pick(a):k;}
+ return C.alts[m];
+}
+const offCampus=()=>C.home==="shared"||C.home==="own";
+const hasCar=()=>C.fin.transit>=100;
+const gig=(amt,what)=>{C.cash+=amt;C.spent.earned+=amt;return amt;};
+
+Object.assign(EV,{
+ /* ---------- alternates ---------- */
+ biketheft:()=>({title:"Your bike is gone",where:`${C.college} College · bike rack`,
+  text:"You come out of class and your bike is gone. The cable lock was cut. Bike theft is one of the most common crimes on campus.",
+  choices:[
+   {l:"Buy a used bike and a real U-lock",s:"About $180 for the bike, $50 for the lock",tag:"−$230",go(){C.cash-=230;C.spent.other+=230;teach("emergency");fx({stress:3});return{t:"You found a used bike on Marketplace and bought a heavy U-lock.",why:"A $50 lock protects a $180 bike. Cheap cable locks take seconds to cut."};}},
+   {l:"Ride the Metro instead",s:"Free with your student ID",go(){fx({stress:2,health:-1});return{t:"You started taking the bus up the hill. Your student fees already pay for it.",why:"UCSC students ride Santa Cruz Metro free with their ID. Use what your fees already cover before buying something new."};}},
+   {l:"Get an e-bike on buy now, pay later",s:"4 payments of $350",go(){C.bnpl.push({amt:350,left:4,what:"e-bike"});fx({happy:6});teach("bnpl");return{t:"You ordered an e-bike for $1,400 in four payments. The hill is easy now.",why:"Four payments of $350 is still $1,400 of debt, and it lands on top of rent and food for four months."};}}]}),
+ gifts:()=>({title:"Holiday gifts",where:"December · downtown Santa Cruz",
+  text:"Finals are done and you want to get gifts for your family and friends. Pacific Avenue is lit up and every store has a sale.",
+  choices:[
+   {l:"Set a $100 limit and stick to it",s:"Pay cash",tag:"−$100",go(){C.cash-=100;C.spent.fun+=100;people(["mother","father"]).forEach(p=>p.bond=clamp(p.bond+4));fx({happy:3});return{t:"You spent $100 on gifts and stayed on budget.",why:"Deciding the number before you shop is what keeps holiday spending from following you into January."};}},
+   {l:"Get everyone something nice on a card",s:"About $400 at 25% APR",tag:"+$400 card",go(){C.debt.card+=400;C.card=true;C.spent.fun+=400;people(["mother","father"]).forEach(p=>p.bond=clamp(p.bond+6));fx({happy:5});teach("apr");return{t:"You put $400 of gifts on a credit card.",why:"Winter quarter aid has to cover rent and food first. Gifts on a card often get paid off slowly, with interest."};}},
+   {l:"Make gifts and write cards",s:"About $20 in supplies",tag:"−$20",go(){C.cash-=20;C.spent.fun+=20;people(["mother","father"]).forEach(p=>p.bond=clamp(p.bond+6));fx({happy:4,stress:-2});return"You baked, wrote cards and framed photos. Your family loved them.";}}]}),
+ textbooks:()=>({title:"Winter quarter textbooks",where:"Bay Tree Bookstore",
+  text:"Your syllabi list about $260 in new textbooks and access codes for this quarter.",
+  choices:[
+   {l:"Buy everything new",s:"About $260",tag:"−$260",go(){C.cash-=260;C.spent.books+=260;C.effort+=0.5;return"You bought every book new.";}},
+   {l:"Rent, buy used, and check the library first",s:"About $110",tag:"−$110",go(){C.cash-=110;C.spent.books+=110;C.effort+=0.4;return{t:"You rented two books, bought one used and found one on course reserve at the library. You spent $110.",k:"k-good",why:"The library keeps many required textbooks on course reserve. Checking before you buy is free."};}},
+   {l:"Skip the books and hope for the best",s:"$0",go(){C.effort-=1;fx({stress:3});return{t:"You didn't buy the books. Homework took longer and you fell behind.",why:"Skipping required books saves money now but can cost grades, and grades protect your aid."};}}]}),
+ gigwork:()=>{const gross=1500,gas=250,set=Math.round((gross-gas)*0.2);return{title:"Delivering food for an app",where:"Santa Cruz · evenings",
+  text:`A friend makes extra money delivering food on weekends. Over the next three months you could earn about ${$(gross)} before gas and car costs of about ${$(gas)}. Delivery apps don't take any taxes out. You pay them yourself at tax time, including about 15% self-employment tax.`,
+  choices:[
+   {l:"Do it and set aside 20% for taxes",s:`Keep about ${$(gross-gas-set)}`,go(){gig(gross-gas-set);fx({stress:5});C.effort-=0.5;teach("taxes");return{t:`You delivered on weekends and put ${$(set)} aside for taxes.`,k:"k-good",why:"Gig work pays you the full amount, so the taxes are on you. Setting money aside each week means April isn't a surprise."};}},
+   {l:"Do it and spend it all",s:`Keep about ${$(gross-gas)} for now`,go(){gig(gross-gas);C.flags.gigOwe=(C.flags.gigOwe||0)+set;fx({stress:4,happy:2});C.effort-=0.5;teach("taxes");return{t:`You made ${$(gross-gas)} after gas and spent it as it came in.`,why:`You'll owe about ${$(set)} in taxes on it in April.`};}},
+   {l:"Pass",s:"Keep your weekends for studying",go(){C.effort+=0.5;return"You passed on delivery work and kept your weekends free.";}}]};},
+ storecard:()=>({title:"15% off if you open a store card",where:"Capitola Mall",
+  text:"You're buying $120 of clothes. The cashier says you'll save 15% today if you open the store's credit card. You ask about the APR: about 30%.",
+  choices:[
+   {l:"Open it for the discount",s:"Save $18 today",tag:"−$102",go(){C.cash-=102;C.spent.other+=102;C.card=true;C.flags.storeCard=true;teach("apr");return{t:"You opened the store card and saved $18.",why:"Store cards often charge higher APRs than regular cards. The discount is gone the first month you carry a balance, and every new account is a hard inquiry on your credit."};}},
+   {l:"Say no thanks and pay full price",s:"$120",tag:"−$120",go(){C.cash-=120;C.spent.other+=120;teach("apr");return{t:"You paid $120 and skipped the store card.",why:"Opening cards for one-time discounts adds accounts and inquiries you don't need."};}},
+   {l:"Put the clothes back",s:"$0",go(){fx({happy:-1});return"You decided you didn't need the clothes after all.";}}]}),
+ storm:()=>({title:"An atmospheric river hits Santa Cruz",where:"December · finals week",
+  text:`Days of heavy rain knock out power ${offCampus()?"on your street":"across part of campus"}. Highway 17 has rockslide closures, and your phone is at 20%.`,
+  choices:[
+   {l:offCampus()?"Toss the spoiled food and restock":"Grab food and study at a friend's place in town",s:offCampus()?"About $70":"About $20",tag:offCampus()?"−$70":"−$20",go(){const c=offCampus()?70:20;C.cash-=c;C.spent.food+=c;teach("emergency");fx({stress:3});return{t:offCampus()?"Your fridge was out for two days. You threw out about $70 of food.":"You stayed with a friend in town with power and studied there.",why:"Storms and power shutoffs happen in Santa Cruz most winters. A small cushion turns them into an annoyance instead of a crisis."};}},
+   {l:"Study by headlamp and ride it out",s:"Free, stressful",go(){fx({stress:7,happy:-3});C.effort-=0.5;return"You studied by headlamp for two nights. Finals felt harder.";}},
+   {l:"Ask your professor for a short extension",s:"Email today",go(){fx({stress:-3});C.effort+=0.3;return{t:"Your professor gave everyone without power two extra days.",why:"Asking early and politely works more often than students expect."};}}]}),
+ aquarium:()=>({title:"Spring break day trip",where:"Monterey Bay",
+  text:"Friends want to drive down to the Monterey Bay Aquarium. Tickets are about $65 each, plus gas and lunch.",
+  choices:[
+   {l:"Go to the aquarium",s:"About $95 with gas and lunch",tag:"−$95",go(){C.cash-=95;C.spent.fun+=95;fx({happy:8,social:5,stress:-6});return"You spent the day at the aquarium. The sea otters were worth it.";}},
+   {l:"Suggest tide pools at Natural Bridges instead",s:"Free, bring lunch",go(){fx({happy:6,social:4,stress:-6});return{t:"You explored the tide pools at Natural Bridges and had a picnic.",why:"Santa Cruz has a lot of free fun: beaches, tide pools, trails. Mixing in free days keeps a fun budget going longer."};}},
+   {l:"Stay in and work",s:"Extra shifts if you have a job",go(){if(C.fin.hours>0){const p=Math.round(C.fin.wage*16*(1-TAX));C.cash+=p;C.spent.earned+=p;}fx({happy:-2});return"You stayed back and worked.";}}]}),
+ rentalscam:()=>({title:"A room that's too good to be true",where:"Facebook Marketplace",
+  text:"You're looking at places for next year. A private room downtown is listed at $900 a month, far below the usual $1,350. The owner says they're out of the country and will mail the keys once you send the deposit by Zelle.",
+  choices:[
+   {l:"Send the $900 deposit to hold it",s:"Before someone else does",tag:"−$900",go(){const a=Math.min(900,Math.max(0,C.cash));C.cash-=a;if(a<900)C.debt.card+=900-a;C.spent.housing+=900;fx({stress:10,happy:-6});teach("scams");return{t:"The keys never came and the listing disappeared. The $900 is gone.",k:"k-bad",why:"Owners who can't show the place, prices far below market and payment apps are the classic rental scam. Payment apps rarely refund scams."};}},
+   {l:"Ask to see it in person first",s:"Takes a day",go(){teach("scams");return{t:"The \"owner\" stopped answering once you asked for a showing.",k:"k-good",why:"A real landlord will show the place. Insisting on a viewing is the simplest scam filter there is."};}},
+   {l:"Report the listing",s:"Two minutes",go(){teach("scams");fx({happy:1});return{t:"You reported the listing and warned your group chat.",why:"Reporting helps the next student who sees it."};}}]}),
+ renthike:()=>{if(!offCampus())return EV.roommate();const up=200;return{title:"Your landlord wants more rent",where:"Text from your landlord",
+  text:`Your landlord texts that rent is going up $${up} starting next month. You're halfway through a 12-month lease.`,
+  choices:[
+   {l:"Check your lease and reply in writing",s:"Free, a little awkward",go(){teach("jointlease");return{t:"Your lease set the rent for 12 months. You replied politely in writing and the landlord dropped it.",k:"k-good",why:"A fixed-term lease locks the rent until it ends, unless the lease itself allows changes. For most California rentals older than 15 years, yearly increases are also capped at 5% plus inflation, never more than 10%."};}},
+   {l:"Just pay it",s:`$${up} more a month`,go(){C.rent+=up;teach("jointlease");return{t:`You agreed to pay $${up} more a month.`,k:"k-bad",why:"You may not have owed it. Reading your lease before agreeing to anything costs nothing."};}},
+   {l:"Ask Basic Needs for help with tenant rights",s:"Free campus help",go(){teach("jointlease");fx({stress:-2});return{t:"Basic Needs pointed you to tenant resources. The rent stayed the same.",k:"k-good",why:"UCSC's Basic Needs office has renter's rights information and referrals for exactly this."};}}]};},
+ laptopstolen:()=>({title:"Your laptop was stolen",where:"McHenry Library",
+  text:"You left your laptop on the table for two minutes to refill your water bottle. When you came back it was gone, and a paper is due Friday.",
+  choices:[
+   {l:"Borrow a library loaner laptop for now",s:"Free, short-term",go(){fx({stress:5});C.effort-=0.3;C.flags.loaner=true;return{t:"You borrowed a library laptop to finish your paper and started saving for a replacement.",why:"The library lends laptops to students. Free campus backups buy you time to make a calm decision."};}},
+   {l:"Buy a refurbished laptop",s:"About $500",tag:"−$500",go(){C.cash-=500;C.spent.other+=500;teach("emergency");fx({stress:3});return{t:"You bought a refurbished laptop for $500.",why:"This is what emergency savings is for. Renters insurance, often about $15 a month, can also cover theft away from home."};}},
+   {l:"Buy a new one on your card",s:"About $1,100 at 25% APR",tag:"+$1,100 card",go(){C.debt.card+=1100;C.card=true;C.spent.other+=1100;teach("emergency");return{t:"You put a new $1,100 laptop on your credit card.",k:"k-bad",why:"Without savings, emergencies land on a card. Paying $1,100 off slowly at 25% APR adds hundreds in interest."};}}]}),
+ catalyst:()=>({title:"A show at the Catalyst",where:"Pacific Avenue",
+  text:"A band you love is playing the Catalyst on a Thursday. Tickets are $45, and your friends want to get dinner downtown first.",
+  choices:[
+   {l:"Go to dinner and the show",s:"About $90",tag:"−$90",go(){C.cash-=90;C.spent.fun+=90;fx({happy:8,social:5,health:-1});return"You had dinner on Pacific and danced all night.";}},
+   {l:"Go to the show, eat at home first",s:"$45",tag:"−$45",go(){C.cash-=45;C.spent.fun+=45;fx({happy:7,social:4});return{t:"You ate at home and went to the show.",why:"Cutting the add-ons, not the event itself, keeps most of the fun for half the cost."};}},
+   {l:"Skip it, you have a midterm Friday",s:"$0",go(){C.effort+=0.6;fx({happy:-3});return"You stayed in and studied.";}}]}),
+ friendloan:()=>{const f=people("friend")[0]||people("roommate")[0];const n=f?f.name:"A friend";return{title:`${n} asks to borrow money`,where:"Text message",
+  text:`${n} is $300 short on rent this month and asks if you can cover it until their next paycheck.`,
+  choices:[
+   {l:"Lend the $300",s:"They promise to pay it back",tag:"−$300",ok:()=>C.cash>=300,go(){C.cash-=300;if(pr(0.6)){C.flags.repay=(C.flags.repay||0)+300;if(f)f.bond=clamp(f.bond+10);return{t:`You lent ${n} $300. They said they'd pay you back soon.`,why:"Only lend what you could afford to lose. Even good friends sometimes can't pay back on time."};}if(f)f.bond=clamp(f.bond-8);return{t:`You lent ${n} $300. Months later it still hasn't come back.`,k:"k-bad",why:"Money between friends goes wrong often. Writing down the amount and date helps both of you."};}},
+   {l:"Give $100 as a gift instead",s:"No strings",tag:"−$100",ok:()=>C.cash>=100,go(){C.cash-=100;if(f)f.bond=clamp(f.bond+8);return{t:`You gave ${n} $100 and told them not to worry about paying it back.`,why:"Giving a smaller amount you can afford protects both the friendship and your budget."};}},
+   {l:"Point them to Slug Support",s:"Emergency funds for students",go(){if(f)f.bond=clamp(f.bond+3);return{t:`You told ${n} about Slug Support, which has emergency funds for students.`,k:"k-good",why:"Campus emergency funds exist for exactly this. Knowing about them helps your friends too."};}}]};},
+
+ /* ---------- wildcards ---------- */
+ w_phish:()=>({title:"\"Your aid refund is on hold\"",where:"Text message",
+  text:"A text says your UCSC financial aid refund is on hold and you have 24 hours to verify your account at a link. It has the UCSC logo.",
+  choices:[
+   {l:"Delete it and check your student portal yourself",s:"Two minutes",go(){teach("scams");return{t:"Your portal showed nothing wrong. The text was a scam.",k:"k-good",why:"Schools don't text you links to log in. Go to the official site yourself."};}},
+   {l:"Click and log in",s:"Better safe than sorry",go(){const a=Math.min(600,Math.max(0,C.cash));C.cash-=a;fx({stress:10});teach("scams");return{t:`Someone got into your account and moved ${$(a)} out before your bank froze it.`,k:"k-bad",why:"Urgency plus a link is the classic phishing pattern. Change your passwords and turn on two-step login."};}}]}),
+ w_fakecheck:()=>({title:"An easy pet-sitting job",where:"Your student email",
+  text:"An email offers $400 a week to pet-sit for a \"professor on sabbatical.\" They mail you a check for $1,900 and ask you to deposit it and Zelle $1,500 to their pet supplier.",
+  choices:[
+   {l:"Deposit it and send the $1,500",s:"The check cleared",go(){const a=Math.min(1500,Math.max(0,C.cash));C.cash-=a;if(a<1500)C.debt.card+=1500-a;fx({stress:12,happy:-6});teach("scams");return{t:"A week later the check bounced. The bank took back the $1,900, and the $1,500 you sent is gone.",k:"k-bad",why:"Banks make deposited money available before a check fully clears. When it bounces, you owe the bank. Never send back part of a check."};}},
+   {l:"Ignore it and report it to campus IT",s:"",go(){teach("scams");return{t:"You reported the email. IT warned other students about the same scam.",k:"k-good",why:"Any job that sends you money and asks you to send some back is a scam."};}}]}),
+ w_farmers:()=>({title:"Wednesday farmers market",where:"Downtown Santa Cruz",
+  text:C.calfresh?"The downtown farmers market takes EBT, and the Market Match program adds extra money for fruits and vegetables when you pay with CalFresh.":"The downtown farmers market is on Wednesday afternoons. Produce is fresh and some stalls are cheaper than the grocery store.",
+  choices:[
+   {l:C.calfresh?"Use your EBT card with Market Match":"Buy produce for the week",s:C.calfresh?"Extra produce for the same money":"About $25",tag:C.calfresh?"":"−$25",go(){if(!C.calfresh){C.cash-=25;C.spent.food+=25;}fx({health:4,happy:3});return C.calfresh?{t:"You used CalFresh at the market and Market Match added extra for produce.",k:"k-good",why:"Market Match stretches CalFresh benefits at many California farmers markets."}:"You stocked up on produce for the week.";}},
+   {l:"Skip it",s:"",go(){return"You skipped the market this week.";}}]}),
+ w_subs:()=>({title:"Counting your subscriptions",where:"Your bank app",
+  text:"You scroll your transactions and count three streaming services, a music app and a cloud storage plan. Together they're about $45 a month.",
+  choices:[
+   {l:"Cancel two you barely use",s:"Save about $25 a month",go(){C.fin.other=Math.max(0,C.fin.other-25);teach("dues");return{t:"You canceled two subscriptions. That's about $300 a year back.",k:"k-good",why:"Subscriptions are small each month and big over a year. Check student discounts for the ones you keep."};}},
+   {l:"Keep them all",s:"",go(){teach("dues");return"You kept everything.";}}]}),
+ w_phone:()=>({title:"Your phone bill",where:"Phone carrier app",
+  text:"You're paying about $75 a month for your phone. A prepaid plan on the same network costs about $30.",
+  choices:[
+   {l:"Switch to prepaid",s:"Save about $45 a month",go(){C.fin.utils=Math.max(20,C.fin.utils-45);return{t:"You switched to prepaid and kept your number.",k:"k-good",why:"Fixed bills are the easiest place to save, because you only have to decide once."};}},
+   {l:"Stay on your current plan",s:"",go(){return"You kept your plan.";}}]}),
+ w_overdraft:()=>({title:"Overdrawn",where:"Bank alert",
+  text:"A $14 lunch on your debit card took your checking account below zero. The bank charged a $35 overdraft fee.",
+  choices:[
+   {l:"Call and ask them to waive it",s:"Five minutes on hold",go(){if(pr(0.6))return{t:"The bank waived the fee since it was your first time.",k:"k-good",why:"Banks often waive a first overdraft fee if you ask. Turn on low-balance alerts so it doesn't happen again."};C.cash-=35;C.spent.other+=35;return{t:"The bank wouldn't waive it. You paid the $35.",why:"Low-balance alerts and turning off overdraft coverage stop this from happening again."};}},
+   {l:"Pay it and move on",s:"$35",tag:"−$35",go(){C.cash-=35;C.spent.other+=35;return{t:"You paid the $35 fee for a $14 lunch.",why:"Overdraft fees can cost more than the purchase. Many banks let you turn overdraft off so the card is just declined."};}}]}),
+ w_bank:()=>({title:"Your bank starts charging a fee",where:"Email from your bank",
+  text:"Your big-bank checking account will start charging $12 a month unless you keep a $1,500 minimum balance. A local credit union offers free student checking.",
+  choices:[
+   {l:"Move to the credit union",s:"An afternoon of paperwork",go(){fx({stress:2});return{t:"You opened free checking at a local credit union and moved your direct deposit.",k:"k-good",why:"A $12 monthly fee is $144 a year for nothing. Credit unions often have free accounts and lower loan rates."};}},
+   {l:"Keep the account",s:"$12 a month",go(){C.fin.other+=12;return{t:"You kept the account and the $12 fee.",why:"Fees you set and forget add up. It's worth comparing banks once a year."};}}]}),
+ w_phonecrack:()=>({title:"You cracked your phone screen",where:"Stairs outside Porter",
+  text:"Your phone slipped out of your pocket on the stairs. The screen is cracked across the middle. A repair costs about $250.",
+  choices:[
+   {l:"Pay for the repair",s:"About $250",tag:"−$250",ok:()=>C.cash>=250,go(){C.cash-=250;C.spent.other+=250;teach("emergency");return"You got the screen fixed.";}},
+   {l:"Live with the crack and buy a $15 screen protector",s:"Cheap, a little ugly",tag:"−$15",go(){C.cash-=15;C.spent.other+=15;fx({happy:-2});return{t:"You put on a screen protector and kept using it.",why:"Not every broken thing needs fixing right away. Deciding what can wait is part of budgeting."};}},
+   {l:"Repair it on your card",s:"About $250 at 25% APR",tag:"+$250 card",go(){C.debt.card+=250;C.card=true;C.spent.other+=250;teach("emergency");return"You put the repair on your card.";}}]}),
+ w_tutor:()=>({title:"A tutoring job",where:"Learning Support Services",
+  text:"Your professor recommends you as a tutor for an intro course. It's about 6 hours a week at about $20 an hour, and tutoring the material helps you remember it too.",
+  choices:[
+   {l:"Take it",s:"About 6 hours a week",go(){C.fin.wage=C.fin.hours?C.fin.wage:20;C.fin.hours+=6;C.career.exp+=0.6;C.effort+=0.3;teach("netpay");return{t:"You started tutoring 6 hours a week.",k:"k-good",why:"Campus jobs related to your classes pay and build your résumé at the same time."};}},
+   {l:"Not this quarter",s:"",go(){return"You said maybe next quarter.";}}]}),
+ w_bulk:()=>({title:"A bulk grocery run",where:"Your kitchen",
+  text:"Your roommates want to split big packs of rice, eggs, oats and frozen vegetables from a warehouse store each month instead of everyone buying their own.",
+  choices:[
+   {l:"Join the split",s:"Save about $40 a month",go(){C.fin.food=Math.max(150,C.fin.food-40);fx({social:2});return{t:"You started splitting groceries with your roommates.",k:"k-good",why:"Buying staples in bulk and sharing them is one of the easiest ways to cut food costs off campus."};}},
+   {l:"Keep shopping on your own",s:"",go(){return"You kept buying your own groceries.";}}]}),
+ w_ride:()=>({title:"Getting home late",where:"Downtown · 1 a.m.",
+  text:"You're downtown late with friends. A rideshare back is about $28. The last buses are done for the night.",
+  choices:[
+   {l:"Split a rideshare with friends going your way",s:"About $9 each",tag:"−$9",go(){C.cash-=9;C.spent.fun+=9;return{t:"You split a ride three ways.",why:"Splitting rides is cheap and safer than walking alone late at night."};}},
+   {l:"Take one alone",s:"About $28",tag:"−$28",go(){C.cash-=28;C.spent.fun+=28;return"You took a rideshare home.";}},
+   {l:"Leave earlier next time and catch the bus",s:"Free with your student ID",go(){fx({social:-1});return{t:"You planned around the bus schedule from then on.",why:"Metro is free for UCSC students. Checking the last bus time saves a lot of rideshare money."};}}]}),
+ w_surf:()=>({title:"Learning to surf",where:"Cowell Beach",
+  text:"Your friends are learning to surf at Cowell's. A rental board and wetsuit are about $40 a day. A used wetsuit and board would cost about $350.",
+  choices:[
+   {l:"Rent for the day",s:"About $40",tag:"−$40",go(){C.cash-=40;C.spent.fun+=40;fx({happy:7,health:3,social:3});return"You stood up on your third wave.";}},
+   {l:"Buy used gear",s:"About $350",tag:"−$350",ok:()=>C.cash>=350,go(){C.cash-=350;C.spent.fun+=350;fx({happy:6,health:2});return{t:"You bought a used board and wetsuit.",why:"Buying makes sense only if you'll go often. Renting first is a cheap way to find out."};}},
+   {l:"Watch from the beach",s:"Free",go(){fx({happy:2,social:2});return"You hung out on the sand and cheered them on.";}}]}),
+ w_utility:()=>({title:"A big PG&E bill",where:"Roommate's payment request",
+  text:"Your roommate sent a payment request for your $85 share of a winter PG&E bill. It's almost double last month's.",
+  choices:[
+   {l:"Ask to see the bill, then pay",s:"$85",tag:"−$85",go(){C.cash-=85;C.spent.other+=85;teach("jointlease");return{t:"The bill was real: the heater ran all month. You paid your share and agreed to keep it lower.",why:"Seeing the actual bill keeps shared costs fair, and gas and electric costs spike in winter."};}},
+   {l:"Pay without asking",s:"$85",tag:"−$85",go(){C.cash-=85;C.spent.other+=85;return"You paid your share.";}}]}),
+ w_dinner:()=>({title:"A friend's birthday dinner",where:"Downtown Santa Cruz",
+  text:"A friend's birthday dinner is at a nice place downtown. With a drink, tax and tip it'll be about $70 each, and the group will split the birthday person's share.",
+  choices:[
+   {l:"Go",s:"About $70",tag:"−$70",go(){C.cash-=70;C.spent.fun+=70;fx({happy:5,social:5});return"You went to dinner and stayed for cake.";}},
+   {l:"Join for dessert only",s:"About $15",tag:"−$15",go(){C.cash-=15;C.spent.fun+=15;fx({happy:3,social:3});return{t:"You showed up for dessert and the toast.",why:"You can show up for people without spending the full amount."};}},
+   {l:"Skip it",s:"$0",go(){fx({social:-3});return"You sent a message and skipped dinner.";}}]}),
+ w_parking:()=>({title:"A parking ticket",where:"Under your windshield wiper",
+  text:"You were 20 minutes late getting back to the meter downtown. The ticket is about $50, and it goes up if you pay late.",
+  choices:[
+   {l:"Pay it this week",s:"About $50",tag:"−$50",go(){C.cash-=50;C.spent.other+=50;return{t:"You paid the ticket on time.",why:"Late fees on tickets can double the cost."};}},
+   {l:"Ignore it for now",s:"",go(){C.cash-=100;C.spent.other+=100;fx({stress:3});return{t:"The late penalty kicked in. You ended up paying about $100.",k:"k-bad",why:"Unpaid tickets grow, and they can block your car registration."};}}]}),
+ w_limit:()=>({title:"A credit limit increase",where:"Card app",
+  text:`Your card company offers to raise your limit from ${$(C.credit.limit)} to ${$(C.credit.limit+1000)}.`,
+  choices:[
+   {l:"Accept and keep spending the same",s:"",go(){C.credit.limit+=1000;teach("credit");return{t:"You accepted the higher limit and didn't change your spending.",k:"k-good",why:"A higher limit with the same balance lowers your utilization, which can raise your score."};}},
+   {l:"Decline",s:"",go(){teach("credit");return{t:"You kept your current limit.",why:"Declining is fine if a higher limit would tempt you to spend more."};}}]}),
+ w_breach:()=>({title:"Your data was in a breach",where:"Email from a company you shopped with",
+  text:"A store you bought from online says hackers got customer names, birthdays and addresses, possibly including yours.",
+  choices:[
+   {l:"Freeze your credit at all three bureaus",s:"Free, about 15 minutes",go(){C.flags.frozen=true;teach("credit");return{t:"You froze your credit with Equifax, Experian and TransUnion.",k:"k-good",why:"Credit freezes are free and stop anyone from opening new accounts in your name. You can lift one any time you apply for something."};}},
+   {l:"Ignore it",s:"",go(){teach("credit");return{t:"You didn't do anything about it.",why:"A free credit freeze is the strongest protection after a breach."};}}]}),
+ w_buyback:()=>({title:"Selling back your books",where:"End of the quarter",
+  text:"The quarter is over. You could sell this quarter's books back or list them for other students.",
+  choices:[
+   {l:"List them for students next quarter",s:"About $60, takes a week",go(){C.cash+=60;C.spent.earned+=60;return"You sold your books to students in the next class for $60.";}},
+   {l:"Sell them back to the bookstore today",s:"About $25",go(){C.cash+=25;C.spent.earned+=25;return"You sold your books back for $25.";}},
+   {l:"Keep them",s:"",go(){return"You kept your books.";}}]}),
+ w_boardwalk:()=>({title:"The Boardwalk is hiring",where:"Santa Cruz Beach Boardwalk",
+  text:"The Boardwalk is hiring for summer: games, rides and food stands, about $18.50 an hour and up to 30 hours a week.",
+  choices:[
+   {l:"Apply",s:"Summer income",go(){if(C.summer==="home"||!C.summer){C.summer="work";C.flags.workedSummer=true;return{t:"You got hired at the Boardwalk for the rest of the summer.",k:"k-good",why:"Summer jobs are how many students cover fall before aid arrives."};}return"You already have summer plans, so you passed.";}},
+   {l:"Pass",s:"",go(){return"You passed on the Boardwalk job.";}}]})
+});
+
+/* Which wildcards can happen right now */
+const WILD={
+ w_phish:()=>inSchool(),
+ w_fakecheck:()=>inSchool(),
+ w_farmers:()=>true,
+ w_subs:()=>yearOf(C.m)>=1,
+ w_phone:()=>C.fin.utils>=50,
+ w_overdraft:()=>C.cash<400,
+ w_bank:()=>true,
+ w_phonecrack:()=>true,
+ w_tutor:()=>inSchool()&&cumGpa()>=3.2&&C.fin.hours<15,
+ w_bulk:()=>offCampus(),
+ w_ride:()=>true,
+ w_surf:()=>!inSchool()||moOf(C.m)>=7,
+ w_utility:()=>offCampus()&&[3,4,5].includes(moOf(C.m)),
+ w_dinner:()=>people("friend").length>0,
+ w_parking:()=>hasCar(),
+ w_limit:()=>C.card&&C.credit.onTime>=3,
+ w_breach:()=>true,
+ w_buyback:()=>[3,6,9].includes(moOf(C.m)),
+ w_boardwalk:()=>[9,10].includes(moOf(C.m))&&C.summer!=="intern"
+};
+
+Object.assign(EV,{
+ cosign:()=>{const f=people("friend")[0]||people("roommate")[0];const n=f?f.name:"A friend";return{title:`${n} asks you to co-sign a car loan`,where:"Coffee on Pacific Ave",
+  text:`${n} found a used car for $9,000 but the dealer won't approve the loan without a co-signer. ${n} says you'd never have to pay anything.`,
+  choices:[
+   {l:"Co-sign",s:"Help a friend",go(){C.flags.cosigned=true;if(f)f.bond=clamp(f.bond+6);teach("credit");if(pr(0.3)){C.credit.late+=1;C.debt.card+=600;fx({stress:10});return{t:`${n} missed three payments. The lender came to you, and the late payments landed on your credit report too. You covered $600.`,k:"k-bad",why:"A co-signer owes the whole loan if the borrower doesn't pay. The missed payments hit both credit reports."};}return{t:`You co-signed. So far ${n} is paying on time.`,why:"Co-signing means the loan is legally yours too. It also counts as your debt when you apply for an apartment or a loan."};}},
+   {l:"Say no kindly",s:"Offer other help",go(){if(f)f.bond=clamp(f.bond-4);teach("credit");return{t:`You told ${n} you can't co-sign, and helped them look for a cheaper car.`,why:"Saying no to co-signing protects your credit. You can still help in other ways."};}}]};},
+ redwoods:()=>({title:"A free weekend in the redwoods",where:"Henry Cowell Redwoods State Park",
+  text:"Friends are going to Henry Cowell for the day. Parking is about $10 a car, or you can bike in from town for free.",
+  choices:[
+   {l:"Carpool and split parking",s:"About $3 each",tag:"−$3",go(){C.cash-=3;C.spent.fun+=3;fx({happy:6,health:3,social:4,stress:-6});return"You hiked the Redwood Grove loop and swam in the river.";}},
+   {l:"Bike in",s:"Free",go(){fx({happy:6,health:5,social:3,stress:-6});return{t:"You biked in and spent the day under the redwoods.",why:"Some of the best days in Santa Cruz cost almost nothing."};}},
+   {l:"Stay home and rest",s:"",go(){fx({stress:-3});return"You stayed home and caught up on sleep.";}}]}),
+ slugcents:()=>({title:"A free money session",where:"SlugCents · peer financial wellness",
+  text:"SlugCents, UCSC's peer-led money program, is running a free one-on-one session on budgeting and credit this week.",
+  choices:[
+   {l:"Book a session",s:"One hour",go(){teach("credit");teach("aid");fx({stress:-4});C.flags.slugcents=true;return{t:"A peer advisor helped you build a monthly budget and check your credit report.",k:"k-good",why:"Free campus money help exists. Most students never use it."};}},
+   {l:"Skip it",s:"",go(){return"You skipped the session.";}}]}),
+ w_halloween:()=>({title:"Halloween downtown",where:"Pacific Avenue",
+  text:"Everyone is dressing up for Halloween downtown. A full costume from a store is about $60. The thrift stores on Pacific have pieces for about $15.",
+  choices:[
+   {l:"Buy a full costume",s:"About $60",tag:"−$60",go(){C.cash-=60;C.spent.fun+=60;fx({happy:5,social:4});return"Your costume was a hit.";}},
+   {l:"Put one together from thrift stores",s:"About $15",tag:"−$15",go(){C.cash-=15;C.spent.fun+=15;fx({happy:6,social:4});return{t:"You built a costume from thrift finds for $15.",why:"One-night purchases are easy places to save without missing out."};}}]}),
+ w_flight:()=>({title:`Flights home for the holidays`,where:"Airline app · San Jose airport",
+  text:`Round-trip flights from San Jose to ${cityName(C.city)} for winter break are about $220 if you book now. Friends who waited last year paid about $400.`,
+  choices:[
+   {l:"Book now",s:"About $220",tag:"−$220",go(){C.cash-=220;C.spent.other+=220;return{t:"You booked your flight home early.",k:"k-good",why:"Holiday fares climb as dates fill up. Booking early is one of the easiest ways to save."};}},
+   {l:"Wait and see",s:"Prices might drop",go(){C.cash-=400;C.spent.other+=400;fx({stress:3});return{t:"You waited. By December the fare was about $400.",k:"k-bad",why:"Holiday fares usually go up, not down."};}}]}),
+ w_coffee:()=>({title:"Your coffee habit",where:"Your bank app",
+  text:"You notice you buy a $6 coffee most weekdays. That's about $120 a month.",
+  choices:[
+   {l:"Make coffee at home most days",s:"Save about $90 a month",go(){C.fin.fun=Math.max(0,C.fin.fun-60);C.fin.food+=30;teach("dues");return{t:"You bought a $25 French press and kept café coffee for Fridays.",k:"k-good",why:"Small daily purchases are big monthly ones. The Calculators page has a habit cost tool for this."};}},
+   {l:"Keep it, it's your treat",s:"",go(){fx({happy:2});return"You decided the coffee was worth it.";}}]}),
+ w_return:()=>({title:"A return window closing",where:"Your closet",
+  text:"You bought $80 shoes that don't fit. The 30-day return window closes tomorrow.",
+  choices:[
+   {l:"Return them today",s:"Get $80 back",go(){C.cash+=80;return{t:"You returned the shoes and got your $80 back.",k:"k-good",why:"Returns are free money you already spent. Set a reminder when you buy something you're unsure about."};}},
+   {l:"Keep them",s:"",go(){fx({happy:-1});return"The shoes are still in the box.";}}]}),
+ w_localschol:()=>({title:"A local scholarship",where:"Community Foundation Santa Cruz County",
+  text:"A local foundation offers scholarships for students from or studying in Santa Cruz County. The application is one short essay.",
+  choices:[
+   {l:"Apply",s:"An evening of writing",go(){teach("scholarships");fx({stress:2});if(pr(0.35)){C.cash+=500;C.spent.aid+=500;return{t:"You won a $500 local scholarship.",k:"k-good",why:"Local scholarships get far fewer applicants than national ones."};}return{t:"You didn't win this time, but you can reuse the essay.",why:"Applying to many small scholarships adds up over four years."};}},
+   {l:"Skip it",s:"",go(){teach("scholarships");return"You skipped the application.";}}]})
+});
+Object.assign(WILD,{
+ w_halloween:()=>moOf(C.m)===1,
+ w_flight:()=>moOf(C.m)===2&&["la","sandiego","outofstate"].includes(C.city),
+ w_coffee:()=>inSchool()&&C.fin.fun>=80,
+ w_return:()=>true,
+ w_localschol:()=>inSchool()&&yearOf(C.m)<=3
+});
+
+function pickWild(){
+ C.seenWild=C.seenWild||[];
+ const ok=Object.keys(WILD).filter(k=>!C.seenWild.includes(k)&&WILD[k]());
+ if(!ok.length)return null;
+ const k=pick(ok);C.seenWild.push(k);return k;
+}
+</script>
+<script>
 /* ======================= SLUG COLLEGE: ENGINE & UI =======================
    Four years at UC Santa Cruz, one month per turn (48 turns from September of
    year 1 to August of year 4). Money figures are rounded game estimates. */
@@ -1382,6 +1665,7 @@ function monthStart(){
   if(F.famQ){C.cash+=F.famQ;if(F.plus)C.spent.plus=(C.spent.plus||0)+F.famQ;add(inc,F.plus?"Parent PLUS loan (your family's debt)":"Family paid toward tuition",F.famQ);}
   if(C.ins==="ship"){C.cash-=SHIP_Q;C.spent.health+=SHIP_Q;add(out,"UC SHIP health insurance",SHIP_Q);}
   if(C.greek){C.cash-=GREEK_DUES;C.spent.fun+=GREEK_DUES;add(out,`${greekWord()[0].toUpperCase()+greekWord().slice(1)} dues`,GREEK_DUES);}
+  if(mi===7&&C.flags.gigOwe){const t=C.flags.gigOwe;C.flags.gigOwe=0;C.cash-=t;C.spent.other+=t;add(out,"Taxes owed on delivery income",t);say(`Tax time: you owed ${$(t)} on your delivery income and paid it from your account.`,"k-bad");}
   if(mi===0&&C.flags.schol){const s=C.flags.schol;C.flags.schol=0;C.cash+=s;C.spent.aid+=s;add(inc,"Scholarship",s);say(`Your ${$(s)} scholarship arrived.`,"k-good");}
   if(g+l>0){say(`${qOf(C.m)} quarter aid arrived: ${$(g+l)}${l?`, including ${$(l)} in loans`:""}. Tuition took ${$(fees)}.`);teach("aid");if(l)teach("loaninterest");}
   else if(fees)say(`${qOf(C.m)} quarter tuition is due: ${$(fees)}.`);
@@ -1424,11 +1708,12 @@ function monthStart(){
  if(C.calfresh&&C.cfMonth!=null&&C.m>C.cfMonth&&(C.m-C.cfMonth)%6===0)C.queue.push({k:"sar7"});
  if(mi===1&&yearOf(C.m)<4)C.queue.push({k:"fafsa"});
  // this month's main event
- const key=MAP[C.m];
+ const key=pickMain(C.m);
  if(key==="SUMMER")C.queue.push({k:"summer"});
  else if(EV[key.toLowerCase()]&&key===key.toUpperCase()&&key!=="MAJOR")C.queue.push({k:key.toLowerCase()});
  else if(key==="MAJOR"){if(!C.major)C.queue.push({k:"major"});else C.queue.push({k:"majorconfirm"});}
  else C.queue.push({k:"preview",m:C.m});
+ if(C.m<46&&pr(WILD_P)){const w=pickWild();if(w)C.queue.push({k:w});}
  nextPending();
 }
 
