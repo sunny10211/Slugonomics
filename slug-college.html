@@ -2089,7 +2089,7 @@ function boardLocal(){
 }
 function createScreen(){
  const c=UI.create,best=lsGet(bestKey(),0),real=(c.mode||"real")==="real";
- return `<section class="hero"><canvas id="heroc" aria-hidden="true"></canvas><div class="in">${SLUG_SVG}<span class="kicker" style="color:#FDC700">${PROF?"Step 2 of 2 · Your four years":"A UCSC college simulator"}</span><h1>Slug <span>College</span></h1><p>Four years at UC Santa Cruz, one month at a time. Aid, rent, classes, friends and summers: see where your choices take you by graduation.</p></div></section>
+ return `<section class="hero"><canvas id="heroc" aria-hidden="true"></canvas><div class="in">${SLUG_SVG}<span class="kicker" style="color:#FDC700">${PROF?"Step 2 of 2 · Your four years":"A UCSC college simulator"}</span><h1>Slug <span>College</span></h1><p>Four years at UC Santa Cruz, one month at a time. Aid, rent, classes, friends and summers: see where your choices take you by graduation.</p><p style="margin-top:10px;font-size:.92rem;opacity:.9">Only have 15 minutes? <a href="college-sim.html" style="color:#FDC700;font-weight:700">Play Workshop week →</a></p></div></section>
  ${profileChip()}
  ${C&&!C.done?`<button class="btn" id="resume">Continue ${esc(C.name)}'s run (${esc(when(C.m))})</button>`:""}
  <section class="panel"><h2>Start college</h2>
