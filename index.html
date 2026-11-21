@@ -422,6 +422,11 @@ footer .cols{display:grid;grid-template-columns:1.4fr 1fr;gap:40px}
 .vid h3{font-size:1.28rem}
 .vid ul{margin:4px 0 0;padding-left:18px;color:var(--text);font-size:.96rem;line-height:1.55}
 .vid ul li{margin:2px 0}
+.vidjump{display:flex;flex-wrap:wrap;gap:10px;margin-top:22px}
+.vidjump a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:99px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);font-weight:700;font-size:.92rem;text-decoration:none}
+.vidjump a:hover{border-color:var(--ink)}
+.vidjump a span{font-size:.8rem;background:var(--sunk);border-radius:99px;padding:1px 8px;color:var(--muted)}
+.vidseries+.vidseries{margin-top:56px}
 .vidseries{margin-top:8px;padding-top:28px;border-top:1px solid var(--line)}
 .sharetoggle .linkbtn{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .related{margin-top:40px}
@@ -589,8 +594,10 @@ const STR={
  vid_h:['Video resources','Recursos en video','영상 자료','视频资源'],
  vid_p:['Short animated walkthroughs of the money moments that show up in your first years on your own. Watch in order, or jump to the one you need.','Guías animadas y cortas sobre los momentos de dinero de tus primeros años por tu cuenta. Míralas en orden o salta a la que necesites.','혼자 생활을 시작하는 첫 몇 년 동안 마주칠 돈 문제를 짧은 애니메이션으로 안내합니다. 순서대로 보거나 필요한 편만 골라 보세요.','用简短的动画带你了解独立生活头几年会遇到的金钱问题。可以按顺序看，也可以直接看你需要的那一集。'],
  vid_series:['Renting 101 · Your first lease','Alquiler 101 · Tu primer contrato','임대 101 · 첫 임대 계약','租房 101 · 你的第一份租约'],
- vid_series_p:['Three episodes, about five minutes total. Captions are built into the video, so you can watch with the sound off.','Tres episodios, unos cinco minutos en total. Los subtítulos están dentro del video, así que puedes verlo sin sonido.','총 3편, 약 5분 분량입니다. 자막이 영상에 들어 있어 소리 없이도 볼 수 있어요.','共三集，总长约五分钟。字幕已内嵌在视频中，静音也能看。'],
+ vid_series_p:['Three episodes, about five minutes total, from apartment search to move-in day. Captions are built in, so you can watch with the sound off.','Tres episodios, unos cinco minutos en total. Los subtítulos están dentro del video, así que puedes verlo sin sonido.','총 3편, 약 5분 분량입니다. 자막이 영상에 들어 있어 소리 없이도 볼 수 있어요.','共三集，总长约五分钟。字幕已内嵌在视频中，静音也能看。'],
  vid_ep:['Episode','Episodio','에피소드','第'],
+ vs_money:['Money 101 · The essentials','Dinero 101 · Lo esencial','머니 101 · 꼭 알아야 할 것','理财 101 · 必修课'],
+ vs_money_p:['Four short lessons on the money you\'ll handle in your first year: financial aid, credit cards, paychecks and taxes. Real 2026 numbers, captions built in.','Cuatro lecciones cortas sobre el dinero de tu primer año: ayuda financiera, tarjetas de crédito, cheques de pago e impuestos. Cifras reales de 2026, con subtítulos.','첫해에 다루게 될 돈에 관한 짧은 강의 4편: 학자금 지원, 신용카드, 급여, 세금. 2026년 실제 수치와 자막이 포함되어 있어요.','四节短课，讲你第一年会碰到的钱：助学金、信用卡、工资和报税。使用 2026 年真实数据，内嵌字幕。'],
  vid_learn:['You\'ll learn','Aprenderás','배울 내용','你将学到'],
  vid_en:['Videos are in English for now.','Por ahora los videos están en inglés.','영상은 현재 영어로만 제공됩니다.','视频目前仅提供英文版。'],
  vid_note:['For education, not legal advice. California rules as of November 2026; laws change, so check current rules before you sign. All names, addresses and amounts in the videos are fictional.','Con fines educativos, no es asesoría legal. Reglas de California a noviembre de 2026; las leyes cambian, así que verifica las reglas vigentes antes de firmar. Todos los nombres, direcciones y montos son ficticios.','교육용이며 법률 자문이 아닙니다. 2026년 11월 기준 캘리포니아 규정이며, 법은 바뀔 수 있으니 서명 전에 최신 규정을 확인하세요. 영상 속 이름·주소·금액은 모두 가상입니다.','仅供学习，不构成法律建议。内容基于 2026 年 11 月的加州规定；法律可能变化，签约前请核实最新规定。视频中的姓名、地址和金额均为虚构。'],
@@ -1577,7 +1584,7 @@ const SIT=[
   bring:{en:['Your student ID number','Your aid offer or a screenshot of your portal','Any email about a hold, missing document or change'],es:['Tu número de estudiante','Tu oferta de ayuda o una captura de pantalla de tu portal','Cualquier correo sobre una retención, un documento faltante o un cambio'],ko:['학생 번호','학자금 제안서 또는 포털 화면 캡처','홀드, 누락 서류, 변경 사항에 관한 이메일'],zh:['你的学生号','助学金方案或学生门户的截图','任何关于账户冻结、缺少文件或方案变动的邮件']},
   say:{en:'I\'m trying to understand my aid for this quarter. It [hasn\'t arrived / is less than I expected / has a hold]. Can you walk me through what\'s happening and what I need to do?',es:'Estoy tratando de entender mi ayuda de este trimestre. [No ha llegado / es menos de lo que esperaba / tiene una retención]. ¿Me pueden explicar qué está pasando y qué tengo que hacer?',ko:'이번 쿼터 학자금을 이해하려고 하는데요, [아직 안 들어왔어요 / 예상보다 적어요 / 홀드가 걸려 있어요]. 무슨 상황인지, 제가 뭘 해야 하는지 설명해 주실 수 있을까요?',zh:'我想弄清楚这个学季的助学金。它[还没到账 / 比我预期的少 / 被冻结了]。能帮我解释一下是怎么回事，以及我需要做什么吗？'},
   know:{en:['If your family\'s situation changed (a job loss, divorce, medical bills), you can ask Financial Aid to review your aid. It\'s called a special circumstances appeal.','You can accept part of a loan instead of all of it, and you can ask for more later in the year if you need it.','File the FAFSA or California Dream Act Application every year. The priority deadline is March 2.'],es:['Si la situación de tu familia cambió (pérdida de trabajo, divorcio, gastos médicos), puedes pedirle a Financial Aid que revise tu ayuda. Se llama apelación por circunstancias especiales.','Puedes aceptar solo una parte de un préstamo, y pedir más después en el año si lo necesitas.','Llena la FAFSA o la Solicitud del California Dream Act cada año. La fecha prioritaria es el 2 de marzo.'],ko:['가족 상황이 바뀌었다면(실직, 이혼, 의료비 등) Financial Aid에 학자금 재검토를 요청할 수 있어요. 이를 특별 사정 이의 신청(special circumstances appeal)이라고 해요.','대출은 전액이 아니라 일부만 받을 수 있고, 필요하면 학년 중에 추가로 요청할 수도 있어요.','FAFSA 또는 California Dream Act 신청서는 매년 내야 해요. 우선 마감일은 3월 2일이에요.'],zh:['如果家庭情况发生变化（失业、离婚、医疗费用等），你可以请 Financial Aid 重新审核你的助学金，这叫作特殊情况申诉（special circumstances appeal）。','贷款可以只接受一部分，学年中如有需要还可以再申请更多。','每年都要提交 FAFSA 或 California Dream Act 申请。优先截止日期是 3 月 2 日。']},
-  site:['aid','loancost']},
+  site:['aid','loancost','video-4']},
  {id:'landlord',ic:'house',t:{en:'I have a problem with my landlord, lease or deposit',es:'Tengo un problema con mi casero, mi contrato o mi depósito',ko:'집주인, 계약서, 보증금 문제가 있어요',zh:'我和房东、租约或押金有纠纷'},
   first:['tenant','cro'],also:[],
   bring:{en:['Your lease','Texts and emails with your landlord','Dated photos of the problem or of the place at move-in','Rent receipts'],es:['Tu contrato','Mensajes y correos con tu casero','Fotos con fecha del problema o de cómo estaba el lugar al mudarte','Recibos de renta'],ko:['임대 계약서','집주인과 주고받은 문자와 이메일','문제나 입주 당시 상태를 찍은 날짜 있는 사진','월세 영수증'],zh:['你的租约','和房东往来的短信和邮件','带日期的照片：问题现状或入住时的房屋状况','房租收据']},
@@ -1596,13 +1603,13 @@ const SIT=[
   bring:{en:['Photo ID','Your Social Security card or ITIN letter','Every W-2 and 1099 from last year','Your 1098-T from UCSC','Bank account and routing numbers for direct deposit'],es:['Identificación con foto','Tu tarjeta del Seguro Social o carta del ITIN','Todos tus W-2 y 1099 del año pasado','Tu 1098-T de UCSC','Números de cuenta y de ruta bancaria para el depósito directo'],ko:['사진이 있는 신분증','Social Security 카드 또는 ITIN 통지서','작년에 받은 모든 W-2와 1099','UCSC에서 받은 1098-T','직접 입금용 은행 계좌 번호와 라우팅 번호'],zh:['带照片的身份证件','你的 Social Security 卡或 ITIN 通知函','去年所有的 W-2 和 1099','UCSC 发的 1098-T','用于直接入账的银行账号和汇款路线号（routing number）']},
   say:{en:'I worked part-time last year and I\'ve never filed on my own. Can you help me file and see if I get a refund?',es:'Trabajé medio tiempo el año pasado y nunca he declarado impuestos por mi cuenta. ¿Me pueden ayudar a declarar y ver si me toca un reembolso?',ko:'작년에 파트타임으로 일했는데 혼자 세금 신고를 해 본 적이 없어요. 신고를 도와주시고 환급받을 수 있는지 봐 주실 수 있을까요?',zh:'我去年做过兼职，但从来没有自己报过税。能帮我报税，看看能不能拿到退税吗？'},
   know:{en:['Students who earn a little often get back most of what was withheld, but only if they file.','Delivery and gig apps don\'t withhold taxes. Set aside about 20% of what you make.','Your 1098-T can help your family claim an education tax credit.'],es:['Los estudiantes que ganan poco a menudo recuperan casi todo lo que les retuvieron, pero solo si declaran.','Las apps de entregas y trabajos por encargo no retienen impuestos. Aparta cerca del 20% de lo que ganes.','Tu 1098-T puede ayudar a tu familia a pedir un crédito fiscal por educación.'],ko:['소득이 적은 학생은 원천징수된 세금 대부분을 돌려받는 경우가 많지만, 신고를 해야만 받아요.','배달·긱 앱은 세금을 떼지 않아요. 번 돈의 약 20%는 따로 모아 두세요.','1098-T로 가족이 교육 세액공제를 받을 수 있어요.'],zh:['收入不高的学生通常能拿回大部分预扣税款，但前提是必须报税。','外卖和零工类应用不会预扣税款，请把收入的大约 20% 存起来。','你的 1098-T 可以帮家人申请教育类税收抵免。']},
-  site:['paycheck','paycalc']},
+  site:['paycheck','paycalc','video-7']},
  {id:'debt',ic:'card',t:{en:'I\'m behind on a credit card or a collector is calling',es:'Estoy atrasado con una tarjeta o me llama un cobrador',ko:'카드값이 밀렸거나 추심 전화가 와요',zh:'我信用卡还款逾期，或有催收打电话来'},
   first:['slugcents'],also:['cfpb'],
   bring:{en:['Your latest statements','Any letters from a collector'],es:['Tus últimos estados de cuenta','Cualquier carta de un cobrador'],ko:['최근 카드 명세서','추심 업체에서 받은 편지'],zh:['最近的账单','催收机构寄来的任何信件']},
   say:{en:'I have about [amount] on a credit card and I\'m only making minimum payments. Can you help me make a plan to pay it down?',es:'Tengo unos [cantidad] en una tarjeta de crédito y solo hago los pagos mínimos. ¿Me pueden ayudar a armar un plan para pagarla?',ko:'신용카드에 약 [금액]이 있는데 최소 금액만 갚고 있어요. 갚아 나갈 계획을 같이 세워 주실 수 있을까요?',zh:'我的信用卡欠了大约[金额]，一直只还最低还款额。能帮我制定一个还款计划吗？'},
   know:{en:['Call the card company before you miss a payment. Ask about a hardship plan or a lower rate.','If a collector contacts you, ask them in writing to verify the debt before you pay anything.','Your credit reports are free every week at AnnualCreditReport.com.'],es:['Llama a la compañía de la tarjeta antes de atrasarte. Pregunta por un plan por dificultades o una tasa más baja.','Si te contacta un cobrador, pídele por escrito que verifique la deuda antes de pagar cualquier cosa.','Tus reportes de crédito son gratis cada semana en AnnualCreditReport.com.'],ko:['결제를 놓치기 전에 카드사에 전화하세요. 어려움 지원 프로그램이나 금리 인하를 물어보세요.','추심 업체가 연락하면, 돈을 내기 전에 채무를 서면으로 확인해 달라고 요구하세요.','신용 보고서는 AnnualCreditReport.com에서 매주 무료로 볼 수 있어요.'],zh:['在错过还款之前给信用卡公司打电话，问问有没有困难援助计划或降低利率。','如果催收机构联系你，在付任何钱之前，先书面要求对方核实这笔债务。','你可以每周在 AnnualCreditReport.com 免费查看信用报告。']},
-  site:['credit','cardpayoff']},
+  site:['credit','cardpayoff','video-5']},
  {id:'scam',ic:'card',t:{en:'I think I got scammed',es:'Creo que me estafaron',ko:'사기를 당한 것 같아요',zh:'我好像被骗了'},
   first:['its','ftc'],also:[],
   bring:{en:['Screenshots of the messages','Any payment receipts or transaction IDs'],es:['Capturas de pantalla de los mensajes','Cualquier recibo de pago o número de transacción'],ko:['메시지 화면 캡처','결제 영수증이나 거래 번호'],zh:['相关消息的截图','付款收据或交易编号']},
@@ -1748,39 +1755,57 @@ V.why=()=>`<div class="wrap page"><div class="pagehead"><h1>${t('why_h')}</h1><p
 
 /* ----- video resources ----- */
 const VIDEOS=[
- {n:1,src:'assets/videos/renting101-ep1.mp4',poster:'assets/videos/renting101-ep1.webp',len:'1:32',title:'Your first lease, start to keys',
+ {n:1,s:'rent',ep:1,src:'assets/videos/renting101-ep1.mp4',poster:'assets/videos/renting101-ep1.webp',len:'1:32',title:'Your first lease, start to keys',
   desc:'The whole renting process in six steps, from budgeting to move-in day.',
   learn:['How much cash you need to move in','What to have ready when you apply','Why dated move-in photos protect your deposit']},
- {n:2,src:'assets/videos/renting101-ep2.mp4',poster:'assets/videos/renting101-ep2.webp',len:'1:44',title:'Reading the lease, line by line',
+ {n:2,s:'rent',ep:2,src:'assets/videos/renting101-ep2.mp4',poster:'assets/videos/renting101-ep2.webp',len:'1:44',title:'Reading the lease, line by line',
   desc:'A sample lease decoded section by section, in plain English.',
   learn:['The 9 parts almost every lease has','What “jointly and severally liable” means for roommates','5 questions to ask before you sign']},
- {n:3,src:'assets/videos/renting101-ep3.mp4',poster:'assets/videos/renting101-ep3.webp',len:'1:35',title:'Red flags & your rights',
+ {n:3,s:'rent',ep:3,src:'assets/videos/renting101-ep3.mp4',poster:'assets/videos/renting101-ep3.webp',len:'1:35',title:'Red flags & your rights',
   desc:'A quick game: red flag, ask, or OK? Plus four California rules every renter should know.',
   learn:['Clauses that aren\'t allowed in California','How to spot a rental scam','Where to get help with a lease']},
+ {n:4,s:'money',ep:1,src:'assets/videos/money101-aid.mp4',poster:'assets/videos/money101-aid.webp',len:'2:20',title:'Financial aid, decoded',
+  desc:'A sample aid offer read line by line: what\'s free, what\'s borrowed, and what to accept.',
+  learn:['Grants vs. work-study vs. loans','Your real net price after free money','Subsidized vs. unsubsidized loans','Making a quarterly refund last 11 weeks']},
+ {n:5,s:'money',ep:2,src:'assets/videos/money101-credit.mp4',poster:'assets/videos/money101-credit.webp',len:'1:42',title:'Your first credit card',
+  desc:'How a card really works, how to read the statement, and how to build credit for $0.',
+  learn:['Why paying the full balance means no interest','The real cost of minimum payments','The two things that drive your credit score']},
+ {n:6,s:'money',ep:3,src:'assets/videos/money101-paycheck.mp4',poster:'assets/videos/money101-paycheck.webp',len:'1:40',title:'Your first paycheck',
+  desc:'From hours worked to money in your account: every line of a paystub explained.',
+  learn:['Gross vs. net pay','Social Security, Medicare and CA SDI','The FICA break for UC campus jobs','The new deduction for tips']},
+ {n:7,s:'money',ep:4,src:'assets/videos/money101-taxes.mp4',poster:'assets/videos/money101-taxes.webp',len:'1:41',title:'Filing taxes as a student',
+  desc:'Why filing usually pays, which forms you need, and how to file for free.',
+  learn:['How a student refund happens','Dependent or independent?','The education tax credit (up to $2,500)','Free File, VITA and CalFile']},
 ];
-V.videos=()=>`<div class="wrap page"><div class="pagehead"><h1>${t('vid_h')}</h1><p>${t('vid_p')}</p></div>
- <section class="vidseries"><h2>${t('vid_series')}</h2><p class="muted" style="margin-top:8px">${t('vid_series_p')} ${LANG==='en'?'':t('vid_en')}</p>
- <div class="vidgrid">${VIDEOS.map(v=>`<article class="vid" id="video-${v.n}" tabindex="-1">
+const VSERIES=[
+ {id:'money',h:'vs_money',p:'vs_money_p',rel:[['path','aid'],['path','credit'],['tool','paycalc']]},
+ {id:'rent',h:'vid_series',p:'vid_series_p',rel:[['path','lease'],['tool','rent'],['help','landlord']]}
+];
+const vidCard=v=>`<article class="vid" id="video-${v.n}" tabindex="-1">
   <video controls preload="none" playsinline poster="${v.poster}"><source src="${v.src}" type="video/mp4"></video>
-  <div class="vb"><div class="ep"><span>${LANG==='zh'?t('vid_ep')+' '+v.n+' 集':t('vid_ep')+' '+v.n}</span><span>${v.len}</span></div>
+  <div class="vb"><div class="ep"><span>${LANG==='zh'?t('vid_ep')+' '+v.ep+' 集':t('vid_ep')+' '+v.ep}</span><span>${v.len}</span></div>
   <h3>${v.title}</h3><p>${v.desc}</p>
   <div class="ep" style="margin-top:6px"><span>${t('vid_learn')}</span></div>
-  <ul>${v.learn.map(x=>`<li>${x}</li>`).join('')}</ul></div></article>`).join('')}</div>
- ${relatedHTML(REL.videos,t('vid_practice'))}
- <p class="note" style="margin-top:28px">${t('vid_note')}</p></section></div>`;
+  <ul>${v.learn.map(x=>`<li>${x}</li>`).join('')}</ul></div></article>`;
+V.videos=()=>`<div class="wrap page"><div class="pagehead"><h1>${t('vid_h')}</h1><p>${t('vid_p')}</p>
+ <nav class="vidjump" aria-label="${t('vid_h')}">${VSERIES.map(x=>`<a href="#videos" onclick="event.preventDefault();document.getElementById('vs-${x.id}').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth'})">${t(x.h)} <span>${VIDEOS.filter(v=>v.s===x.id).length}</span></a>`).join('')}</nav></div>
+ ${VSERIES.map((x,i)=>`<section class="vidseries" id="vs-${x.id}"><h2>${t(x.h)}</h2><p class="muted" style="margin-top:8px">${t(x.p)}${i===0&&LANG!=='en'?' '+t('vid_en'):''}</p>
+ <div class="vidgrid">${VIDEOS.filter(v=>v.s===x.id).map(vidCard).join('')}</div>
+ ${relatedHTML(x.rel,t('vid_practice'))}</section>`).join('')}
+ <p class="note" style="margin-top:28px">${t('vid_note')}</p></div>`;
 
 
 /* ----- related content ("Keep going") ----- */
 const REL={
- path:{aid:[['game','slug-college'],['help','aid'],['path','quarter']],
-  credit:[['game','slug-life'],['help','debt'],['path','habit']],
-  paycheck:[['game','slug-college'],['tool','budget'],['help','taxes']],
+ path:{aid:[['video',4],['game','slug-college'],['help','aid']],
+  credit:[['video',5],['game','slug-life'],['help','debt']],
+  paycheck:[['video',6],['video',7],['tool','budget'],['help','taxes']],
   lease:[['video',1],['video',2],['video',3],['help','landlord']],
   quarter:[['tool','savegoal'],['game','slug-college'],['help','food']],
   habit:[['game','slug-life'],['path','quarter'],['path','credit']]},
- tool:{rent:[['video',1],['video',3],['help','landlord']],budget:[['game','slug-college'],['help','food']],
-  loancost:[['game','slug-college'],['help','aid']],cardpayoff:[['game','slug-life'],['help','debt']],
-  paycalc:[['game','slug-college'],['help','taxes']],savegoal:[['path','quarter'],['game','slug-life']]},
+ tool:{rent:[['video',1],['video',3],['help','landlord']],budget:[['video',4],['game','slug-college'],['help','food']],
+  loancost:[['video',4],['game','slug-college'],['help','aid']],cardpayoff:[['video',5],['game','slug-life'],['help','debt']],
+  paycalc:[['video',6],['video',7],['help','taxes']],savegoal:[['path','quarter'],['game','slug-life']]},
  videos:[['path','lease'],['tool','rent'],['help','landlord']]
 };
 const GAMEN={'slug-life':'Slug Life','slug-college':'Slug College'};
@@ -1805,7 +1830,7 @@ function render(){
  else if(TOOLS[h]){html=toolsView(h);after=()=>mountTool($('#toolmount'),h,Object.fromEntries(new URLSearchParams(hq||'')),{url:true});nav='tools';}
  else if(h==='tools'){html=toolsView();after=()=>mountTool($('#toolmount'),'budget',{},{url:true});nav='tools';}
  else if(h==='checkup'){html=V.checkup();after=bindCheckup;nav='paths';}
- else if(/^video-\d$/.test(h)){html=V.videos();nav='videos';after=()=>{const c=document.getElementById(h);if(c){c.classList.add('flash');setTimeout(()=>c.scrollIntoView({block:'center'}),30);c.focus({preventScroll:true});}};}
+ else if(/^video-\d+$/.test(h)){html=V.videos();nav='videos';after=()=>{const c=document.getElementById(h);if(c){c.classList.add('flash');setTimeout(()=>c.scrollIntoView({block:'center'}),30);c.focus({preventScroll:true});}};}
  else if(/^help-[a-z]+$/.test(h)&&SIT.some(x=>x.id===h.slice(5))){helpSel=h.slice(5);html=V.resources();nav='resources';after=()=>{const d=$('#hdet');if(d&&innerWidth<=900)d.scrollIntoView({block:'start'});};}
  else if(V[h]&&h!=='home'){html=V[h]();}
  else{html=V.home();nav='home';after=bindHome;}
